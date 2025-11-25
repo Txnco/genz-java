@@ -1,10 +1,4 @@
 {
-  "functions": {
-    "api/**/*.ts": {
-      "region": "fra1"
-    },
-    "app/**/*.ts": {
-      "region": "fra1"
-    }
-  }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["fra1"]
 }

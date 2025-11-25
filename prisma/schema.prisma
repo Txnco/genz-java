@@ -1,0 +1,228 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  FILL_IN_BLANK
+  CODE_WILL_COMPILE
+  CODE_WILL_CRASH
+  SHORT_TEXT
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+// Models
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STUDENT)
+
+  // Gamification fields
+  xp           Int      @default(0)
+  level        Int      @default(1)
+  currentStreak Int     @default(0)
+  longestStreak Int     @default(0)
+  lastActivityDate DateTime?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  answers       UserQuestionAnswer[]
+  progress      UserProgress[]
+  openAISettings OpenAISettings?
+  testAttempts  TestAttempt[]
+  createdTests  Test[]         @relation("TestCreator")
+}
+
+model Lecture {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  order       Int      @default(0)
+  content     String?  @db.Text // Rich text / markdown for question generation
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  questions   Question[]
+  progress    UserProgress[]
+}
+
+model Question {
+  id          String       @id @default(cuid())
+  lectureId   String
+  type        QuestionType
+  prompt      String       @db.Text
+  codeSnippet String?      @db.Text // Java code for compile/crash questions
+  explanation String?      @db.Text // Shown after answering
+  difficulty  Difficulty   @default(MEDIUM)
+  tags        Json         @default("[]") // Array of tags stored as JSON
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  lecture     Lecture      @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  options     QuestionOption[]
+  answers     UserQuestionAnswer[]
+  testQuestions TestQuestion[]
+  testAnswers TestAnswer[]
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  questionId String
+  text       String
+  isCorrect  Boolean  @default(false)
+  order      Int      @default(0)
+
+  // Relations
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model UserQuestionAnswer {
+  id              String   @id @default(cuid())
+  userId          String
+  questionId      String
+  selectedOptionIds Json     @default("[]") // Array of selected option IDs stored as JSON
+  textAnswer      String?  // For FILL_IN_BLANK or SHORT_TEXT
+  isCorrect       Boolean
+  xpAwarded       Int      @default(0)
+
+  createdAt       DateTime @default(now())
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, questionId])
+  @@index([userId, createdAt])
+}
+
+model UserProgress {
+  id               String   @id @default(cuid())
+  userId           String
+  lectureId        String
+  questionsAnswered Int     @default(0)
+  questionsCorrect  Int     @default(0)
+  lastActivityAt   DateTime @default(now())
+
+  // Relations
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lecture          Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lectureId])
+}
+
+model OpenAISettings {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  apiKey         String   // Should be encrypted in production
+  preferredModel String   @default("gpt-4o-mini")
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Test {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  questionCount   Int      @default(10)
+  timeLimit       Int?     // Time limit in minutes (optional)
+  isActive        Boolean  @default(true)
+  createdById     String?  // User who created the test (null for admin-created)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  createdBy       User?    @relation("TestCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  questions       TestQuestion[]
+  attempts        TestAttempt[]
+}
+
+model TestQuestion {
+  id              String   @id @default(cuid())
+  testId          String
+  questionId      String
+  order           Int      @default(0)
+
+  // Relations
+  test            Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([testId, questionId])
+  @@index([testId, order])
+}
+
+model TestAttempt {
+  id              String   @id @default(cuid())
+  testId          String
+  userId          String
+  score           Int      @default(0)
+  totalQuestions  Int
+  correctAnswers  Int      @default(0)
+  incorrectAnswers Int     @default(0)
+  skippedCount    Int      @default(0)
+  timeSpent       Int?     // Time spent in seconds
+  completed       Boolean  @default(false)
+  
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+
+  // Relations
+  test            Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers         TestAnswer[]
+
+  @@index([testId, userId])
+  @@index([testId, completed])
+}
+
+model TestAnswer {
+  id              String   @id @default(cuid())
+  attemptId       String
+  questionId      String
+  selectedOptionIds Json   @default("[]")
+  textAnswer      String?
+  isCorrect       Boolean
+  isSkipped       Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+
+  // Relations
+  attempt         TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question        Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([attemptId, questionId])
+}

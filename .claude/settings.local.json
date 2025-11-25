@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm i:*)",
+      "Bash(npm run dev:*)",
+      "Bash(node:*)",
+      "Bash(python fix-seed-files.py:*)",
+      "Bash(python fix-code-compile.py:*)",
+      "Bash(npx tsc:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

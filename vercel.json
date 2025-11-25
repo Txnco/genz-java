@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/**/*.ts": {
+      "region": "fra1"
+    },
+    "app/**/*.ts": {
+      "region": "fra1"
+    }
+  }
+}

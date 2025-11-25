@@ -76,7 +76,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     return NextResponse.json(lecture)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors[0].message }, { status: 400 })
+      return NextResponse.json({ error: error.issues[0].message }, { status: 400 })
     }
     console.error('Greška pri ažuriranju predavanja:', error)
     return NextResponse.json({ error: 'Greška poslužitelja. Molimo pokušajte ponovno.' }, { status: 500 })

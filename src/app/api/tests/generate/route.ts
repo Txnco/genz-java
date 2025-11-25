@@ -17,8 +17,20 @@ function shuffleArray<T>(array: T[]): T[] {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session || !session.user?.id) {
       return NextResponse.json({ error: 'Neautorizirano' }, { status: 401 })
+    }
+
+    // Verify user exists in database
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    })
+
+    if (!user) {
+      console.error('User not found in database:', session.user.id)
+      return NextResponse.json({ 
+        error: `Korisnik nije pronađen u bazi podataka. ID: ${session.user.id}` 
+      }, { status: 404 })
     }
 
     const { lectureIds } = await request.json()
@@ -31,6 +43,8 @@ export async function POST(request: Request) {
     const allQuestions = await prisma.question.findMany({
       where: whereClause,
     })
+
+    console.log('User found:', user.email, 'Generating test with', allQuestions.length, 'total questions')
 
     if (allQuestions.length === 0) {
       return NextResponse.json(

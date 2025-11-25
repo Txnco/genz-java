@@ -57,6 +57,7 @@ export async function POST(request: Request) {
     answersWithQuestions.forEach(answer => {
       if (answer.isSkipped) {
         skippedCount++
+        // Skipped = 0 points (no penalty)
       } else if (answer.isCorrect) {
         correctAnswers++
         // MEDIUM questions = +2 points
@@ -64,11 +65,12 @@ export async function POST(request: Request) {
         score += answer.question.difficulty === 'MEDIUM' ? 2 : 3
       } else {
         incorrectAnswers++
-        score -= 1 // -1 for incorrect
+        score -= 1 // -1 for incorrect (only if answered, not skipped)
       }
     })
 
-    const maxScore = 30 // 6 medium (2 pts) + 6 hard (3 pts) = 12 + 18 = 30
+    // Max score is always 30 (6 medium * 2 + 6 hard * 3)
+    const maxScore = 30
 
     // Update attempt
     const updatedAttempt = await prisma.testAttempt.update({

@@ -67,11 +67,11 @@ export async function seedQuestions() {
       await prisma.question.create({
         data: {
           lectureId: lecture.id,
-          type: questionData.type,
+          type: questionData.type as any,
           prompt: questionData.prompt,
-          codeSnippet: questionData.codeSnippet,
-          explanation: questionData.explanation,
-          difficulty: questionData.difficulty,
+          codeSnippet: questionData.codeSnippet || null,
+          explanation: questionData.explanation || null,
+          difficulty: questionData.difficulty as any,
           tags: ['seed'],
           options: {
             create: questionData.options.map((opt: { text: string; isCorrect: boolean }, index: number) => ({

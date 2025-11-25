@@ -29,8 +29,20 @@ export async function GET(request: Request, context: RouteContext) {
         answers: {
           include: {
             question: {
-              include: {
-                options: true,
+              select: {
+                id: true,
+                type: true,
+                difficulty: true,
+                prompt: true,
+                codeSnippet: true,
+                explanation: true,
+                options: {
+                  select: {
+                    id: true,
+                    text: true,
+                    isCorrect: true,
+                  },
+                },
                 lecture: {
                   select: {
                     title: true,

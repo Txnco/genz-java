@@ -1,5 +1,4 @@
 import { QuestionType, Difficulty } from '@prisma/client'
-import { createCompileOptions, createShuffledOptions } from './seed-utils'
 
 export const classesAndObjectsQuestions = {
   lectureSlug: 'classes-and-objects',

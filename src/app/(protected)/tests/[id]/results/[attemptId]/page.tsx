@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { use } from 'react'
 import Link from 'next/link'
 import { QuestionType } from '@prisma/client'
-import { shuffleArrayWithSeed } from '@/lib/shuffle-utils'
 
 interface TestAnswer {
   id: string
@@ -16,6 +15,7 @@ interface TestAnswer {
   question: {
     id: string
     type: QuestionType
+    difficulty: string
     prompt: string
     codeSnippet: string | null
     explanation: string | null
@@ -93,9 +93,9 @@ export default function ResultsPage({ params }: ResultsPageProps) {
     )
   }
 
-  const maxScore = result.totalQuestions * 2
+  const maxScore = 30 // Always 30 points: 6 medium (2 pts) + 6 hard (3 pts) = 30
   const percentage = Math.round((result.correctAnswers / result.totalQuestions) * 100)
-  const passed = result.score > 0 && percentage >= 50
+  const passed = result.score >= 15 // 50% of 30 points
   const timeSpentFormatted = result.timeSpent 
     ? `${Math.floor(result.timeSpent / 60)}:${(result.timeSpent % 60).toString().padStart(2, '0')}`
     : 'N/A'
@@ -129,7 +129,7 @@ export default function ResultsPage({ params }: ResultsPageProps) {
               </p>
               
               <p className="text-sm opacity-70 mb-4">
-                Bodovanje: Teorija (lako) = +2 | Zadaci (srednje/teško) = +3 | Netočno = -1 | Preskočeno = 0
+                Bodovanje: Medium = +2 boda | Hard = +3 boda | Netočno = -1 bod | Preskočeno = 0 bodova
               </p>
 
               <div className="stats stats-horizontal shadow">
@@ -173,7 +173,7 @@ export default function ResultsPage({ params }: ResultsPageProps) {
             <h2 className="text-2xl font-bold mb-4">Pregled odgovora</h2>
             
             {result.answers.map((answer, index) => {
-              const pointValue = answer.question.difficulty === 'EASY' ? 2 : 3
+              const pointValue = answer.question.difficulty === 'MEDIUM' ? 2 : 3
               const pointsEarned = answer.isSkipped ? 0 : answer.isCorrect ? pointValue : -1
               
               return (
@@ -205,11 +205,9 @@ export default function ResultsPage({ params }: ResultsPageProps) {
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold">Pitanje {index + 1}</h3>
                           <span className={`badge badge-sm ${
-                            answer.question.difficulty === 'EASY' ? 'badge-info' : 
-                            answer.question.difficulty === 'MEDIUM' ? 'badge-warning' : 
-                            'badge-error'
+                            answer.question.difficulty === 'MEDIUM' ? 'badge-warning' : 'badge-error'
                           }`}>
-                            {answer.question.difficulty === 'EASY' ? 'Teorija' : 'Zadatak'}
+                            {answer.question.difficulty === 'MEDIUM' ? 'Medium (+2)' : 'Hard (+3)'}
                           </span>
                           {answer.isSkipped && <span className="badge badge-warning badge-sm">Preskočeno</span>}
                         </div>
@@ -226,46 +224,44 @@ export default function ResultsPage({ params }: ResultsPageProps) {
 
                       {!answer.isSkipped && (
                         <div className="space-y-2 mt-3">
-                          {shuffleArrayWithSeed(answer.question.options, answer.question.id).map(option => {
+                          {(answer.question.options || []).filter(opt => opt != null).map(option => {
                             const isSelected = answer.selectedOptionIds.includes(option.id)
                             const isCorrect = option.isCorrect
 
                             return (
                               <div
                                 key={option.id}
-                                className={`p-3 rounded-lg border-2 transition-all ${
+                                className={`p-4 rounded-lg border-2 ${
                                   isCorrect && isSelected
-                                    ? 'bg-success bg-opacity-20 border-success'
+                                    ? 'bg-success/20 border-success border-[3px]'
                                     : isCorrect
-                                    ? 'bg-success bg-opacity-10 border-success border-dashed'
+                                    ? 'bg-success/10 border-success'
                                     : isSelected
-                                    ? 'bg-error bg-opacity-20 border-error'
-                                    : 'bg-base-100 border-base-300'
+                                    ? 'bg-error/20 border-error border-[3px]'
+                                    : 'bg-base-200 border-base-300'
                                 }`}
                               >
-                                <div className="flex items-center gap-3">
-                                  {/* Icon indicators */}
-                                  <div className="flex gap-1">
+                                <div className="flex flex-col gap-2">
+                                  {/* Badges */}
+                                  <div className="flex gap-2 flex-wrap">
                                     {isCorrect && (
-                                      <span className="badge badge-success gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </svg>
-                                        Točan odgovor
+                                      <span className="badge badge-success badge-sm gap-1 font-semibold">
+                                        ✓ TOČAN ODGOVOR
                                       </span>
                                     )}
                                     {isSelected && (
-                                      <span className={`badge gap-1 ${isCorrect ? 'badge-success' : 'badge-error'}`}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                        </svg>
-                                        Vaš odabir
+                                      <span className={`badge badge-sm gap-1 font-semibold ${
+                                        isCorrect ? 'badge-success' : 'badge-error'
+                                      }`}>
+                                        {isCorrect ? '✓ VAŠ ODABIR' : '✗ VAŠ ODABIR'}
                                       </span>
                                     )}
                                   </div>
                                   
                                   {/* Option text */}
-                                  <span className={`flex-1 ${isCorrect || isSelected ? 'font-medium' : ''}`}>
+                                  <span className={`text-base ${
+                                    isCorrect || isSelected ? 'font-semibold' : ''
+                                  }`}>
                                     {option.text}
                                   </span>
                                 </div>

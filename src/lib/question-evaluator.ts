@@ -42,9 +42,20 @@ function evaluateSingleChoice(
   selectedOptionIds: string[]
 ): EvaluationResult {
   const correctOption = options.find(opt => opt.isCorrect)
-  const selectedId = selectedOptionIds[0]
 
-  const isCorrect = correctOption?.id === selectedId
+  // Since we now allow checkboxes for all questions, users might select multiple answers
+  // For SINGLE_CHOICE to be correct:
+  // 1. User must have selected exactly one answer
+  // 2. That answer must be the correct one
+  // OR treat it like multiple choice where only one answer is correct
+  const correctOptionIds = options.filter(opt => opt.isCorrect).map(opt => opt.id)
+  const selectedSet = new Set(selectedOptionIds)
+  const correctSet = new Set(correctOptionIds)
+
+  // Check if selected options match exactly with correct options
+  const isCorrect =
+    selectedSet.size === correctSet.size &&
+    Array.from(selectedSet).every(id => correctSet.has(id))
 
   return {
     isCorrect,

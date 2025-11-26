@@ -177,11 +177,11 @@ export default function ResultsPage({ params }: ResultsPageProps) {
               const pointsEarned = answer.isSkipped ? 0 : answer.isCorrect ? pointValue : -1
               
               return (
-              <div key={answer.id} className={`card shadow-xl border-2 ${
-                answer.isSkipped ? 'border-warning bg-warning' : 
-                answer.isCorrect ? 'border-success bg-success' : 
-                'border-error bg-error'
-              } bg-opacity-10`}>
+              <div key={answer.id} className={`card shadow-xl border-2 bg-base-100 ${
+                answer.isSkipped ? 'border-warning' :
+                answer.isCorrect ? 'border-success' :
+                'border-error'
+              }`}>
                 <div className="card-body">
                   <div className="flex items-start gap-2">
                     <div className="flex flex-col items-center gap-1">
@@ -223,47 +223,56 @@ export default function ResultsPage({ params }: ResultsPageProps) {
                       )}
 
                       {!answer.isSkipped && (
-                        <div className="space-y-2 mt-3">
+                        <div className="space-y-3 mt-4">
                           {(answer.question.options || []).filter(opt => opt != null).map(option => {
                             const isSelected = answer.selectedOptionIds.includes(option.id)
                             const isCorrect = option.isCorrect
+                            const isUserCorrect = isSelected && isCorrect
+                            const isUserIncorrect = isSelected && !isCorrect
+
+                            // Determine styling based on the same logic as QuestionCard
+                            let containerClass = 'p-4 rounded-lg border-2 transition-all '
+
+                            if (isUserCorrect) {
+                              // User selected & correct - green background
+                              containerClass += 'bg-green-600/20 border-green-500'
+                            } else if (isUserIncorrect) {
+                              // User selected & incorrect - red background
+                              containerClass += 'bg-red-600/20 border-red-500'
+                            } else if (isCorrect) {
+                              // Correct but not selected - green outline only
+                              containerClass += 'border-green-500 bg-base-200'
+                            } else {
+                              // Not selected and not correct - normal
+                              containerClass += 'border-base-300 bg-base-200'
+                            }
 
                             return (
-                              <div
-                                key={option.id}
-                                className={`p-4 rounded-lg border-2 ${
-                                  isCorrect && isSelected
-                                    ? 'bg-success/20 border-success border-[3px]'
-                                    : isCorrect
-                                    ? 'bg-success/10 border-success'
-                                    : isSelected
-                                    ? 'bg-error/20 border-error border-[3px]'
-                                    : 'bg-base-200 border-base-300'
-                                }`}
-                              >
-                                <div className="flex flex-col gap-2">
-                                  {/* Badges */}
-                                  <div className="flex gap-2 flex-wrap">
-                                    {isCorrect && (
-                                      <span className="badge badge-success badge-sm gap-1 font-semibold">
-                                        ✓ TOČAN ODGOVOR
-                                      </span>
-                                    )}
-                                    {isSelected && (
-                                      <span className={`badge badge-sm gap-1 font-semibold ${
-                                        isCorrect ? 'badge-success' : 'badge-error'
-                                      }`}>
-                                        {isCorrect ? '✓ VAŠ ODABIR' : '✗ VAŠ ODABIR'}
-                                      </span>
-                                    )}
-                                  </div>
-                                  
-                                  {/* Option text */}
-                                  <span className={`text-base ${
-                                    isCorrect || isSelected ? 'font-semibold' : ''
-                                  }`}>
-                                    {option.text}
-                                  </span>
+                              <div key={option.id} className={containerClass}>
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    disabled
+                                    readOnly
+                                    className="checkbox checkbox-primary"
+                                  />
+                                  <span className="flex-1">{option.text}</span>
+                                  {isCorrect && (
+                                    <svg
+                                      className="w-5 h-5 text-green-500"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M5 13l4 4L19 7"
+                                      />
+                                    </svg>
+                                  )}
                                 </div>
                               </div>
                             )
@@ -281,11 +290,11 @@ export default function ResultsPage({ params }: ResultsPageProps) {
                       )}
 
                       {answer.question.explanation && (
-                        <div className="alert mt-3">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                          </svg>
-                          <span><strong>Objašnjenje:</strong> {answer.question.explanation}</span>
+                        <div className="mt-6 p-4 bg-base-300 rounded-lg">
+                          <h4 className="font-medium mb-2">Objašnjenje:</h4>
+                          <p className="text-base-content/80 whitespace-pre-wrap">
+                            {answer.question.explanation}
+                          </p>
                         </div>
                       )}
                     </div>

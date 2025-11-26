@@ -75,6 +75,15 @@ export async function POST(request: Request) {
       data.textAnswer
     )
 
+    // Get correct answer IDs for detailed feedback
+    const correctAnswerIds = question.options
+      .filter(opt => opt.isCorrect)
+      .map(opt => opt.id)
+
+    // Determine which user answers were correct and which were incorrect
+    const userCorrect = data.selectedOptionIds.filter(id => correctAnswerIds.includes(id))
+    const userIncorrect = data.selectedOptionIds.filter(id => !correctAnswerIds.includes(id))
+
     // Save answer
     const answer = await prisma.testAnswer.create({
       data: {
@@ -89,7 +98,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ...answer,
-      evaluation,
+      evaluation: {
+        ...evaluation,
+        correctAnswerIds,
+        userCorrect,
+        userIncorrect,
+      },
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

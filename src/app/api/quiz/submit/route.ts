@@ -150,9 +150,21 @@ export async function POST(request: Request) {
       }),
     ])
 
+    // Get correct answer IDs
+    const correctAnswerIds = question.options
+      .filter(opt => opt.isCorrect)
+      .map(opt => opt.id)
+
+    // Determine which user answers were correct and which were incorrect
+    const userCorrect = selectedOptionIds.filter(id => correctAnswerIds.includes(id))
+    const userIncorrect = selectedOptionIds.filter(id => !correctAnswerIds.includes(id))
+
     return NextResponse.json({
       isCorrect: result.isCorrect,
       correctAnswers: result.correctAnswers,
+      correctAnswerIds,
+      userCorrect,
+      userIncorrect,
       explanation: question.explanation,
       xpAwarded,
       newXp,

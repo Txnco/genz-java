@@ -378,45 +378,45 @@ Comparator<Person> comp = Comparator
     .thenComparing(Person::getFirstName)
     .thenComparing(Person::getAge);`,
   },
-//   {
-//     title: 'Predviđanje ponašanja koda',
-//     slug: 'code-behavior',
-//     order: 10,
-//     description: 'Analiza Java koda - hoće li se kompilirati, baciti iznimku ili proizvesti određeni izlaz.',
-//     content: `# Predviđanje ponašanja koda
+  {
+    title: 'Predviđanje ponašanja koda',
+    slug: 'code-behavior',
+    order: 10,
+    description: 'Analiza Java koda - hoće li se kompilirati, baciti iznimku ili proizvesti određeni izlaz.',
+    content: `# Predviđanje ponašanja koda
 
-// ## Hoće li se kod kompajlirati?
-// - Provjera tipova
-// - Provjera sintakse
-// - Provjera access modifikatora
+## Hoće li se kod kompajlirati?
+- Provjera tipova
+- Provjera sintakse
+- Provjera access modifikatora
 
-// ## Compile-time vs Runtime greške
-// - Compile-time: syntax errors, type mismatches
-// - Runtime: NullPointerException, ArrayIndexOutOfBoundsException
+## Compile-time vs Runtime greške
+- Compile-time: syntax errors, type mismatches
+- Runtime: NullPointerException, ArrayIndexOutOfBoundsException
 
-// ## Česte compile-time greške
-// - Missing semicolon
-// - Type mismatch
-// - Unreported exception must be caught or declared
-// - Cannot find symbol
+## Česte compile-time greške
+- Missing semicolon
+- Type mismatch
+- Unreported exception must be caught or declared
+- Cannot find symbol
 
-// ## Česte runtime iznimke
-// - NullPointerException: pristup null referenci
-// - ArrayIndexOutOfBoundsException: neispravan indeks
-// - ClassCastException: neispravan cast
-// - NumberFormatException: neispravna konverzija stringa
+## Česte runtime iznimke
+- NullPointerException: pristup null referenci
+- ArrayIndexOutOfBoundsException: neispravan indeks
+- ClassCastException: neispravan cast
+- NumberFormatException: neispravna konverzija stringa
 
-// ## Edge-case situacije
-// - Null vrijednosti
-// - Prazne kolekcije
-// - Granične vrijednosti
-// - Integer overflow
+## Edge-case situacije
+- Null vrijednosti
+- Prazne kolekcije
+- Granične vrijednosti
+- Integer overflow
 
-// ## Evaluacija izraza
-// - Operator precedence
-// - Short-circuit evaluation
-// - Pre vs post increment`,
-//   },
+## Evaluacija izraza
+- Operator precedence
+- Short-circuit evaluation
+- Pre vs post increment`,
+  }
 //   {
 //     title: 'Java osnove',
 //     slug: 'java-basics',

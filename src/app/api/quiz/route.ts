@@ -13,6 +13,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const lectureSlug = searchParams.get('lecture')
     const repeatMode = searchParams.get('repeatMode') === 'true'
+    const restart = searchParams.get('restart') === 'true'
 
     if (!lectureSlug) {
       return NextResponse.json({ error: 'Slug predavanja je obavezan' }, { status: 400 })
@@ -26,8 +27,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Predavanje nije pronađeno' }, { status: 404 })
     }
 
-    // Get user's answered questions for this lecture
-    const answeredQuestions = await prisma.userQuestionAnswer.findMany({
+    // Get user's answered questions for this lecture (skip if restart mode)
+    const answeredQuestions = restart ? [] : await prisma.userQuestionAnswer.findMany({
       where: {
         userId: session.user.id,
         question: { lectureId: lecture.id },

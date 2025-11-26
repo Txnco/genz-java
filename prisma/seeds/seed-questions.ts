@@ -23,8 +23,8 @@ const questionSeeders = [
   genericsQuestions,
   lambdaExpressionsQuestions,
   streamApiQuestions,
-  sortingQuestions
-  // codeBehaviorQuestions,
+  sortingQuestions,
+  codeBehaviorQuestions,
   // javaBasicsQuestions,
 ]
 

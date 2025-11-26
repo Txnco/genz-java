@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, use } from 'react'
 import Link from 'next/link'
 import { QuestionCard } from '@/components/question-card'
-import { AnswerResult } from '@/components/answer-result'
 import { QuestionType } from '@prisma/client'
 
 interface QuestionOption {
@@ -35,6 +34,9 @@ interface QuizState {
 interface AnswerResultData {
   isCorrect: boolean
   correctAnswers?: string[]
+  correctAnswerIds: string[]
+  userCorrect: string[]
+  userIncorrect: string[]
   explanation: string | null
   xpAwarded: number
   newXp: number
@@ -57,13 +59,15 @@ export default function QuizPage({ params }: QuizPageProps) {
   const [isRepeatMode, setIsRepeatMode] = useState(false)
   const [repeatAnswered, setRepeatAnswered] = useState(0)
 
-  const fetchQuestion = useCallback(async (repeatMode = false) => {
+  const fetchQuestion = useCallback(async (repeatMode = false, restart = false) => {
     try {
       setIsLoading(true)
       setError(null)
-      const url = repeatMode
-        ? `/api/quiz?lecture=${slug}&repeatMode=true`
-        : `/api/quiz?lecture=${slug}`
+      const params = new URLSearchParams({ lecture: slug })
+      if (repeatMode) params.append('repeatMode', 'true')
+      if (restart) params.append('restart', 'true')
+
+      const url = `/api/quiz?${params.toString()}`
       const response = await fetch(url)
       const data = await response.json()
 
@@ -129,6 +133,12 @@ export default function QuizPage({ params }: QuizPageProps) {
   const handleStartRepeat = () => {
     setRepeatAnswered(0)
     fetchQuestion(true)
+  }
+
+  const handleRestartQuiz = () => {
+    setIsRepeatMode(false)
+    setRepeatAnswered(0)
+    fetchQuestion(false, true) // Pass restart=true
   }
 
   if (isLoading) {
@@ -220,6 +230,27 @@ export default function QuizPage({ params }: QuizPageProps) {
                 Natrag na lekciju
               </Link>
 
+              {/* <button
+                onClick={handleRestartQuiz}
+                className="btn btn-accent"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                Ponovi od početka
+              </button> */}
+
               {hasIncorrect && !isRepeatMode && (
                 <button
                   onClick={handleStartRepeat}
@@ -279,23 +310,20 @@ export default function QuizPage({ params }: QuizPageProps) {
         ></progress>
       </div>
 
-      {/* Question or Result */}
-      {answerResult ? (
-        <AnswerResult
-          isCorrect={answerResult.isCorrect}
-          explanation={answerResult.explanation}
-          correctAnswers={answerResult.correctAnswers}
-          xpAwarded={answerResult.xpAwarded}
-          onNext={handleNextQuestion}
-          isHalfPoints={answerResult.wasHalfPoints}
-        />
-      ) : (
-        <QuestionCard
-          question={quizState.question}
-          onSubmit={handleSubmitAnswer}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      {/* Question Card (always visible, shows evaluation after submission) */}
+      <QuestionCard
+        question={quizState.question}
+        onSubmit={handleSubmitAnswer}
+        isSubmitting={isSubmitting}
+        evaluation={answerResult ? {
+          correctAnswerIds: answerResult.correctAnswerIds,
+          userCorrect: answerResult.userCorrect,
+          userIncorrect: answerResult.userIncorrect,
+          explanation: answerResult.explanation,
+          xpAwarded: answerResult.xpAwarded,
+        } : null}
+        onNext={handleNextQuestion}
+      />
     </div>
   )
 }

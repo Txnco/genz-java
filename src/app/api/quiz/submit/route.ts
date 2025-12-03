@@ -11,8 +11,10 @@ import {
   shouldIncrementStreak,
   shouldResetStreak,
 } from '@/lib/gamification'
+import { checkNewBadges, UserStats } from '@/lib/badges'
 import { checkRateLimit, QUIZ_SUBMIT_RATE_LIMIT } from '@/lib/rate-limit'
 import { z } from 'zod'
+import { BadgeType } from '@prisma/client'
 
 const submitSchema = z.object({
   questionId: z.string(),
@@ -150,6 +152,55 @@ export async function POST(request: Request) {
       }),
     ])
 
+    // Check for new badges
+    const [totalAnswersCount, existingBadges, recentAnswers] = await Promise.all([
+      prisma.userQuestionAnswer.count({
+        where: { userId: session.user.id },
+      }),
+      prisma.userBadge.findMany({
+        where: { userId: session.user.id },
+        select: { badgeType: true },
+      }),
+      prisma.userQuestionAnswer.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: { isCorrect: true },
+      }),
+    ])
+
+    // Calculate consecutive correct answers
+    let consecutiveCorrect = 0
+    for (const answer of recentAnswers) {
+      if (answer.isCorrect) {
+        consecutiveCorrect++
+      } else {
+        break
+      }
+    }
+
+    const userStats: UserStats = {
+      totalAnswers: totalAnswersCount,
+      currentStreak: newStreak,
+      consecutiveCorrect,
+      existingBadges: existingBadges.map(b => b.badgeType),
+    }
+
+    const newBadges = checkNewBadges(userStats)
+    let earnedBadges: BadgeType[] = []
+
+    // Award new badges
+    if (newBadges.length > 0) {
+      await prisma.userBadge.createMany({
+        data: newBadges.map(badgeType => ({
+          userId: session.user.id,
+          badgeType,
+        })),
+        skipDuplicates: true,
+      })
+      earnedBadges = newBadges
+    }
+
     // Get correct answer IDs
     const correctAnswerIds = question.options
       .filter(opt => opt.isCorrect)
@@ -171,6 +222,7 @@ export async function POST(request: Request) {
       newLevel,
       streak: newStreak,
       wasHalfPoints: halfPoints || false,
+      earnedBadges,
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

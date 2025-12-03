@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, use } from 'react'
 import Link from 'next/link'
 import { QuestionCard } from '@/components/question-card'
-import { QuestionType } from '@prisma/client'
+import { BadgePopup, useBadgePopup } from '@/components/badge-popup'
+import { QuestionType, BadgeType } from '@prisma/client'
 
 interface QuestionOption {
   id: string
@@ -43,6 +44,7 @@ interface AnswerResultData {
   newLevel: number
   streak: number
   wasHalfPoints?: boolean
+  earnedBadges?: BadgeType[]
 }
 
 interface QuizPageProps {
@@ -58,6 +60,7 @@ export default function QuizPage({ params }: QuizPageProps) {
   const [error, setError] = useState<string | null>(null)
   const [isRepeatMode, setIsRepeatMode] = useState(false)
   const [repeatAnswered, setRepeatAnswered] = useState(0)
+  const { earnedBadge, showBadges, closeBadge } = useBadgePopup()
 
   const fetchQuestion = useCallback(async (repeatMode = false, restart = false) => {
     try {
@@ -119,6 +122,10 @@ export default function QuizPage({ params }: QuizPageProps) {
       if (isRepeatMode) {
         setRepeatAnswered(prev => prev + 1)
       }
+      // Show badge popup if badges were earned
+      if (data.earnedBadges && data.earnedBadges.length > 0) {
+        showBadges(data.earnedBadges)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Greška pri slanju odgovora')
     } finally {
@@ -145,19 +152,19 @@ export default function QuizPage({ params }: QuizPageProps) {
     return (
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <div className="h-8 w-32 bg-base-300/50 rounded-lg animate-pulse" />
-          <div className="h-8 w-24 bg-base-300/50 rounded-lg animate-pulse" />
+          <div className="h-7 w-28 bg-[var(--border-color)]/50 rounded-xl animate-pulse" />
+          <div className="h-7 w-20 bg-[var(--border-color)]/50 rounded-xl animate-pulse" />
         </div>
-        <div className="h-2 w-full bg-base-300/50 rounded-full mb-6 animate-pulse" />
-        <div className="card-float p-6">
-          <div className="space-y-4">
-            <div className="h-5 w-24 bg-base-300/50 rounded-lg animate-pulse" />
-            <div className="h-6 w-3/4 bg-base-300/50 rounded-lg animate-pulse" />
-            <div className="h-24 w-full bg-base-300/50 rounded-xl animate-pulse" />
-            <div className="space-y-3 pt-4">
-              <div className="h-14 w-full bg-base-300/50 rounded-xl animate-pulse" />
-              <div className="h-14 w-full bg-base-300/50 rounded-xl animate-pulse" />
-              <div className="h-14 w-full bg-base-300/50 rounded-xl animate-pulse" />
+        <div className="h-1 w-full bg-[var(--border-color)]/30 rounded-full mb-8 animate-pulse" />
+        <div className="bg-[var(--bg-surface)] rounded-3xl p-7 shadow-[var(--shadow-md)] ring-1 ring-[var(--border-color)]/30">
+          <div className="space-y-5">
+            <div className="h-6 w-28 bg-[var(--border-color)]/40 rounded-full animate-pulse" />
+            <div className="h-5 w-4/5 bg-[var(--border-color)]/40 rounded-xl animate-pulse" />
+            <div className="h-28 w-full bg-[var(--border-color)]/30 rounded-2xl animate-pulse" />
+            <div className="space-y-3 pt-3">
+              <div className="h-16 w-full bg-[var(--border-color)]/25 rounded-2xl animate-pulse" />
+              <div className="h-16 w-full bg-[var(--border-color)]/25 rounded-2xl animate-pulse" />
+              <div className="h-16 w-full bg-[var(--border-color)]/25 rounded-2xl animate-pulse" />
             </div>
           </div>
         </div>
@@ -168,17 +175,17 @@ export default function QuizPage({ params }: QuizPageProps) {
   if (error) {
     return (
       <div className="max-w-3xl mx-auto">
-        <div className="card-float p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <div className="bg-[var(--bg-surface)] rounded-3xl p-12 text-center shadow-[var(--shadow-lg)] ring-1 ring-[var(--border-color)]/30">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center mx-auto mb-5">
+            <svg className="w-8 h-8 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold mb-2">Greška</h2>
-          <p className="text-base-content/60 mb-6">{error}</p>
+          <h2 className="text-xl font-semibold mb-3 text-[var(--text-primary)]">Greška</h2>
+          <p className="text-[var(--text-muted)] mb-7">{error}</p>
           <button
             onClick={() => fetchQuestion(isRepeatMode)}
-            className="btn-modern btn-modern-primary"
+            className="px-6 py-3 rounded-2xl font-semibold bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90 transition-all"
           >
             Pokušaj ponovno
           </button>
@@ -194,32 +201,38 @@ export default function QuizPage({ params }: QuizPageProps) {
 
     return (
       <div className="max-w-3xl mx-auto">
-        <div className="card-float p-10 text-center animate-scale-in">
+        <div className="bg-[var(--bg-surface)] rounded-3xl p-10 text-center shadow-[var(--shadow-lg)] ring-1 ring-[var(--border-color)]/30 animate-scale-in">
           {allCorrect ? (
             <>
-              <div className="text-6xl mb-5">🏆</div>
-              <h2 className="text-2xl font-bold tracking-tight mb-3">Izvrsno!</h2>
-              <p className="text-base-content/60">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 flex items-center justify-center">
+                <span className="text-5xl">🏆</span>
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight mb-3 text-[var(--text-primary)]">Izvrsno!</h2>
+              <p className="text-[var(--text-muted)]">
                 Odgovorio/la si točno na sva pitanja u ovoj lekciji!
               </p>
             </>
           ) : isRepeatMode ? (
             <>
-              <div className="text-6xl mb-5">✅</div>
-              <h2 className="text-2xl font-bold tracking-tight mb-3">Ponavljanje završeno!</h2>
-              <p className="text-base-content/60">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-green-500/20 flex items-center justify-center">
+                <span className="text-5xl">✅</span>
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight mb-3 text-[var(--text-primary)]">Ponavljanje završeno!</h2>
+              <p className="text-[var(--text-muted)]">
                 Prošao/la si kroz sva netočna pitanja.
               </p>
             </>
           ) : (
             <>
-              <div className="text-6xl mb-5">📚</div>
-              <h2 className="text-2xl font-bold tracking-tight mb-3">Lekcija završena!</h2>
-              <p className="text-base-content/60 mb-4">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-400/20 to-indigo-500/20 flex items-center justify-center">
+                <span className="text-5xl">📚</span>
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight mb-3 text-[var(--text-primary)]">Lekcija završena!</h2>
+              <p className="text-[var(--text-muted)] mb-5">
                 Odgovorio/la si na sva pitanja u ovoj lekciji.
               </p>
               {hasIncorrect && (
-                <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-warning/10 border border-warning/30 text-warning text-sm">
+                <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20 text-amber-600 dark:text-amber-400 text-sm">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                   </svg>
@@ -232,7 +245,7 @@ export default function QuizPage({ params }: QuizPageProps) {
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
             <Link
               href={`/lectures/${slug}`}
-              className="btn-modern btn-modern-secondary"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-semibold text-[var(--text-primary)] bg-[var(--border-color)]/50 hover:bg-[var(--border-color)] transition-all"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -243,7 +256,7 @@ export default function QuizPage({ params }: QuizPageProps) {
             {hasIncorrect && !isRepeatMode && (
               <button
                 onClick={handleStartRepeat}
-                className="btn-modern btn-modern-primary"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-semibold bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90 transition-all shadow-lg shadow-[var(--text-primary)]/10"
               >
                 Ponovi netočna (50% XP)
               </button>
@@ -252,7 +265,7 @@ export default function QuizPage({ params }: QuizPageProps) {
             {isRepeatMode && hasIncorrect && (
               <button
                 onClick={handleStartRepeat}
-                className="btn-modern btn-modern-primary"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-semibold bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90 transition-all shadow-lg shadow-[var(--text-primary)]/10"
               >
                 Ponovi ponovno
               </button>
@@ -270,10 +283,10 @@ export default function QuizPage({ params }: QuizPageProps) {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-6">
         <Link
           href={`/lectures/${slug}`}
-          className="inline-flex items-center gap-2 text-sm text-base-content/60 hover:text-base-content transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -282,11 +295,11 @@ export default function QuizPage({ params }: QuizPageProps) {
         </Link>
         <div className="flex items-center gap-3">
           {isRepeatMode && (
-            <span className="badge-warning-modern text-xs">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20">
               Ponavljanje (50% XP)
             </span>
           )}
-          <span className="text-sm text-base-content/60 font-medium">
+          <span className="text-sm text-[var(--text-muted)] font-medium tabular-nums">
             {isRepeatMode
               ? `${repeatAnswered}/${quizState.totalQuestions}`
               : `${quizState.answeredQuestions}/${quizState.totalQuestions}`
@@ -296,10 +309,10 @@ export default function QuizPage({ params }: QuizPageProps) {
       </div>
 
       {/* Progress Bar */}
-      <div className="mb-6">
-        <div className={`h-1.5 rounded-full ${isRepeatMode ? 'bg-warning/20' : 'bg-base-300/50'}`}>
+      <div className="mb-8">
+        <div className={`h-1 rounded-full overflow-hidden ${isRepeatMode ? 'bg-amber-500/15' : 'bg-[var(--border-color)]/40'}`}>
           <div 
-            className={`h-full rounded-full transition-all duration-500 ${isRepeatMode ? 'bg-warning' : 'bg-linear-to-r from-primary to-secondary'}`}
+            className={`h-full rounded-full transition-all duration-500 ease-out ${isRepeatMode ? 'bg-amber-500' : 'bg-[var(--text-primary)]'}`}
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -319,6 +332,9 @@ export default function QuizPage({ params }: QuizPageProps) {
         } : null}
         onNext={handleNextQuestion}
       />
+
+      {/* Badge Popup */}
+      <BadgePopup badgeType={earnedBadge} onClose={closeBadge} />
     </div>
   )
 }

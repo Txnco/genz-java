@@ -3,6 +3,8 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { getLevelProgress } from '@/lib/gamification'
+import { getAllBadges, getBadgeDefinition } from '@/lib/badges'
+import { BadgeType } from '@prisma/client'
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -15,6 +17,7 @@ export default async function DashboardPage() {
         include: { lecture: true },
       },
       answers: true,
+      badges: true,
     },
   })
 
@@ -144,6 +147,50 @@ export default async function DashboardPage() {
           <p className="text-xs text-base-content/50">
             {correctAnswers}/{totalAnswers} točno
           </p>
+        </div>
+      </div>
+
+      {/* Badges Section */}
+      <div>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-semibold tracking-tight">Značke</h2>
+          <span className="text-sm text-base-content/60">
+            {user.badges.length}/{getAllBadges().length} otključano
+          </span>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          {getAllBadges().map((badge) => {
+            const earned = user.badges.some(b => b.badgeType === badge.type)
+            
+            return (
+              <div 
+                key={badge.type}
+                className={`card-float p-4 text-center transition-all ${
+                  earned 
+                    ? 'border-2 border-primary/30 bg-primary/5' 
+                    : 'opacity-50 grayscale'
+                }`}
+              >
+                <div 
+                  className={`w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center text-3xl ${
+                    earned 
+                      ? `bg-gradient-to-br ${badge.gradient} shadow-lg`
+                      : 'bg-base-300'
+                  }`}
+                >
+                  {badge.icon}
+                </div>
+                <p className="font-semibold text-sm mb-1">{badge.name}</p>
+                <p className="text-xs text-base-content/60 line-clamp-2">{badge.description}</p>
+                {earned && (
+                  <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600">
+                    ✓ Otključano
+                  </span>
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
 

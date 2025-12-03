@@ -58,6 +58,7 @@ model User {
   testAttempts  TestAttempt[]
   createdTests  Test[]         @relation("TestCreator")
   lectureRestarts LectureProgressRestart[]
+  badges        UserBadge[]
 }
 
 model Lecture {
@@ -249,4 +250,26 @@ model LectureProgressRestart {
 
   @@index([userId, lectureId])
   @@index([userId, restartedAt])
+}
+
+// Badge Types
+enum BadgeType {
+  FIRST_STEPS        // Answer first question
+  KNOWLEDGE_SEEKER   // Answer 50 questions
+  JAVA_WARRIOR       // Answer 200 questions
+  STREAK_MASTER      // Achieve 7-day streak
+  PERFECTIONIST      // Get 10 correct answers in a row
+}
+
+model UserBadge {
+  id          String    @id @default(cuid())
+  userId      String
+  badgeType   BadgeType
+  earnedAt    DateTime  @default(now())
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeType])
+  @@index([userId])
 }

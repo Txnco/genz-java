@@ -11,6 +11,7 @@ interface Lecture {
   description: string | null
   order: number
   content: string | null
+  tags: string[]
 }
 
 interface GenerateQuestionsResponse {
@@ -34,12 +35,15 @@ export default function EditLecturePage({ params }: EditLecturePageProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [tagInput, setTagInput] = useState('')
+  const [tags, setTags] = useState<string[]>([])
 
   useEffect(() => {
     fetch(`/api/admin/lectures/${id}`)
       .then(res => res.json())
       .then(data => {
         setLecture(data)
+        setTags(data.tags || [])
         setIsLoading(false)
       })
       .catch(() => {
@@ -47,6 +51,25 @@ export default function EditLecturePage({ params }: EditLecturePageProps) {
         setIsLoading(false)
       })
   }, [id])
+
+  const handleAddTag = () => {
+    const trimmedTag = tagInput.trim()
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setTags([...tags, trimmedTag])
+      setTagInput('')
+    }
+  }
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove))
+  }
+
+  const handleTagKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleAddTag()
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -60,6 +83,7 @@ export default function EditLecturePage({ params }: EditLecturePageProps) {
       description: formData.get('description'),
       order: parseInt(formData.get('order') as string) || 0,
       content: formData.get('content'),
+      tags: tags,
     }
 
     try {
@@ -143,31 +167,46 @@ export default function EditLecturePage({ params }: EditLecturePageProps) {
   }
 
   if (isLoading) {
-    return <div className="animate-pulse">Loading...</div>
+    return (
+      <div className="max-w-2xl animate-pulse space-y-4">
+        <div className="h-4 w-32 bg-base-200 rounded" />
+        <div className="h-8 w-48 bg-base-200 rounded" />
+        <div className="space-y-3 mt-6">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-12 bg-base-200 rounded" />
+          ))}
+        </div>
+      </div>
+    )
   }
 
   if (!lecture) {
-    return <div>Lecture not found</div>
+    return (
+      <div className="card-float p-8 text-center">
+        <p className="text-base-content/60">Lecture not found</p>
+      </div>
+    )
   }
 
   return (
     <div className="max-w-2xl">
       <Link
         href="/admin/lectures"
-        className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm mb-4 inline-block"
+        className="inline-flex items-center gap-2 text-sm text-base-content/60 hover:text-base-content transition-colors mb-6"
       >
-        &larr; Back to Lectures
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Back to Lectures
       </Link>
 
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Edit Lecture
-        </h2>
+        <h2 className="text-2xl font-bold">Edit Lecture</h2>
         <div className="flex gap-2">
           <button
             onClick={handleGenerateQuestions}
             disabled={isGenerating}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm flex items-center gap-2"
+            className="btn-modern btn-modern-secondary text-sm py-2 flex items-center gap-2"
           >
             {isGenerating ? (
               <>
@@ -182,14 +221,14 @@ export default function EditLecturePage({ params }: EditLecturePageProps) {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Generate Questions (AI)
+                Generate AI Questions
               </>
             )}
           </button>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm"
+            className="btn-modern btn-modern-danger text-sm py-2"
           >
             {isDeleting ? 'Deleting...' : 'Delete'}
           </button>
@@ -197,92 +236,127 @@ export default function EditLecturePage({ params }: EditLecturePageProps) {
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
+        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm">
           {error}
         </div>
       )}
 
       {successMessage && (
-        <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-600 dark:text-green-400">
+        <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-green-500 text-sm">
           {successMessage}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="card-float p-6 space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Title
-          </label>
+          <label className="block text-sm font-medium mb-2">Title</label>
           <input
             type="text"
             name="title"
             required
             defaultValue={lecture.title}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className="input-modern"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Slug
-          </label>
+          <label className="block text-sm font-medium mb-2">Slug</label>
           <input
             type="text"
             name="slug"
             required
             pattern="[a-z0-9-]+"
             defaultValue={lecture.slug}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className="input-modern"
           />
+          <p className="text-xs text-base-content/50 mt-1">Lowercase letters, numbers, and hyphens only</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Order
-          </label>
+          <label className="block text-sm font-medium mb-2">Order</label>
           <input
             type="number"
             name="order"
             defaultValue={lecture.order}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className="input-modern"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Description
-          </label>
+          <label className="block text-sm font-medium mb-2">Description</label>
           <textarea
             name="description"
             rows={2}
             defaultValue={lecture.description || ''}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className="input-modern resize-none"
           />
         </div>
 
+        {/* Tags Input */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Content (Markdown)
-          </label>
+          <label className="block text-sm font-medium mb-2">Tags</label>
+          <div className="flex gap-2 mb-3">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              placeholder="Add a tag..."
+              className="input-modern flex-1"
+            />
+            <button
+              type="button"
+              onClick={handleAddTag}
+              className="btn-modern btn-modern-secondary px-4"
+            >
+              Add
+            </button>
+          </div>
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="tag tag-removable flex items-center gap-1.5 pr-1.5"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="hover:text-red-500 transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Content (Markdown)</label>
           <textarea
             name="content"
             rows={10}
             defaultValue={lecture.content || ''}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white font-mono text-sm"
+            className="input-modern resize-none font-mono text-sm"
           />
+          <p className="text-xs text-base-content/50 mt-1">Used for AI question generation</p>
         </div>
 
-        <div className="flex gap-4 pt-4">
+        <div className="flex gap-3 pt-4">
           <button
             type="submit"
             disabled={isSaving}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+            className="btn-modern btn-modern-primary flex-1 py-3"
           >
             {isSaving ? 'Saving...' : 'Save Changes'}
           </button>
           <Link
             href="/admin/lectures"
-            className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+            className="btn-modern btn-modern-secondary py-3 px-6"
           >
             Cancel
           </Link>

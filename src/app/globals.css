@@ -1,28 +1,702 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
+  themes: lightbw --default, darkbw --prefersdark;
 }
 
-/* Code block styling */
-pre {
-  background-color: #1e1e1e;
-  color: #d4d4d4;
-  padding: 1rem;
+/* ============================================
+   GENZ JAVA - Black & White Design System
+   Monochrome with subtle color accents
+   ============================================ */
+
+/* DaisyUI Theme Customization */
+@theme {
+  /* Light B/W Theme */
+  --color-lightbw-primary: #020617;
+  --color-lightbw-secondary: #0f172a;
+  --color-lightbw-accent: #111827;
+  --color-lightbw-neutral: #111827;
+  --color-lightbw-base-100: #f9fafb;
+  --color-lightbw-info: #0ea5e9;
+  --color-lightbw-success: #22c55e;
+  --color-lightbw-warning: #eab308;
+  --color-lightbw-error: #ef4444;
+  
+  /* Dark B/W Theme */
+  --color-darkbw-primary: #f9fafb;
+  --color-darkbw-secondary: #e5e7eb;
+  --color-darkbw-accent: #d4d4d8;
+  --color-darkbw-neutral: #020617;
+  --color-darkbw-base-100: #020617;
+  --color-darkbw-info: #38bdf8;
+  --color-darkbw-success: #4ade80;
+  --color-darkbw-warning: #facc15;
+  --color-darkbw-error: #f97373;
+}
+
+/* Custom Design Tokens */
+:root {
+  /* Typography */
+  --font-display: 'Space Grotesk', 'Sora', system-ui, sans-serif;
+  --font-body: 'DM Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* Spacing rhythm */
+  --space-unit: 0.25rem;
+  
+  /* Animations */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  
+  /* Glass effect */
+  --glass-blur: 16px;
+  --glass-opacity: 0.75;
+  
+  /* Light mode - B/W palette */
+  --bg-primary: #f9fafb;
+  --bg-surface: #ffffff;
+  --text-primary: #020617;
+  --text-muted: #64748b;
+  --border-color: #e5e7eb;
+  --code-bg: #0f172a;
+  --accent-bg: #020617;
+  --accent-text: #f9fafb;
+  
+  /* Shadows - light mode (subtle) */
+  --shadow-xs: 0 1px 2px rgba(2, 6, 23, 0.03);
+  --shadow-sm: 0 2px 8px rgba(2, 6, 23, 0.04);
+  --shadow-md: 0 4px 12px rgba(2, 6, 23, 0.06);
+  --shadow-lg: 0 8px 24px rgba(2, 6, 23, 0.08);
+  --shadow-xl: 0 12px 36px rgba(2, 6, 23, 0.1);
+  
+  /* Glow effects - light mode */
+  --glow-accent: 0 0 24px rgba(2, 6, 23, 0.08);
+}
+
+/* Dark mode tokens */
+[data-theme="darkbw"] {
+  --bg-primary: #020617;
+  --bg-surface: #0b1120;
+  --text-primary: #f9fafb;
+  --text-muted: #94a3b8;
+  --border-color: #1e293b;
+  --code-bg: #111827;
+  --accent-bg: #f9fafb;
+  --accent-text: #020617;
+  
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 12px 36px rgba(0, 0, 0, 0.4);
+  
+  --glow-accent: 0 0 30px rgba(249, 250, 251, 0.1);
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  letter-spacing: -0.01em;
+  line-height: 1.6;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+/* ============================================
+   Custom Utility Classes
+   ============================================ */
+
+/* Glass morphism panels */
+.glass {
+  background: rgba(255, 255, 255, var(--glass-opacity));
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="darkbw"] .glass {
+  background: rgba(11, 17, 32, var(--glass-opacity));
+  border: 1px solid rgba(30, 41, 59, 0.6);
+}
+
+/* Gradient text - B/W mode just uses solid color */
+.text-gradient {
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-muted) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtle glow effect */
+.glow {
+  box-shadow: var(--glow-accent);
+}
+
+/* Animated border gradient */
+.border-gradient {
+  position: relative;
+  background: var(--bg-surface);
+  border-radius: 1rem;
+}
+
+.border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--text-primary), var(--text-muted));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.2;
+  transition: opacity var(--duration-normal) var(--ease-smooth);
+}
+
+.border-gradient:hover::before {
+  opacity: 0.4;
+}
+
+/* ============================================
+   Modern Card Styles
+   ============================================ */
+
+.card-modern {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.card-modern:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--text-muted);
+  transform: translateY(-2px);
+}
+
+/* Floating card with depth */
+.card-float {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+  transition: all var(--duration-slow) var(--ease-out-expo);
+}
+
+.card-float:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--text-muted);
+}
+
+/* ============================================
+   Modern Button Styles
+   ============================================ */
+
+.btn-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  border-radius: 0.75rem;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  cursor: pointer;
+  border: none;
+}
+
+.btn-modern-primary {
+  background: var(--accent-bg);
+  color: var(--accent-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-modern-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  opacity: 0.9;
+}
+
+.btn-modern-primary:active {
+  transform: translateY(0);
+}
+
+.btn-modern-secondary {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-modern-secondary:hover {
+  background: var(--border-color);
+  border-color: var(--text-muted);
+}
+
+.btn-modern-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+}
+
+.btn-modern-ghost:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.btn-modern-danger {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.15);
+}
+
+.btn-modern-danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+}
+
+/* ============================================
+   Modern Input Styles
+   ============================================ */
+
+.input-modern {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  transition: all var(--duration-fast) var(--ease-smooth);
+  outline: none;
+  color: var(--text-primary);
+}
+
+.input-modern:focus {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 3px rgba(2, 6, 23, 0.08);
+}
+
+[data-theme="darkbw"] .input-modern:focus {
+  box-shadow: 0 0 0 3px rgba(249, 250, 251, 0.1);
+}
+
+.input-modern::placeholder {
+  color: var(--text-muted);
+}
+
+/* ============================================
+   Tag/Chip Styles
+   ============================================ */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
   border-radius: 0.5rem;
+  background: var(--border-color);
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.tag:hover {
+  background: var(--text-muted);
+  color: var(--bg-primary);
+}
+
+.tag-active {
+  background: var(--accent-bg);
+  color: var(--accent-text);
+}
+
+.tag-removable {
+  cursor: pointer;
+}
+
+.tag-removable:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+/* ============================================
+   Progress & Stats Styles
+   ============================================ */
+
+.stat-ring {
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.stat-ring svg {
+  transform: rotate(-90deg);
+}
+
+.stat-ring-bg {
+  stroke: var(--border-color);
+}
+
+.stat-ring-fill {
+  stroke: var(--text-primary);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s var(--ease-smooth);
+}
+
+.progress-modern {
+  width: 100%;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-modern-fill {
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 999px;
+  transition: width var(--duration-slow) var(--ease-smooth);
+}
+
+/* ============================================
+   Badge Styles
+   ============================================ */
+
+.badge-modern {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 999px;
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.badge-success-modern {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+[data-theme="darkbw"] .badge-success-modern {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.badge-warning-modern {
+  background: rgba(234, 179, 8, 0.1);
+  color: #ca8a04;
+}
+
+[data-theme="darkbw"] .badge-warning-modern {
+  background: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+}
+
+.badge-error-modern {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+[data-theme="darkbw"] .badge-error-modern {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f97373;
+}
+
+/* ============================================
+   Code Block Styling
+   ============================================ */
+
+pre {
+  background: var(--code-bg);
+  color: #e2e8f0;
+  padding: 1.25rem;
+  border-radius: 0.875rem;
   overflow-x: auto;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: var(--font-mono);
   font-size: 0.875rem;
-  line-height: 1.5;
+  line-height: 1.7;
+  border: 1px solid var(--border-color);
 }
 
 code {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: var(--font-mono);
 }
 
-/* Inline code */
 :not(pre) > code {
-  background-color: oklch(var(--b2));
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
+  background: var(--border-color);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.375rem;
   font-size: 0.875em;
+  color: var(--text-primary);
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes flip {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(180deg); }
+}
+
+.animate-fade-in {
+  animation: fade-in var(--duration-normal) var(--ease-smooth);
+}
+
+.animate-fade-up {
+  animation: fade-up var(--duration-slow) var(--ease-out-expo) forwards;
+  opacity: 0;
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-normal) var(--ease-bounce);
+}
+
+.animate-slide-down {
+  animation: slide-down var(--duration-normal) var(--ease-smooth);
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* ============================================
+   Decorative Elements
+   ============================================ */
+
+.dot-pattern {
+  background-image: radial-gradient(var(--text-muted) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.15;
+}
+
+.grid-pattern {
+  background-image: 
+    linear-gradient(var(--border-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.noise-bg {
+  position: relative;
+}
+
+.noise-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 999px;
+  opacity: 0.3;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  opacity: 0.5;
+}
+
+/* ============================================
+   Selection Styling
+   ============================================ */
+
+::selection {
+  background: var(--accent-bg);
+  color: var(--accent-text);
+}
+
+/* ============================================
+   Focus Visible Styling
+   ============================================ */
+
+:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Horizontal Scroll Snap
+   ============================================ */
+
+.snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-start {
+  scroll-snap-align: start;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+/* Hide scrollbar for snap containers */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ============================================
+   Flip Card for Flashcards
+   ============================================ */
+
+.flip-card {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 1rem;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }

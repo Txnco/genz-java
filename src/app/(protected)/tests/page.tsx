@@ -10,7 +10,6 @@ export default async function TestsPage() {
     redirect('/auth/login')
   }
 
-  // Fetch tests directly from database
   const tests = await prisma.test.findMany({
     where: { isActive: true },
     include: {
@@ -37,7 +36,6 @@ export default async function TestsPage() {
     orderBy: { createdAt: 'desc' },
   })
 
-  // Calculate statistics for each test
   const testsWithStats = tests.map(test => {
     const completedAttempts = test.attempts.length
     const totalAnswers = test.attempts.reduce((sum, a) => sum + a.totalQuestions, 0)
@@ -60,36 +58,58 @@ export default async function TestsPage() {
   })
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Testovi</h1>
-        <div className="flex gap-2">
-          <Link href="/tests/create" className="btn btn-primary">
-            ⚡ Generiraj test
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Testovi</h1>
+          <p className="mt-2 text-base-content/60">
+            Testiraj svoje znanje kombiniranim pitanjima iz više lekcija
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Link href="/tests/create" className="btn-modern btn-modern-primary">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Generiraj test
           </Link>
           {session.user.role === 'ADMIN' && (
-            <Link href="/admin/tests/new" className="btn btn-outline">
-              Kreiraj detaljni test
+            <Link href="/admin/tests/new" className="btn-modern btn-modern-secondary">
+              Detaljni test
             </Link>
           )}
         </div>
       </div>
 
-      <div className="alert alert-info mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <span>Testovi kombiniraju pitanja iz različitih lekcija. Testirajte svoje znanje!</span>
+      {/* Info Banner */}
+      <div className="card-modern p-4 flex items-center gap-4 bg-primary/5 border-primary/20">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+        </div>
+        <p className="text-sm text-base-content/70">
+          Testovi kombiniraju pitanja iz različitih lekcija. Generiraj vlastiti test ili odaberi postojeći.
+        </p>
       </div>
 
+      {/* Tests Grid */}
       {testsWithStats.length === 0 ? (
-        <div className="alert">
-          <span>Nema dostupnih testova. Generirajte prvi test!</span>
+        <div className="card-float p-12 text-center">
+          <div className="text-5xl mb-4">📋</div>
+          <h3 className="text-lg font-medium mb-2">Nema dostupnih testova</h3>
+          <p className="text-base-content/60 mb-6">
+            Generiraj prvi test i testiraj svoje znanje!
+          </p>
+          <Link href="/tests/create" className="btn-modern btn-modern-primary">
+            Generiraj test
+          </Link>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {testsWithStats.map((test) => (
-            <TestCard key={test.id} test={test} />
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {testsWithStats.map((test, index) => (
+            <TestCard key={test.id} test={test} index={index} />
           ))}
         </div>
       )}
@@ -97,53 +117,62 @@ export default async function TestsPage() {
   )
 }
 
-function TestCard({ test }: { test: any }) {
+function TestCard({ test, index }: { test: any; index: number }) {
   return (
-    <div className="card bg-base-100 shadow-xl">
-      <div className="card-body">
-        <h2 className="card-title">{test.title}</h2>
-        {test.description && (
-          <p className="text-sm opacity-70">{test.description}</p>
+    <div 
+      className="card-float p-6 flex flex-col animate-fade-up group"
+      style={{ animationDelay: `${index * 0.05}s` }}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-4">
+        <h2 className="font-semibold text-lg group-hover:text-primary transition-colors line-clamp-2">
+          {test.title}
+        </h2>
+        {test.timeLimit && (
+          <span className="shrink-0 ml-3 text-xs font-medium px-2.5 py-1 rounded-full bg-base-200">
+            {test.timeLimit} min
+          </span>
         )}
-        
-        {test.createdBy && (
-          <div className="badge badge-outline badge-sm">
-            Kreirao: {test.createdBy.name || test.createdBy.email}
-          </div>
-        )}
-        
-        <div className="divider my-2"></div>
-        
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="opacity-70">Broj pitanja:</span>
-            <span className="font-semibold">{test.questionCount}</span>
-          </div>
-          
-          {test.timeLimit && (
-            <div className="flex justify-between">
-              <span className="opacity-70">Vremensko ograničenje:</span>
-              <span className="font-semibold">{test.timeLimit} min</span>
-            </div>
-          )}
-          
-          <div className="flex justify-between">
-            <span className="opacity-70">Pokušaja:</span>
-            <span className="font-semibold">{test.statistics.attemptCount}</span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="opacity-70">Prosječan uspjeh:</span>
-            <span className="font-semibold">{test.statistics.successRate}%</span>
-          </div>
-        </div>
+      </div>
 
-        <div className="card-actions justify-end mt-4">
-          <Link href={`/tests/${test.id}`} className="btn btn-primary btn-sm">
-            Započni test
-          </Link>
+      {test.description && (
+        <p className="text-sm text-base-content/50 line-clamp-2 mb-4">
+          {test.description}
+        </p>
+      )}
+
+      {test.createdBy && (
+        <p className="text-xs text-base-content/40 mb-4">
+          Kreirao: {test.createdBy.name || test.createdBy.email}
+        </p>
+      )}
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3 py-4 border-t border-base-200/80 mt-auto">
+        <div className="text-center">
+          <p className="text-lg font-semibold">{test.questionCount}</p>
+          <p className="text-xs text-base-content/50">Pitanja</p>
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-semibold">{test.statistics.attemptCount}</p>
+          <p className="text-xs text-base-content/50">Pokušaja</p>
+        </div>
+        <div className="text-center">
+          <p className="text-lg font-semibold">{test.statistics.successRate}%</p>
+          <p className="text-xs text-base-content/50">Uspjeh</p>
         </div>
       </div>
+
+      {/* Action */}
+      <Link 
+        href={`/tests/${test.id}`} 
+        className="btn-modern btn-modern-primary w-full mt-4 justify-center"
+      >
+        Započni test
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </Link>
     </div>
   )
 }

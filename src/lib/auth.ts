@@ -12,32 +12,49 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.log('[AUTH] authorize called with email:', credentials?.email)
+        
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email and password required')
+          console.log('[AUTH] Missing credentials')
+          return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        })
+        try {
+          console.log('[AUTH] Querying database...')
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          })
 
-        if (!user) {
-          throw new Error('Invalid credentials')
-        }
+          console.log('[AUTH] User found:', user ? 'yes' : 'no')
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        )
+          if (!user) {
+            console.log('[AUTH] No user found for email:', credentials.email)
+            return null
+          }
 
-        if (!isPasswordValid) {
-          throw new Error('Invalid credentials')
-        }
+          console.log('[AUTH] Comparing passwords...')
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.passwordHash
+          )
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
+          console.log('[AUTH] Password valid:', isPasswordValid)
+
+          if (!isPasswordValid) {
+            console.log('[AUTH] Invalid password')
+            return null
+          }
+
+          console.log('[AUTH] Login successful for user:', user.id)
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          }
+        } catch (error) {
+          console.error('[AUTH] Error during authentication:', error)
+          return null
         }
       },
     }),

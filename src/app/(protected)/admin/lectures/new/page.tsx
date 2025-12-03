@@ -8,6 +8,27 @@ export default function NewLecturePage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [tagInput, setTagInput] = useState('')
+  const [tags, setTags] = useState<string[]>([])
+
+  const handleAddTag = () => {
+    const trimmedTag = tagInput.trim()
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setTags([...tags, trimmedTag])
+      setTagInput('')
+    }
+  }
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove))
+  }
+
+  const handleTagKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleAddTag()
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -21,6 +42,7 @@ export default function NewLecturePage() {
       description: formData.get('description'),
       order: parseInt(formData.get('order') as string) || 0,
       content: formData.get('content'),
+      tags: tags,
     }
 
     try {
@@ -48,102 +70,136 @@ export default function NewLecturePage() {
     <div className="max-w-2xl">
       <Link
         href="/admin/lectures"
-        className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm mb-4 inline-block"
+        className="inline-flex items-center gap-2 text-sm text-base-content/60 hover:text-base-content transition-colors mb-6"
       >
-        &larr; Back to Lectures
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Back to Lectures
       </Link>
 
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-        Create New Lecture
-      </h2>
+      <h2 className="text-2xl font-bold mb-6">Create New Lecture</h2>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
+        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="card-float p-6 space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Title
-          </label>
+          <label className="block text-sm font-medium mb-2">Title</label>
           <input
             type="text"
             name="title"
             required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className="input-modern"
             placeholder="e.g., Classes and Objects"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Slug
-          </label>
+          <label className="block text-sm font-medium mb-2">Slug</label>
           <input
             type="text"
             name="slug"
             required
             pattern="[a-z0-9-]+"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className="input-modern"
             placeholder="e.g., classes-and-objects"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            URL-friendly identifier (lowercase, hyphens only)
+          <p className="text-xs text-base-content/50 mt-1">
+            Lowercase letters, numbers, and hyphens only
           </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Order
-          </label>
+          <label className="block text-sm font-medium mb-2">Order</label>
           <input
             type="number"
             name="order"
             defaultValue={0}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className="input-modern"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Description
-          </label>
+          <label className="block text-sm font-medium mb-2">Description</label>
           <textarea
             name="description"
             rows={2}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className="input-modern resize-none"
             placeholder="Brief description of the lecture"
           />
         </div>
 
+        {/* Tags Input */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Content (Markdown)
-          </label>
+          <label className="block text-sm font-medium mb-2">Tags</label>
+          <div className="flex gap-2 mb-3">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              placeholder="Add a tag..."
+              className="input-modern flex-1"
+            />
+            <button
+              type="button"
+              onClick={handleAddTag}
+              className="btn-modern btn-modern-secondary px-4"
+            >
+              Add
+            </button>
+          </div>
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="tag tag-removable flex items-center gap-1.5 pr-1.5"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="hover:text-red-500 transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Content (Markdown)</label>
           <textarea
             name="content"
             rows={10}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white font-mono text-sm"
+            className="input-modern resize-none font-mono text-sm"
             placeholder="Lecture content in markdown format..."
           />
-          <p className="text-xs text-gray-500 mt-1">
-            This content can be used for AI question generation
+          <p className="text-xs text-base-content/50 mt-1">
+            Used for AI question generation
           </p>
         </div>
 
-        <div className="flex gap-4 pt-4">
+        <div className="flex gap-3 pt-4">
           <button
             type="submit"
             disabled={isLoading}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+            className="btn-modern btn-modern-primary flex-1 py-3"
           >
             {isLoading ? 'Creating...' : 'Create Lecture'}
           </button>
           <Link
             href="/admin/lectures"
-            className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+            className="btn-modern btn-modern-secondary py-3 px-6"
           >
             Cancel
           </Link>

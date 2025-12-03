@@ -10,6 +10,7 @@ const lectureSchema = z.object({
   description: z.string().optional(),
   order: z.number().default(0),
   content: z.string().optional(),
+  tags: z.array(z.string()).default([]),
 })
 
 interface RouteParams {
@@ -32,7 +33,13 @@ export async function GET(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Predavanje nije pronađeno' }, { status: 404 })
     }
 
-    return NextResponse.json(lecture)
+    // Ensure tags is always an array
+    const lectureWithTags = {
+      ...lecture,
+      tags: (lecture.tags as string[]) || [],
+    }
+
+    return NextResponse.json(lectureWithTags)
   } catch (error) {
     console.error('Greška pri dohvaćanju predavanja:', error)
     return NextResponse.json({ error: 'Greška poslužitelja. Molimo pokušajte ponovno.' }, { status: 500 })
@@ -70,6 +77,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         description: data.description || null,
         order: data.order,
         content: data.content || null,
+        tags: data.tags,
       },
     })
 

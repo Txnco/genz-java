@@ -3,6 +3,8 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { RestartButton } from './restart-button'
+import { RestartHistory } from './restart-history'
 
 interface LectureDetailPageProps {
   params: Promise<{ slug: string }>
@@ -37,6 +39,18 @@ export default async function LectureDetailPage({ params }: LectureDetailPagePro
     },
   })
 
+  // Get restart history
+  const restartHistory = await prisma.lectureProgressRestart.findMany({
+    where: {
+      userId: session.user.id,
+      lectureId: lecture.id,
+    },
+    orderBy: {
+      restartedAt: 'desc',
+    },
+    take: 5, // Show last 5 attempts
+  })
+
   const answeredQuestionIds = new Set(userAnswers.map(a => a.questionId))
   const correctQuestionIds = new Set(
     userAnswers.filter(a => a.isCorrect).map(a => a.questionId)
@@ -45,17 +59,12 @@ export default async function LectureDetailPage({ params }: LectureDetailPagePro
   const totalQuestions = lecture.questions.length
   const answeredCount = answeredQuestionIds.size
   const correctCount = correctQuestionIds.size
+  const accuracy = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0
 
   const difficultyStats = {
-    EASY: { total: 0, answered: 0, correct: 0 },
-    MEDIUM: { total: 0, answered: 0, correct: 0 },
-    HARD: { total: 0, answered: 0, correct: 0 },
-  }
-
-  const difficultyLabels = {
-    EASY: 'Lagano',
-    MEDIUM: 'Srednje',
-    HARD: 'Teško',
+    EASY: { total: 0, answered: 0, correct: 0, label: 'Lagano', color: 'green' },
+    MEDIUM: { total: 0, answered: 0, correct: 0, label: 'Srednje', color: 'yellow' },
+    HARD: { total: 0, answered: 0, correct: 0, label: 'Teško', color: 'red' },
   }
 
   lecture.questions.forEach(q => {
@@ -68,104 +77,123 @@ export default async function LectureDetailPage({ params }: LectureDetailPagePro
     }
   })
 
+  const tags = (lecture.tags as string[]) || []
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <div>
-        <Link href="/lectures" className="btn btn-ghost btn-sm mb-4">
-          ← Natrag na lekcije
-        </Link>
+      {/* Back Link */}
+      <Link 
+        href="/lectures" 
+        className="inline-flex items-center gap-2 text-sm text-base-content/60 hover:text-base-content transition-colors"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Natrag na lekcije
+      </Link>
 
-        <h1 className="text-3xl font-bold">{lecture.title}</h1>
-        {lecture.description && (
-          <p className="mt-2 text-base-content/70">{lecture.description}</p>
+      {/* Header */}
+      <div>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{lecture.title}</h1>
+            {lecture.description && (
+              <p className="mt-2 text-lg text-base-content/60">{lecture.description}</p>
+            )}
+          </div>
+          {answeredCount > 0 && (
+            <RestartButton lectureId={lecture.id} lectureTitle={lecture.title} />
+          )}
+        </div>
+        
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {tags.map((tag, index) => (
+              <span key={index} className="tag">
+                {tag}
+              </span>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Progress Overview */}
-      <div className="card bg-base-200 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title">Tvoj napredak</h2>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="card-float p-5 text-center">
+          <p className="text-3xl font-bold text-gradient">{answeredCount}/{totalQuestions}</p>
+          <p className="text-sm text-base-content/60 mt-1">Riješeno</p>
+        </div>
+        <div className="card-float p-5 text-center">
+          <p className="text-3xl font-bold text-green-500">{correctCount}</p>
+          <p className="text-sm text-base-content/60 mt-1">Točno</p>
+        </div>
+        <div className="card-float p-5 text-center">
+          <p className={`text-3xl font-bold ${accuracy >= 70 ? 'text-green-500' : accuracy >= 40 ? 'text-yellow-500' : 'text-red-500'}`}>
+            {accuracy}%
+          </p>
+          <p className="text-sm text-base-content/60 mt-1">Točnost</p>
+        </div>
+      </div>
 
-          <div className="stats stats-vertical lg:stats-horizontal shadow mt-4">
-            <div className="stat">
-              <div className="stat-title">Pokušano pitanja</div>
-              <div className="stat-value">{answeredCount}/{totalQuestions}</div>
-              <div className="stat-desc">Ukupno pitanja u lekciji</div>
-            </div>
-
-            <div className="stat">
-              <div className="stat-title">Točni odgovori</div>
-              <div className="stat-value text-success">{correctCount}</div>
-              <div className="stat-desc">Od {answeredCount} pokušanih</div>
-            </div>
-
-            <div className="stat">
-              <div className="stat-title">Točnost</div>
-              <div className="stat-value text-primary">
-                {answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0}%
-              </div>
-              <div className="stat-desc">Postotak točnih</div>
-            </div>
-          </div>
-
-          {/* Difficulty Breakdown */}
-          <div className="mt-6">
-            <h3 className="font-medium mb-3">Po težini</h3>
-            <div className="space-y-3">
-              {(['EASY', 'MEDIUM', 'HARD'] as const).map(difficulty => {
-                const stats = difficultyStats[difficulty]
-                const percentage = stats.total > 0 ? Math.round((stats.answered / stats.total) * 100) : 0
-                const progressClass = {
-                  EASY: 'progress-success',
-                  MEDIUM: 'progress-warning',
-                  HARD: 'progress-error',
-                }
-                return (
-                  <div key={difficulty}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>{difficultyLabels[difficulty]}</span>
-                      <span>
-                        {stats.answered}/{stats.total} ({stats.correct} točno)
-                      </span>
-                    </div>
-                    <progress
-                      className={`progress ${progressClass[difficulty]} w-full`}
-                      value={percentage}
-                      max={100}
-                    ></progress>
+      {/* Difficulty Breakdown */}
+      <div className="card-float p-6">
+        <h2 className="font-semibold text-lg mb-5">Napredak po težini</h2>
+        <div className="space-y-5">
+          {(['EASY', 'MEDIUM', 'HARD'] as const).map(difficulty => {
+            const stats = difficultyStats[difficulty]
+            const percentage = stats.total > 0 ? Math.round((stats.answered / stats.total) * 100) : 0
+            const colors = {
+              green: { bg: 'bg-green-500', light: 'bg-green-500/10', text: 'text-green-600' },
+              yellow: { bg: 'bg-yellow-500', light: 'bg-yellow-500/10', text: 'text-yellow-600' },
+              red: { bg: 'bg-red-500', light: 'bg-red-500/10', text: 'text-red-600' },
+            }
+            const color = colors[stats.color as keyof typeof colors]
+            
+            return (
+              <div key={difficulty}>
+                <div className="flex justify-between items-center text-sm mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${color.bg}`} />
+                    <span className="font-medium">{stats.label}</span>
                   </div>
-                )
-              })}
-            </div>
-          </div>
+                  <span className="text-base-content/60">
+                    {stats.answered}/{stats.total}
+                    {stats.answered > 0 && (
+                      <span className={`ml-2 ${color.text}`}>
+                        ({stats.correct} točno)
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div className={`h-2 rounded-full ${color.light}`}>
+                  <div 
+                    className={`h-full rounded-full ${color.bg} transition-all duration-500`}
+                    style={{ width: `${percentage}%` }} 
+                  />
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
 
       {/* Start Quiz Button */}
-      <div className="flex justify-center">
+      <div className="flex justify-center pt-4">
         <Link
           href={`/lectures/${slug}/quiz`}
-          className="btn btn-primary btn-lg"
+          className="btn-modern btn-modern-primary text-base px-10 py-4"
         >
           {answeredCount > 0 ? 'Nastavi kviz' : 'Pokreni kviz'}
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
         </Link>
       </div>
 
-      {/* Lecture Content */}
-      {lecture.content && (
-        <div className="card bg-base-200 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Sadržaj lekcije</h2>
-            <div className="prose max-w-none mt-4">
-              <pre className="whitespace-pre-wrap text-sm">
-                {lecture.content}
-              </pre>
-            </div>
-          </div>
-        </div>
+      {/* Restart History */}
+      {restartHistory.length > 0 && (
+        <RestartHistory history={restartHistory} />
       )}
     </div>
   )

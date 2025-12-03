@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 const AVAILABLE_MODELS = [
-  { value: 'gpt-4o-mini', label: 'GPT-4o Mini (Fast & Affordable)' },
-  { value: 'gpt-4o', label: 'GPT-4o (Balanced)' },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo (High Quality)' },
+  { value: 'gpt-4o-mini', label: 'GPT-4o Mini (Brz i pristupačan)' },
+  { value: 'gpt-4o', label: 'GPT-4o (Uravnotežen)' },
+  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo (Visoka kvaliteta)' },
 ]
 
 export default function AISettingsPage() {
@@ -15,7 +15,7 @@ export default function AISettingsPage() {
   const [hasExistingKey, setHasExistingKey] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     fetch('/api/settings/ai')
@@ -35,7 +35,7 @@ export default function AISettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
-    setMessage('')
+    setMessage(null)
 
     try {
       const response = await fetch('/api/settings/ai', {
@@ -49,21 +49,21 @@ export default function AISettingsPage() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Failed to save settings')
+        throw new Error(data.error || 'Nije moguće spremiti postavke')
       }
 
-      setMessage('Settings saved successfully!')
+      setMessage({ type: 'success', text: 'Postavke uspješno spremljene!' })
       setApiKey('')
       setHasExistingKey(true)
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Failed to save')
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Spremanje nije uspjelo' })
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to remove your API key?')) return
+    if (!confirm('Jeste li sigurni da želite ukloniti API ključ?')) return
 
     setIsSaving(true)
     try {
@@ -72,77 +72,107 @@ export default function AISettingsPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete API key')
+        throw new Error('Brisanje API ključa nije uspjelo')
       }
 
       setHasExistingKey(false)
-      setMessage('API key removed')
+      setMessage({ type: 'success', text: 'API ključ je uklonjen' })
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Failed to delete')
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Brisanje nije uspjelo' })
     } finally {
       setIsSaving(false)
     }
   }
 
   if (isLoading) {
-    return <div className="animate-pulse">Loading settings...</div>
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="h-8 w-32 bg-base-300/50 rounded-lg animate-pulse" />
+        <div className="h-12 w-64 bg-base-300/50 rounded-lg animate-pulse" />
+        <div className="card-float p-6">
+          <div className="space-y-4">
+            <div className="h-4 w-3/4 bg-base-300/50 rounded animate-pulse" />
+            <div className="h-12 w-full bg-base-300/50 rounded-lg animate-pulse" />
+            <div className="h-12 w-full bg-base-300/50 rounded-lg animate-pulse" />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Back link */}
       <Link
         href="/settings"
-        className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm mb-4 inline-block"
+        className="inline-flex items-center gap-2 text-sm text-base-content/60 hover:text-base-content transition-colors"
       >
-        &larr; Back to Settings
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Natrag na postavke
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-        AI Settings
-      </h1>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">AI postavke</h1>
+        <p className="mt-2 text-base-content/60">
+          Konfiguriraj OpenAI za generiranje pitanja
+        </p>
+      </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-          Enter your OpenAI API key to enable AI-powered question generation. Your API key is stored securely and never logged.
+      {/* Settings card */}
+      <div className="card-float p-6">
+        <p className="text-sm text-base-content/60 mb-6">
+          Unesi svoj OpenAI API ključ za omogućavanje AI generiranja pitanja. 
+          Tvoj ključ je sigurno pohranjen i nikad se ne logira.
         </p>
 
         {message && (
-          <div className={`mb-4 p-3 rounded-lg text-sm ${
-            message.includes('success') || message.includes('removed')
-              ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-              : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+          <div className={`flex items-center gap-3 p-4 rounded-xl mb-6 text-sm animate-scale-in ${
+            message.type === 'success' 
+              ? 'bg-green-500/10 border border-green-500/20 text-green-600' 
+              : 'bg-error/10 border border-error/20 text-error'
           }`}>
-            {message}
+            {message.type === 'success' ? (
+              <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+            )}
+            <span>{message.text}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              OpenAI API Key
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-base-content/80">
+              OpenAI API ključ
             </label>
             <input
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder={hasExistingKey ? '••••••••••••••••' : 'sk-...'}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white"
+              className="input-modern"
             />
             {hasExistingKey && (
-              <p className="text-xs text-gray-500 mt-1">
-                You have an existing API key. Leave blank to keep it.
+              <p className="text-xs text-base-content/50">
+                Imaš postojeći API ključ. Ostavi prazno da zadržiš trenutni.
               </p>
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Preferred Model
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-base-content/80">
+              Preferirani model
             </label>
             <select
               value={preferredModel}
               onChange={(e) => setPreferredModel(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white"
+              className="input-modern cursor-pointer"
             >
               {AVAILABLE_MODELS.map(model => (
                 <option key={model.value} value={model.value}>
@@ -152,13 +182,23 @@ export default function AISettingsPage() {
             </select>
           </div>
 
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="submit"
               disabled={isSaving}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+              className="btn-modern btn-modern-primary disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isSaving ? 'Saving...' : 'Save Settings'}
+              {isSaving ? (
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Spremanje...
+                </span>
+              ) : (
+                'Spremi postavke'
+              )}
             </button>
 
             {hasExistingKey && (
@@ -166,25 +206,33 @@ export default function AISettingsPage() {
                 type="button"
                 onClick={handleDelete}
                 disabled={isSaving}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                className="btn-modern bg-error/10 text-error border border-error/20 hover:bg-error/20 disabled:opacity-60"
               >
-                Remove API Key
+                Ukloni API ključ
               </button>
             )}
           </div>
         </form>
       </div>
 
-      <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-        <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
-          How to get an API key
-        </h3>
-        <ol className="list-decimal list-inside text-sm text-blue-700 dark:text-blue-300 space-y-1">
-          <li>Go to <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline">platform.openai.com/api-keys</a></li>
-          <li>Sign in or create an account</li>
-          <li>Click &quot;Create new secret key&quot;</li>
-          <li>Copy the key and paste it above</li>
-        </ol>
+      {/* Help card */}
+      <div className="card-modern p-5 bg-primary/5 border-primary/20">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-2">Kako dobiti API ključ</h3>
+            <ol className="list-decimal list-inside text-sm text-base-content/70 space-y-1">
+              <li>Idi na <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">platform.openai.com/api-keys</a></li>
+              <li>Prijavi se ili kreiraj račun</li>
+              <li>Klikni &quot;Create new secret key&quot;</li>
+              <li>Kopiraj ključ i zalijepi ga gore</li>
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
   )

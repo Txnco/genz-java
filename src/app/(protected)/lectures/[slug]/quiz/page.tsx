@@ -138,24 +138,26 @@ export default function QuizPage({ params }: QuizPageProps) {
   const handleRestartQuiz = () => {
     setIsRepeatMode(false)
     setRepeatAnswered(0)
-    fetchQuestion(false, true) // Pass restart=true
+    fetchQuestion(false, true)
   }
 
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto">
-        <div className="flex flex-col gap-4">
-          <div className="skeleton h-8 w-1/4"></div>
-          <div className="card bg-base-200">
-            <div className="card-body">
-              <div className="skeleton h-4 w-3/4"></div>
-              <div className="skeleton h-4 w-1/2"></div>
-              <div className="skeleton h-32 w-full"></div>
-              <div className="flex flex-col gap-3">
-                <div className="skeleton h-12 w-full"></div>
-                <div className="skeleton h-12 w-full"></div>
-                <div className="skeleton h-12 w-full"></div>
-              </div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="h-8 w-32 bg-base-300/50 rounded-lg animate-pulse" />
+          <div className="h-8 w-24 bg-base-300/50 rounded-lg animate-pulse" />
+        </div>
+        <div className="h-2 w-full bg-base-300/50 rounded-full mb-6 animate-pulse" />
+        <div className="card-float p-6">
+          <div className="space-y-4">
+            <div className="h-5 w-24 bg-base-300/50 rounded-lg animate-pulse" />
+            <div className="h-6 w-3/4 bg-base-300/50 rounded-lg animate-pulse" />
+            <div className="h-24 w-full bg-base-300/50 rounded-xl animate-pulse" />
+            <div className="space-y-3 pt-4">
+              <div className="h-14 w-full bg-base-300/50 rounded-xl animate-pulse" />
+              <div className="h-14 w-full bg-base-300/50 rounded-xl animate-pulse" />
+              <div className="h-14 w-full bg-base-300/50 rounded-xl animate-pulse" />
             </div>
           </div>
         </div>
@@ -165,16 +167,22 @@ export default function QuizPage({ params }: QuizPageProps) {
 
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto text-center py-12">
-        <div className="text-error text-6xl mb-4">!</div>
-        <h2 className="text-xl font-semibold mb-2">Greška</h2>
-        <p className="text-base-content/70 mb-6">{error}</p>
-        <button
-          onClick={() => fetchQuestion(isRepeatMode)}
-          className="btn btn-primary"
-        >
-          Pokušaj ponovno
-        </button>
+      <div className="max-w-3xl mx-auto">
+        <div className="card-float p-12 text-center">
+          <div className="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold mb-2">Greška</h2>
+          <p className="text-base-content/60 mb-6">{error}</p>
+          <button
+            onClick={() => fetchQuestion(isRepeatMode)}
+            className="btn-modern btn-modern-primary"
+          >
+            Pokušaj ponovno
+          </button>
+        </div>
       </div>
     )
   }
@@ -185,114 +193,103 @@ export default function QuizPage({ params }: QuizPageProps) {
     const allCorrect = quizState?.allCorrect
 
     return (
-      <div className="max-w-3xl mx-auto text-center py-12">
-        <div className="card bg-base-200 shadow-xl">
-          <div className="card-body items-center">
-            {allCorrect ? (
-              <>
-                <div className="text-6xl mb-4">🏆</div>
-                <h2 className="card-title text-2xl">Izvrsno!</h2>
-                <p className="text-base-content/70">
-                  Odgovorio/la si točno na sva pitanja u ovoj lekciji!
-                </p>
-              </>
-            ) : isRepeatMode ? (
-              <>
-                <div className="text-6xl mb-4">✅</div>
-                <h2 className="card-title text-2xl">Ponavljanje završeno!</h2>
-                <p className="text-base-content/70">
-                  Prošao/la si kroz sva netočna pitanja.
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="text-6xl mb-4">📚</div>
-                <h2 className="card-title text-2xl">Lekcija završena!</h2>
-                <p className="text-base-content/70 mb-2">
-                  Odgovorio/la si na sva pitanja u ovoj lekciji.
-                </p>
-                {hasIncorrect && (
-                  <div className="alert alert-warning mt-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span>Imate {quizState?.incorrectCount} netočnih pitanja</span>
-                  </div>
-                )}
-              </>
+      <div className="max-w-3xl mx-auto">
+        <div className="card-float p-10 text-center animate-scale-in">
+          {allCorrect ? (
+            <>
+              <div className="text-6xl mb-5">🏆</div>
+              <h2 className="text-2xl font-bold tracking-tight mb-3">Izvrsno!</h2>
+              <p className="text-base-content/60">
+                Odgovorio/la si točno na sva pitanja u ovoj lekciji!
+              </p>
+            </>
+          ) : isRepeatMode ? (
+            <>
+              <div className="text-6xl mb-5">✅</div>
+              <h2 className="text-2xl font-bold tracking-tight mb-3">Ponavljanje završeno!</h2>
+              <p className="text-base-content/60">
+                Prošao/la si kroz sva netočna pitanja.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="text-6xl mb-5">📚</div>
+              <h2 className="text-2xl font-bold tracking-tight mb-3">Lekcija završena!</h2>
+              <p className="text-base-content/60 mb-4">
+                Odgovorio/la si na sva pitanja u ovoj lekciji.
+              </p>
+              {hasIncorrect && (
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-warning/10 border border-warning/30 text-warning text-sm">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                  </svg>
+                  <span>Imaš {quizState?.incorrectCount} netočnih pitanja</span>
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+            <Link
+              href={`/lectures/${slug}`}
+              className="btn-modern btn-modern-secondary"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+              Natrag na lekciju
+            </Link>
+
+            {hasIncorrect && !isRepeatMode && (
+              <button
+                onClick={handleStartRepeat}
+                className="btn-modern btn-modern-primary"
+              >
+                Ponovi netočna (50% XP)
+              </button>
             )}
 
-            <div className="card-actions mt-6 flex-col sm:flex-row gap-3">
-              <Link
-                href={`/lectures/${slug}`}
-                className="btn btn-outline"
+            {isRepeatMode && hasIncorrect && (
+              <button
+                onClick={handleStartRepeat}
+                className="btn-modern btn-modern-primary"
               >
-                Natrag na lekciju
-              </Link>
-
-              {/* <button
-                onClick={handleRestartQuiz}
-                className="btn btn-accent"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                Ponovi od početka
-              </button> */}
-
-              {hasIncorrect && !isRepeatMode && (
-                <button
-                  onClick={handleStartRepeat}
-                  className="btn btn-primary"
-                >
-                  Ponovi netočna pitanja (50% bodova)
-                </button>
-              )}
-
-              {isRepeatMode && hasIncorrect && (
-                <button
-                  onClick={handleStartRepeat}
-                  className="btn btn-primary"
-                >
-                  Ponovi ponovno
-                </button>
-              )}
-            </div>
+                Ponovi ponovno
+              </button>
+            )}
           </div>
         </div>
       </div>
     )
   }
 
+  const progressPercent = isRepeatMode
+    ? (repeatAnswered / quizState.totalQuestions) * 100
+    : (quizState.answeredQuestions / quizState.totalQuestions) * 100
+
   return (
     <div className="max-w-3xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <Link
           href={`/lectures/${slug}`}
-          className="btn btn-ghost btn-sm"
+          className="inline-flex items-center gap-2 text-sm text-base-content/60 hover:text-base-content transition-colors"
         >
-          ← Izađi iz kviza
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Izađi iz kviza
         </Link>
         <div className="flex items-center gap-3">
           {isRepeatMode && (
-            <div className="badge badge-warning">Ponavljanje (50% bodova)</div>
+            <span className="badge-warning-modern text-xs">
+              Ponavljanje (50% XP)
+            </span>
           )}
-          <span className="text-sm text-base-content/70">
+          <span className="text-sm text-base-content/60 font-medium">
             {isRepeatMode
-              ? `${repeatAnswered} / ${quizState.totalQuestions} ponovljeno`
-              : `${quizState.answeredQuestions} / ${quizState.totalQuestions} odgovoreno`
+              ? `${repeatAnswered}/${quizState.totalQuestions}`
+              : `${quizState.answeredQuestions}/${quizState.totalQuestions}`
             }
           </span>
         </div>
@@ -300,17 +297,15 @@ export default function QuizPage({ params }: QuizPageProps) {
 
       {/* Progress Bar */}
       <div className="mb-6">
-        <progress
-          className={`progress w-full ${isRepeatMode ? 'progress-warning' : 'progress-primary'}`}
-          value={isRepeatMode
-            ? repeatAnswered
-            : quizState.answeredQuestions
-          }
-          max={quizState.totalQuestions}
-        ></progress>
+        <div className={`h-1.5 rounded-full ${isRepeatMode ? 'bg-warning/20' : 'bg-base-300/50'}`}>
+          <div 
+            className={`h-full rounded-full transition-all duration-500 ${isRepeatMode ? 'bg-warning' : 'bg-linear-to-r from-primary to-secondary'}`}
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
       </div>
 
-      {/* Question Card (always visible, shows evaluation after submission) */}
+      {/* Question Card */}
       <QuestionCard
         question={quizState.question}
         onSubmit={handleSubmitAnswer}

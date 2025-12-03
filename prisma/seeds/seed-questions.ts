@@ -9,6 +9,7 @@ import { lambdaExpressionsQuestions } from './questions-lambda-expressions'
 import { streamApiQuestions } from './questions-stream-api'
 import { sortingQuestions } from './questions-sorting'
 import { codeBehaviorQuestions } from './questions-code-behavior'
+import { filesAndFoldersQuestions } from './files-and-folders'
 import { javaBasicsQuestions } from './questions-java-basics'
 
 const prisma = new PrismaClient()
@@ -25,6 +26,7 @@ const questionSeeders = [
   streamApiQuestions,
   sortingQuestions,
   codeBehaviorQuestions,
+  filesAndFoldersQuestions,
   // javaBasicsQuestions,
 ]
 

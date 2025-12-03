@@ -416,7 +416,22 @@ Comparator<Person> comp = Comparator
 - Operator precedence
 - Short-circuit evaluation
 - Pre vs post increment`,
-  }
+  },
+  {
+    title: 'Datoteke i direktoriji',
+    slug: 'files-and-folders',
+    order: 11,
+    description: 'Osnove rada s datotekama i direktorijima u Javi.',
+    content: `# Datoteke i direktoriji
+
+## Što je datoteka, što je direktorij
+- Datoteka je zapamćeni skup podataka
+- Direktorij je mapa za pohranu datoteka
+
+## Paths
+- Relative path: relativna putanja
+- Absolute path: apsolutna putanja`,
+  },
 //   {
 //     title: 'Java osnove',
 //     slug: 'java-basics',

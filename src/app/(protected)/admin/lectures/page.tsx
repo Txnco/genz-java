@@ -12,77 +12,109 @@ export default async function AdminLecturesPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Manage Lectures
-        </h2>
+        <div>
+          <h2 className="text-2xl font-bold">Manage Lectures</h2>
+          <p className="text-base-content/60 text-sm mt-1">
+            {lectures.length} lectures total
+          </p>
+        </div>
         <Link
           href="/admin/lectures/new"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          className="btn-modern btn-modern-primary text-sm"
         >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
           Add Lecture
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="card-float overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-gray-900">
-            <tr>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+          <thead>
+            <tr className="border-b border-base-200">
+              <th className="px-4 py-3 text-left text-sm font-medium text-base-content/60">
                 Order
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+              <th className="px-4 py-3 text-left text-sm font-medium text-base-content/60">
                 Title
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                Slug
+              <th className="px-4 py-3 text-left text-sm font-medium text-base-content/60">
+                Tags
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+              <th className="px-4 py-3 text-left text-sm font-medium text-base-content/60">
                 Questions
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+              <th className="px-4 py-3 text-left text-sm font-medium text-base-content/60">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {lectures.map(lecture => (
-              <tr key={lecture.id}>
-                <td className="px-4 py-3 text-gray-900 dark:text-white">
-                  {lecture.order}
-                </td>
-                <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
-                  {lecture.title}
-                </td>
-                <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">
-                  {lecture.slug}
-                </td>
-                <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                  {lecture._count.questions}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/admin/lectures/${lecture.id}`}
-                      className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 text-sm"
-                    >
-                      Edit
-                    </Link>
-                    <Link
-                      href={`/admin/questions?lecture=${lecture.id}`}
-                      className="text-gray-600 hover:text-gray-800 dark:text-gray-400 text-sm"
-                    >
-                      Questions
-                    </Link>
-                  </div>
-                </td>
-              </tr>
-            ))}
+          <tbody className="divide-y divide-base-200">
+            {lectures.map(lecture => {
+              const tags = (lecture.tags as string[]) || []
+              return (
+                <tr key={lecture.id} className="hover:bg-base-200/30 transition-colors">
+                  <td className="px-4 py-3">
+                    <span className="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-sm font-medium">
+                      {lecture.order}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div>
+                      <p className="font-medium">{lecture.title}</p>
+                      <p className="text-xs text-base-content/50">{lecture.slug}</p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {tags.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {tags.slice(0, 3).map((tag, i) => (
+                          <span key={i} className="tag text-xs py-0.5 px-2">
+                            {tag}
+                          </span>
+                        ))}
+                        {tags.length > 3 && (
+                          <span className="text-xs text-base-content/40">
+                            +{tags.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-base-content/40">No tags</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="badge-modern text-xs">
+                      {lecture._count.questions} questions
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/lectures/${lecture.id}`}
+                        className="text-sm text-violet-500 hover:text-violet-600 font-medium transition-colors"
+                      >
+                        Edit
+                      </Link>
+                      <Link
+                        href={`/admin/questions?lecture=${lecture.id}`}
+                        className="text-sm text-base-content/60 hover:text-base-content font-medium transition-colors"
+                      >
+                        Questions
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
 
         {lectures.length === 0 && (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            No lectures yet. Create your first lecture!
+          <div className="text-center py-12">
+            <div className="text-5xl mb-4">📚</div>
+            <p className="text-base-content/60">No lectures yet. Create your first lecture!</p>
           </div>
         )}
       </div>

@@ -10,6 +10,7 @@ const lectureSchema = z.object({
   description: z.string().optional(),
   order: z.number().default(0),
   content: z.string().optional(),
+  tags: z.array(z.string()).default([]),
 })
 
 export async function GET() {
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
         description: data.description || null,
         order: data.order,
         content: data.content || null,
+        tags: data.tags,
       },
     })
 

@@ -11,6 +11,7 @@ import { sortingQuestions } from './questions-sorting'
 import { codeBehaviorQuestions } from './questions-code-behavior'
 import { filesAndFoldersQuestions } from './files-and-folders'
 import { javaBasicsQuestions } from './questions-java-basics'
+import { javaFx } from './javafx'
 
 const prisma = new PrismaClient()
 
@@ -27,6 +28,7 @@ const questionSeeders = [
   sortingQuestions,
   codeBehaviorQuestions,
   filesAndFoldersQuestions,
+  javaFx,
   // javaBasicsQuestions,
 ]
 

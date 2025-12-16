@@ -28,14 +28,14 @@ export function LecturesList({ lectures, allTags }: LecturesListProps) {
     return lectures.filter(lecture => {
       // Search filter
       const searchLower = search.toLowerCase()
-      const matchesSearch = 
+      const matchesSearch =
         search === '' ||
         lecture.title.toLowerCase().includes(searchLower) ||
         lecture.description?.toLowerCase().includes(searchLower) ||
         lecture.tags.some(tag => tag.toLowerCase().includes(searchLower))
 
       // Tag filter
-      const matchesTags = 
+      const matchesTags =
         selectedTags.length === 0 ||
         selectedTags.some(tag => lecture.tags.includes(tag))
 
@@ -44,8 +44,8 @@ export function LecturesList({ lectures, allTags }: LecturesListProps) {
   }, [lectures, search, selectedTags])
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
+    setSelectedTags(prev =>
+      prev.includes(tag)
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     )
@@ -64,15 +64,6 @@ export function LecturesList({ lectures, allTags }: LecturesListProps) {
       <div className="space-y-4">
         {/* Search Input */}
         <div className="relative">
-          <svg 
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor" 
-            strokeWidth={1.5}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-          </svg>
           <input
             type="text"
             value={search}
@@ -99,9 +90,8 @@ export function LecturesList({ lectures, allTags }: LecturesListProps) {
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
-                className={`tag transition-all ${
-                  selectedTags.includes(tag) ? 'tag-active' : ''
-                }`}
+                className={`tag transition-all ${selectedTags.includes(tag) ? 'tag-active' : ''
+                  }`}
               >
                 {tag}
                 {selectedTags.includes(tag) && (
@@ -133,11 +123,11 @@ export function LecturesList({ lectures, allTags }: LecturesListProps) {
       {/* Lectures Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredLectures.map((lecture, index) => {
-          const percentage = lecture.totalQuestions > 0 
-            ? Math.round((lecture.answered / lecture.totalQuestions) * 100) 
+          const percentage = lecture.totalQuestions > 0
+            ? Math.round((lecture.answered / lecture.totalQuestions) * 100)
             : 0
-          const correctPercentage = lecture.answered > 0 
-            ? Math.round((lecture.correct / lecture.answered) * 100) 
+          const correctPercentage = lecture.answered > 0
+            ? Math.round((lecture.correct / lecture.answered) * 100)
             : 0
           const isCompleted = percentage === 100
 
@@ -145,80 +135,91 @@ export function LecturesList({ lectures, allTags }: LecturesListProps) {
             <Link
               key={lecture.id}
               href={`/lectures/${lecture.slug}`}
-              className="card-float p-6 group animate-fade-up"
+              className="group relative flex flex-col bg-[var(--bg-surface)] rounded-3xl p-6 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-lg)] ring-1 ring-[var(--border-color)]/50 hover:ring-violet-500/30 transition-all duration-300 hover:-translate-y-1 animate-fade-up overflow-hidden"
               style={{ animationDelay: `${index * 0.05}s` }}
             >
-              {/* Header */}
+              {/* Header row with Order and Status */}
               <div className="flex items-start justify-between mb-4">
-                <div className="w-11 h-11 rounded-xl bg-linear-to-br from-violet-500/15 to-purple-500/15 flex items-center justify-center font-bold text-violet-600 dark:text-violet-400">
+                <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-600 dark:text-violet-400 font-bold text-lg shadow-inner">
                   {lecture.order}
                 </div>
+
                 {isCompleted ? (
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-green-600 bg-green-500/10 px-2.5 py-1 rounded-full">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     Završeno
                   </span>
                 ) : lecture.answered > 0 ? (
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                    correctPercentage >= 70 
-                      ? 'bg-green-500/10 text-green-600' 
-                      : correctPercentage >= 40 
-                        ? 'bg-yellow-500/10 text-yellow-600' 
-                        : 'bg-red-500/10 text-red-600'
-                  }`}>
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ring-1 ${correctPercentage >= 70
+                    ? 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/20'
+                    : correctPercentage >= 40
+                      ? 'bg-amber-500/10 text-amber-600 ring-amber-500/20'
+                      : 'bg-rose-500/10 text-rose-600 ring-rose-500/20'
+                    }`}>
                     {correctPercentage}% točno
                   </span>
                 ) : null}
               </div>
 
-              {/* Content */}
-              <h3 className="font-semibold text-lg mb-2 group-hover:text-violet-500 transition-colors">
-                {lecture.title}
-              </h3>
-              
-              {lecture.description && (
-                <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-3">
-                  {lecture.description}
-                </p>
-              )}
+              {/* Main Content */}
+              <div className="flex-1 mb-6">
+                <h3 className="text-xl font-bold mb-2 text-[var(--text-primary)] group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors line-clamp-2">
+                  {lecture.title}
+                </h3>
 
-              {/* Tags */}
-              {lecture.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {lecture.tags.slice(0, 3).map((tag, i) => (
-                    <span key={i} className="tag text-xs py-0.5 px-2">
-                      {tag}
-                    </span>
-                  ))}
-                  {lecture.tags.length > 3 && (
-                    <span className="text-xs text-[var(--text-muted)]">
-                      +{lecture.tags.length - 3}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Progress */}
-              <div className="mt-auto pt-4 border-t border-[var(--border-color)]">
-                <div className="flex justify-between items-center text-sm mb-2">
-                  <span className="text-[var(--text-muted)]">Napredak</span>
-                  <span className="font-medium">{lecture.answered}/{lecture.totalQuestions}</span>
-                </div>
-                <div className="progress-modern h-1.5">
-                  <div 
-                    className="progress-modern-fill" 
-                    style={{ width: `${percentage}%` }} 
-                  />
-                </div>
+                {lecture.description && (
+                  <p className="text-sm text-[var(--text-muted)] line-clamp-2 leading-relaxed">
+                    {lecture.description}
+                  </p>
+                )}
               </div>
 
-              {/* Hover Arrow */}
-              <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg className="w-5 h-5 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
+              {/* Footer Section */}
+              <div className="mt-auto space-y-4">
+                {/* Tags */}
+                {lecture.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {lecture.tags.slice(0, 3).map((tag, i) => (
+                      <span key={i} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--bg-background)] text-[var(--text-muted)] ring-1 ring-[var(--border-color)]">
+                        {tag}
+                      </span>
+                    ))}
+                    {lecture.tags.length > 3 && (
+                      <span className="px-2 py-1 text-xs text-[var(--text-muted)]">
+                        +{lecture.tags.length - 3}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Progress Bar & Arrow Row */}
+                <div className="pt-4 border-t border-[var(--border-color)]/50">
+                  <div className="flex items-end justify-between gap-4">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex justify-between text-xs font-medium">
+                        <span className="text-[var(--text-muted)]">Napredak</span>
+                        <span className="text-[var(--text-primary)]">
+                          {lecture.answered} / {lecture.totalQuestions}
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-[var(--bg-background)] rounded-full overflow-hidden ring-1 ring-[var(--border-color)]/30">
+                        <div
+                          className="h-full bg-violet-500 rounded-full transition-all duration-500"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Arrow Button */}
+                    <div className="w-8 h-8 rounded-full bg-[var(--bg-background)] flex items-center justify-center text-[var(--text-muted)] group-hover:bg-violet-500 group-hover:text-white transition-all duration-300 shadow-sm ring-1 ring-[var(--border-color)] group-hover:ring-violet-500 shrink-0 group-hover:scale-110 group-hover:shadow-md">
+                      <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
               </div>
             </Link>
           )
@@ -230,7 +231,7 @@ export function LecturesList({ lectures, allTags }: LecturesListProps) {
           <div className="text-5xl mb-4">🔍</div>
           <h3 className="text-lg font-medium mb-2">Nema rezultata</h3>
           <p className="text-[var(--text-muted)] mb-4">
-            {hasFilters 
+            {hasFilters
               ? 'Pokušaj s drugim filterima ili pojmovima za pretraživanje'
               : 'Lekcije će se pojaviti ovdje kada budu dodane'
             }

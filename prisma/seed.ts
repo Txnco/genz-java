@@ -432,58 +432,69 @@ Comparator<Person> comp = Comparator
 - Relative path: relativna putanja
 - Absolute path: apsolutna putanja`,
   },
-//   {
-//     title: 'Java osnove',
-//     slug: 'java-basics',
-//     order: 11,
-//     description: 'Osnovni koncepti Jave - tipovi podataka, operatori, kontrolne strukture.',
-//     content: `# Java osnove
+  {
+    title: 'JavaFX',
+    slug: 'javafx',
+    order: 12,
+    description: 'JavaFX - uvod u izradu GUI aplikacija u Javi koristeći JavaFX framework.',
+    content: `# JavaFX
+    
+## Uvod u JavaFX
+- Što je JavaFX
+- Prednosti korištenja JavaFX-a za GUI aplikacije`,
+  },
+  //   {
+  //     title: 'Java osnove',
+  //     slug: 'java-basics',
+  //     order: 11,
+  //     description: 'Osnovni koncepti Jave - tipovi podataka, operatori, kontrolne strukture.',
+  //     content: `# Java osnove
 
-// ## Tipovi podataka
-// - Primitivni: byte, short, int, long, float, double, boolean, char
-// - Referentni: klase, sučelja, nizovi
+  // ## Tipovi podataka
+  // - Primitivni: byte, short, int, long, float, double, boolean, char
+  // - Referentni: klase, sučelja, nizovi
 
-// ## Petlje
-// - for: for (int i = 0; i < n; i++)
-// - enhanced for: for (Type item : collection)
-// - while: while (condition)
-// - do-while: do { } while (condition)
+  // ## Petlje
+  // - for: for (int i = 0; i < n; i++)
+  // - enhanced for: for (Type item : collection)
+  // - while: while (condition)
+  // - do-while: do { } while (condition)
 
-// ## switch
-// - Traditional switch
-// - Switch expressions (Java 12+)
-// - Pattern matching (Java 17+)
+  // ## switch
+  // - Traditional switch
+  // - Switch expressions (Java 12+)
+  // - Pattern matching (Java 17+)
 
-// ## Scope pravila
-// - Block scope
-// - Method scope
-// - Class scope
-// - Shadowing
+  // ## Scope pravila
+  // - Block scope
+  // - Method scope
+  // - Class scope
+  // - Shadowing
 
-// ## Operatori
-// - Aritmetički: +, -, *, /, %
-// - Relacijski: ==, !=, <, >, <=, >=
-// - Logički: &&, ||, !
-// - Bitovni: &, |, ^, ~, <<, >>, >>>
-// - Assignment: =, +=, -=, *=, /=
+  // ## Operatori
+  // - Aritmetički: +, -, *, /, %
+  // - Relacijski: ==, !=, <, >, <=, >=
+  // - Logički: &&, ||, !
+  // - Bitovni: &, |, ^, ~, <<, >>, >>>
+  // - Assignment: =, +=, -=, *=, /=
 
-// ## Pre- i post-increment
-// - ++i vs i++
-// - --i vs i--
+  // ## Pre- i post-increment
+  // - ++i vs i++
+  // - --i vs i--
 
-// ## String manipulacija
-// - String je immutable
-// - StringBuilder za promjenjive stringove
-// - String metode: length(), charAt(), substring(), indexOf()
+  // ## String manipulacija
+  // - String je immutable
+  // - StringBuilder za promjenjive stringove
+  // - String metode: length(), charAt(), substring(), indexOf()
 
-// ## Autoboxing i unboxing
-// - Automatska konverzija primitiv <-> wrapper
-// - Integer, Double, Boolean, Character...
+  // ## Autoboxing i unboxing
+  // - Automatska konverzija primitiv <-> wrapper
+  // - Integer, Double, Boolean, Character...
 
-// ## == vs .equals()
-// - == uspoređuje reference
-// - .equals() uspoređuje sadržaj`,
-//   },
+  // ## == vs .equals()
+  // - == uspoređuje reference
+  // - .equals() uspoređuje sadržaj`,
+  //   },
 ]
 
 

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { QuestionCard } from '@/components/question-card'
 import { BadgePopup, useBadgePopup } from '@/components/badge-popup'
 import { QuestionType, BadgeType } from '@prisma/client'
+import { getSelectedDifficulties } from '../difficulty-selector'
 
 interface QuestionOption {
   id: string
@@ -69,6 +70,10 @@ export default function QuizPage({ params }: QuizPageProps) {
       const params = new URLSearchParams({ lecture: slug })
       if (repeatMode) params.append('repeatMode', 'true')
       if (restart) params.append('restart', 'true')
+
+      // Add difficulty filter from localStorage
+      const difficulties = getSelectedDifficulties()
+      params.append('difficulties', difficulties.join(','))
 
       const url = `/api/quiz?${params.toString()}`
       const response = await fetch(url)
@@ -311,7 +316,7 @@ export default function QuizPage({ params }: QuizPageProps) {
       {/* Progress Bar */}
       <div className="mb-8">
         <div className={`h-1 rounded-full overflow-hidden ${isRepeatMode ? 'bg-amber-500/15' : 'bg-[var(--border-color)]/40'}`}>
-          <div 
+          <div
             className={`h-full rounded-full transition-all duration-500 ease-out ${isRepeatMode ? 'bg-amber-500' : 'bg-[var(--text-primary)]'}`}
             style={{ width: `${progressPercent}%` }}
           />

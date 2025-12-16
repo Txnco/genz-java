@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { RestartButton } from './restart-button'
 import { RestartHistory } from './restart-history'
+import { LectureQuizSection } from './lecture-client'
 
 interface LectureDetailPageProps {
   params: Promise<{ slug: string }>
@@ -82,8 +83,8 @@ export default async function LectureDetailPage({ params }: LectureDetailPagePro
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Back Link */}
-      <Link 
-        href="/lectures" 
+      <Link
+        href="/lectures"
         className="inline-flex items-center gap-2 text-sm text-base-content/60 hover:text-base-content transition-colors"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -105,7 +106,7 @@ export default async function LectureDetailPage({ params }: LectureDetailPagePro
             <RestartButton lectureId={lecture.id} lectureTitle={lecture.title} />
           )}
         </div>
-        
+
         {/* Tags */}
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
@@ -149,7 +150,7 @@ export default async function LectureDetailPage({ params }: LectureDetailPagePro
               red: { bg: 'bg-red-500', light: 'bg-red-500/10', text: 'text-red-600' },
             }
             const color = colors[stats.color as keyof typeof colors]
-            
+
             return (
               <div key={difficulty}>
                 <div className="flex justify-between items-center text-sm mb-2">
@@ -167,9 +168,9 @@ export default async function LectureDetailPage({ params }: LectureDetailPagePro
                   </span>
                 </div>
                 <div className={`h-2 rounded-full ${color.light}`}>
-                  <div 
+                  <div
                     className={`h-full rounded-full ${color.bg} transition-all duration-500`}
-                    style={{ width: `${percentage}%` }} 
+                    style={{ width: `${percentage}%` }}
                   />
                 </div>
               </div>
@@ -178,18 +179,12 @@ export default async function LectureDetailPage({ params }: LectureDetailPagePro
         </div>
       </div>
 
-      {/* Start Quiz Button */}
-      <div className="flex justify-center pt-4">
-        <Link
-          href={`/lectures/${slug}/quiz`}
-          className="btn-modern btn-modern-primary text-base px-10 py-4"
-        >
-          {answeredCount > 0 ? 'Nastavi kviz' : 'Pokreni kviz'}
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </Link>
-      </div>
+      {/* Difficulty Selector and Start Quiz Button */}
+      <LectureQuizSection
+        slug={slug}
+        answeredCount={answeredCount}
+        difficultyStats={difficultyStats}
+      />
 
       {/* Restart History */}
       {restartHistory.length > 0 && (

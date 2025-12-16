@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { Difficulty } from '@prisma/client'
 
 export async function GET(request: Request) {
   try {
@@ -14,6 +15,19 @@ export async function GET(request: Request) {
     const lectureSlug = searchParams.get('lecture')
     const repeatMode = searchParams.get('repeatMode') === 'true'
     const restart = searchParams.get('restart') === 'true'
+    const difficultiesParam = searchParams.get('difficulties')
+
+    // Parse difficulties filter (comma-separated: EASY,MEDIUM,HARD)
+    const validDifficulties: Difficulty[] = ['EASY', 'MEDIUM', 'HARD']
+    let difficulties: Difficulty[] = validDifficulties
+    if (difficultiesParam) {
+      const parsed = difficultiesParam.split(',').filter(d =>
+        validDifficulties.includes(d as Difficulty)
+      ) as Difficulty[]
+      if (parsed.length > 0) {
+        difficulties = parsed
+      }
+    }
 
     if (!lectureSlug) {
       return NextResponse.json({ error: 'Slug predavanja je obavezan' }, { status: 400 })
@@ -64,9 +78,12 @@ export async function GET(request: Request) {
       return shuffled
     }
 
-    // Get all questions for this lecture
+    // Get all questions for this lecture filtered by difficulty
     const allQuestions = await prisma.question.findMany({
-      where: { lectureId: lecture.id },
+      where: {
+        lectureId: lecture.id,
+        difficulty: { in: difficulties },
+      },
       include: {
         options: {
           select: {

@@ -80,14 +80,14 @@ export function QuestionCard({
     if (!isSubmitted || !evaluation) {
       const isSelected = selectedOptions.includes(optionId)
       return {
-        containerClass: `group relative px-5 py-4 rounded-2xl cursor-pointer transition-all duration-300 ${
-          isSelected
+        containerClass: `group relative px-5 py-4 rounded-2xl cursor-pointer transition-all duration-300 ${isSelected
             ? 'bg-[var(--text-primary)]/[0.06] ring-1 ring-[var(--text-primary)]/20'
             : 'bg-[var(--bg-surface)] hover:bg-[var(--text-primary)]/[0.03] ring-1 ring-transparent hover:ring-[var(--text-primary)]/10'
-        }`,
-        indicatorClass: isSelected 
-          ? 'bg-[var(--text-primary)] ring-0' 
+          }`,
+        indicatorClass: isSelected
+          ? 'bg-[var(--text-primary)] ring-0'
           : 'bg-transparent ring-1 ring-[var(--text-muted)]/40 group-hover:ring-[var(--text-muted)]/60',
+        checkIconClass: isSelected ? 'text-[var(--bg-surface)]' : '',
         shouldShowCheck: false,
         isCorrect: false,
         isIncorrect: false,
@@ -100,6 +100,7 @@ export function QuestionCard({
 
     let containerClass = 'relative px-5 py-4 rounded-2xl transition-all duration-300 cursor-default '
     let indicatorClass = 'ring-1 '
+    let checkIconClass = 'text-white'
 
     if (isUserCorrect) {
       containerClass += 'bg-emerald-500/[0.08] ring-1 ring-emerald-500/30'
@@ -110,6 +111,7 @@ export function QuestionCard({
     } else if (isCorrectAnswer) {
       containerClass += 'bg-emerald-500/[0.04] ring-1 ring-emerald-500/20'
       indicatorClass = 'bg-transparent ring-1 ring-emerald-500/50'
+      checkIconClass = 'text-emerald-500'
     } else {
       containerClass += 'bg-[var(--bg-surface)]/50 ring-1 ring-[var(--border-color)]/30'
       indicatorClass = 'bg-transparent ring-1 ring-[var(--text-muted)]/20'
@@ -118,6 +120,7 @@ export function QuestionCard({
     return {
       containerClass,
       indicatorClass,
+      checkIconClass,
       shouldShowCheck: isCorrectAnswer,
       isCorrect: isUserCorrect,
       isIncorrect: isUserIncorrect,
@@ -184,13 +187,13 @@ export function QuestionCard({
                     {/* Custom radio/checkbox indicator */}
                     <div className={`shrink-0 w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 ${styling.indicatorClass}`}>
                       {(selectedOptions.includes(option.id) || styling.shouldShowCheck) && (
-                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <svg className={`w-3 h-3 ${styling.checkIconClass}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       )}
                     </div>
                     <span className="flex-1 text-[15px] leading-relaxed text-[var(--text-primary)]/90">{option.text}</span>
-                    
+
                     {/* Result icon */}
                     {isSubmitted && styling.isCorrect && (
                       <div className="shrink-0 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
@@ -246,13 +249,12 @@ export function QuestionCard({
         <button
           onClick={handleSubmit}
           disabled={!canSubmit || isSubmitting}
-          className={`w-full mt-7 py-4 px-6 rounded-2xl font-semibold text-[15px] transition-all duration-300 flex items-center justify-center gap-2 ${
-            isSubmitted
+          className={`w-full mt-7 py-4 px-6 rounded-2xl font-semibold text-[15px] transition-all duration-300 flex items-center justify-center gap-2 ${isSubmitted
               ? 'bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90'
               : canSubmit
                 ? 'bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90 shadow-lg shadow-[var(--text-primary)]/10'
                 : 'bg-[var(--border-color)] text-[var(--text-muted)] cursor-not-allowed'
-          }`}
+            }`}
         >
           {isSubmitting ? (
             <>

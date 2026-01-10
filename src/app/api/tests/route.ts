@@ -53,6 +53,7 @@ export async function GET(request: Request) {
         timeLimit: test.timeLimit,
         createdAt: test.createdAt,
         createdBy: test.createdBy,
+        tags: test.tags,
         statistics: {
           attemptCount: completedAttempts,
           successRate,
@@ -102,6 +103,23 @@ export async function POST(request: Request) {
       )
     }
 
+    // Get tags from selected lectures if any
+    let tags: string[] = []
+    if (data.lectureIds && data.lectureIds.length > 0) {
+      const lectures = await prisma.lecture.findMany({
+        where: { id: { in: data.lectureIds } },
+        select: { tags: true }
+      })
+
+      // Merge all tags and deduplicate
+      const allTags = lectures.flatMap(l => {
+        // Handle both string[] and likely parsed JSON (though prisma types it as Json)
+        const t = l.tags as unknown
+        return Array.isArray(t) ? t as string[] : []
+      })
+      tags = [...new Set(allTags)]
+    }
+
     // Randomly select questions
     const shuffled = [...allQuestions].sort(() => Math.random() - 0.5)
     const selectedQuestions = shuffled.slice(0, data.questionCount)
@@ -114,6 +132,7 @@ export async function POST(request: Request) {
         questionCount: data.questionCount,
         timeLimit: data.timeLimit,
         createdById: session.user.role === 'ADMIN' ? null : session.user.id,
+        tags: tags,
         questions: {
           create: selectedQuestions.map((q, index) => ({
             questionId: q.id,

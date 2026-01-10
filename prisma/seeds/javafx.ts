@@ -5,2196 +5,1594 @@ export const javaFx = {
   questions: [
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što se događa ako pozovete Application.launch() VIŠE PUTA u istom programu? (Odaberite sve točne)",
-      "explanation": "Application.launch() može se pozvati SAMO JEDNOM po JVM procesu! Drugi poziv baca IllegalStateException: 'Application launch must not be called more than once'. launch() pokreće JavaFX Application Thread koji može postojati samo jednom. Za ponovno pokretanje aplikacije mora se kreirati NOVI JVM proces. launch() je BLOCKING poziv - vraća kontrolu tek kada se aplikacija zatvori. Platform.exit() ili Stage.close() zatvaraju aplikaciju ali NE resetiraju launch() status. Za testiranje koristiti @Rule JavaFXThreadingRule ili TestFX framework. Workaround: Koristiti Platform.startup() (Java 19+) umjesto launch().",
-      "difficulty": "HARD",
+      "prompt": "Koje klase ili interface moraju JavaFX aplikacije naslijediti/implementirati? (Odaberite sve točne)",
+      "explanation": "JavaFX aplikacija nasljeđuje javafx.application.Application klasu koja upravlja životnim ciklusom. Application je konkretna klasa, ne interface. Ova klasa pruža metode kao što su start(), init() i stop(). Nije potrebno implementirati dodatne interface-e osim ako aplikacija ima specifične potrebe (npr. EventHandler).",
+      "difficulty": "EASY",
       "options": [
-        { "text": "Baca IllegalStateException - može se pozvati samo jednom", "isCorrect": true },
-        { "text": "Kreira novi Stage - multiple windows", "isCorrect": false },
-        { "text": "Resetira aplikaciju na početno stanje", "isCorrect": false },
-        { "text": "Drugi poziv se ignorira - no-op", "isCorrect": false },
-        { "text": "launch() je blocking - vraća kontrolu tek pri zatvaranju", "isCorrect": true },
-        { "text": "Mora se kreirati novi JVM proces za ponovno pokretanje", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se sljedeći JavaFX kod kompilirati?",
-      "codeSnippet": "import javafx.application.Application;\nimport javafx.stage.Stage;\nimport javafx.scene.Scene;\nimport javafx.scene.layout.StackPane;\n\npublic class MultiSceneTest extends Application {\n    @Override\n    public void start(Stage primaryStage) {\n        StackPane root1 = new StackPane();\n        Scene scene1 = new Scene(root1, 300, 200);\n        \n        StackPane root2 = new StackPane();\n        Scene scene2 = new Scene(root2, 400, 300);\n        \n        // Postavi obje scene na isti Stage?\n        primaryStage.setScene(scene1);\n        primaryStage.setScene(scene2);\n        \n        primaryStage.show();\n    }\n    \n    public static void main(String[] args) {\n        launch(args);\n    }\n}",
-      "explanation": "Kod se KOMPILIRA i prikazuje scene2! Stage može imati SAMO JEDNU Scene u bilo kojem trenutku. Drugi setScene() poziv ZAMJENJUJE prvu scenu. scene1 se NE prikazuje jer je overwriteana. Za switching između scena koristiti setScene() dinamički (npr. na button click). Scene Graph koncept: Stage → Scene → Root Node → Children. Svaka Scene može imati različitu veličinu, CSS, root node. Multiple stages = multiple windows. Scene.setRoot() također može mijenjati sadržaj. Scene NE mora biti na Stage-u da postoji - može se kreirati unaprijed. getScene() vraća trenutnu scenu.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Kompilira se i prikazuje scene2 - drugi setScene() zamjenjuje prvi", "isCorrect": true },
-        { "text": "Neće se kompilirati - Stage ne može imati dvije Scene", "isCorrect": false },
-        { "text": "Kompilira se i prikazuje obje scene odjednom", "isCorrect": false },
-        { "text": "Pada u runtime s IllegalStateException", "isCorrect": false },
-        { "text": "Kompilira se ali ne prikazuje ništa", "isCorrect": false }
+        { "text": "javafx.application.Application", "isCorrect": true },
+        { "text": "javafx.stage.Stage", "isCorrect": false },
+        { "text": "javafx.scene.Node", "isCorrect": false },
+        { "text": "Runnable", "isCorrect": false },
+        { "text": "Serializable", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje metode JavaFX Application klase MORAJU biti implementirane? (Odaberite sve točne)",
-      "explanation": "SAMO start(Stage primaryStage) metoda je OBAVEZNA - to je ABSTRACT metoda! init() i stop() su OPCIONALNE - imaju default implementacije. init() se poziva PRIJE start() na launcher thread-u (ne JavaFX thread). stop() se poziva NAKON zatvaranja svih Stage-ova na JavaFX thread-u. main() metoda NIJE obavezna ako se pokreće direktno s 'java MyApp' (module-info). Lifecycle: main() → launch() → init() → start() → [aplikacija radi] → stop(). init() koristi se za: učitavanje konfiguracije, database connection, ne za GUI kreiranje! stop() za: cleanup, zatvaranje resursa, spremanje stanja.",
-      "difficulty": "MEDIUM",
+      "prompt": "Što predstavlja Stage u JavaFX aplikaciji? (Odaberite sve točne)",
+      "explanation": "Stage je vrhovna razina kontejnera koji predstavlja prozor aplikacije. Svaka JavaFX aplikacija ima barem jedan Stage (primaryStage). Stage može sadržavati Scene objekte i upravlja naslovom prozora, veličinom i vidljivošću. Stage je kao kazališna pozornica na koju se postavljaju scene.",
+      "difficulty": "EASY",
       "options": [
-        { "text": "start(Stage primaryStage) - OBAVEZNA abstract metoda", "isCorrect": true },
-        { "text": "init() - opcionalna, poziva se prije start()", "isCorrect": false },
-        { "text": "stop() - opcionalna, poziva se pri zatvaranju", "isCorrect": false },
-        { "text": "main(String[] args) - obavezna za pokretanje", "isCorrect": false },
-        { "text": "launch(String[] args) - mora biti pozvana", "isCorrect": false },
-        { "text": "Sve navedene metode su obavezne", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Što će ispisati sljedeći kod s Platform.runLater()?",
-      "codeSnippet": "import javafx.application.Application;\nimport javafx.application.Platform;\nimport javafx.stage.Stage;\n\npublic class RunLaterTest extends Application {\n    @Override\n    public void start(Stage primaryStage) {\n        System.out.println(\"1\");\n        \n        Platform.runLater(() -> {\n            System.out.println(\"2\");\n        });\n        \n        System.out.println(\"3\");\n        \n        Platform.runLater(() -> {\n            System.out.println(\"4\");\n        });\n        \n        System.out.println(\"5\");\n        \n        primaryStage.show();\n    }\n    \n    public static void main(String[] args) {\n        launch(args);\n    }\n}",
-      "explanation": "Ispisuje '1', '3', '5', '2', '4' (ili '1', '3', '5', zatim '2' i '4' u nekom redoslijedu). Platform.runLater() ODGAĐA izvršavanje na SLJEDEĆI JavaFX pulse! runLater() dodaje Runnable u JavaFX event queue. start() metoda JE na JavaFX thread-u pa se izvršava odmah. runLater() lambde se izvršavaju NAKON što start() završi. Redoslijed runLater() poziva je GARANTIRAN (FIFO queue). Pulse = JavaFX render cycle (~60 FPS). runLater() koristi se za: UI updates iz background threada, deferring heavy operations, breaking stack depth. Platform.isFxApplicationThread() provjerava jeste li na FX threadu.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "1, 3, 5, 2, 4 - runLater() odgađa izvršavanje", "isCorrect": true },
-        { "text": "1, 2, 3, 4, 5 - izvršava se redom", "isCorrect": false },
-        { "text": "5, 4, 3, 2, 1 - reverse order", "isCorrect": false },
-        { "text": "1, 3, 5 - runLater() se preskače", "isCorrect": false },
-        { "text": "Neće se kompilirati - runLater() ne prima lambda", "isCorrect": false }
+        { "text": "Glavni prozor aplikacije", "isCorrect": true },
+        { "text": "Top-level container", "isCorrect": true },
+        { "text": "Može sadržavati Scene objekte", "isCorrect": true },
+        { "text": "Layout container za kontrole", "isCorrect": false },
+        { "text": "CSS stylesheet datoteka", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što FXMLLoader.load() vraća ako FXML datoteka ne postoji? (Odaberite sve točne)",
-      "explanation": "FXMLLoader.load() baca IOException ako datoteka ne postoji! NE vraća null. Razlozi za IOException: (1) FXML datoteka ne postoji na navedenoj putanji, (2) Path je pogrešan (typo), (3) Resource nije u classpath-u, (4) Package struktura ne odgovara. load() također baca IOException za: invalid XML, nepostojeće JavaFX klase u FXML-u, missing fx:controller klasa. Za debug koristiti getClass().getResource() prije load() - vraća null ako resource ne postoji. Best practice: Provjeriti null prije load(). LoadException se baca za FXML syntax errors. NullPointerException ako je URL null.",
-      "difficulty": "MEDIUM",
+      "prompt": "Što Scene predstavlja u JavaFX-u? (Odaberite sve točne)",
+      "explanation": "Scene je kontejner za sav sadržaj u JavaFX grafu. Scene drži root node koji je početak hijerarhije svih UI elemenata. Scene se postavlja na Stage pomoću setScene(). Scene može imati svoje CSS stylesheets i veličinu. Scene Graph je hijerarhija node-ova unutar Scene objekta.",
+      "difficulty": "EASY",
       "options": [
-        { "text": "Baca IOException - datoteka ne postoji", "isCorrect": true },
-        { "text": "Vraća null", "isCorrect": false },
-        { "text": "Vraća prazan Parent node", "isCorrect": false },
-        { "text": "Baca FileNotFoundException", "isCorrect": false },
-        { "text": "getResource() vraća null ako resource ne postoji", "isCorrect": true },
-        { "text": "LoadException za FXML syntax errors", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Je li potreban no-arg konstruktor za FXML Controller klasu?",
-      "codeSnippet": "// Controller.java\npublic class MyController {\n    @FXML\n    private Button myButton;\n    \n    // Konstruktor s parametrom\n    public MyController(String param) {\n        System.out.println(param);\n    }\n    \n    // NEMA no-arg konstruktora!\n    \n    @FXML\n    public void initialize() {\n        myButton.setText(\"Initialized\");\n    }\n}\n\n// FXML\n// fx:controller=\"com.example.MyController\"",
-      "explanation": "FXMLLoader će FAILATI s InstantiationException! Controller klasa MORA imati no-arg konstruktor (public ili package-private). FXMLLoader koristi reflection za kreiranje instance: Class.newInstance() ili Constructor.newInstance(). Bez no-arg konstruktora reflection ne može kreirati objekt. Rješenja: (1) Dodati prazan konstruktor, (2) Koristiti FXMLLoader s custom controller factory, (3) setControllerFactory() prije load(). Custom factory omogućava dependency injection (Spring, Guice). initialize() se poziva NAKON što su sva @FXML polja inicijalizirana. Controller može biti inner class ALI mora biti static!",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "DA - baca InstantiationException bez no-arg konstruktora", "isCorrect": true },
-        { "text": "NE - FXMLLoader poziva konstruktor s parametrima", "isCorrect": false },
-        { "text": "NE - initialize() zamjenjuje konstruktor", "isCorrect": false },
-        { "text": "DA - ali može biti private", "isCorrect": false },
-        { "text": "Rješenje: setControllerFactory() za custom instantiation", "isCorrect": true }
+        { "text": "Kontejner za UI sadržaj", "isCorrect": true },
+        { "text": "Drži root node hijerarhije", "isCorrect": true },
+        { "text": "Postavlja se na Stage", "isCorrect": true },
+        { "text": "Isti objekt kao Stage", "isCorrect": false },
+        { "text": "Ne može imati CSS", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je razlika između Stage.close() i Platform.exit()? (Odaberite sve točne)",
-      "explanation": "Stage.close() zatvara JEDAN Stage (window), Platform.exit() zatvara CIJELU aplikaciju! close() poziva onCloseRequest handler - može se cancelirati. exit() force quit - NEMA cancel mogućnosti. close() na primaryStage defaultno zatvara app ako je implicitExit=true. setImplicitExit(false) sprječava automatic shutdown. exit() poziva stop() metodu prije zatvaranja. close() ne poziva stop() osim ako je zadnji Stage. Multiple stages: close() samo taj Stage, exit() SVE. System.exit() također zatvara ali preskače JavaFX cleanup! Best practice: close() za pojedine prozore, exit() za explicit shutdown. OnCloseRequest može se koristiti za 'Are you sure?' dialog.",
-      "difficulty": "MEDIUM",
+      "prompt": "Koja metoda pokreće JavaFX aplikaciju? (Odaberite sve točne)",
+      "explanation": "Application.launch() je statička metoda koja pokreće JavaFX runtime i kreira Application Thread. Poziva se iz main metode. launch() metoda je blocking - ne vraća kontrolu dok se aplikacija ne zatvori. Može se pozvati samo jednom u životnom vijeku JVM procesa.",
+      "difficulty": "EASY",
       "options": [
-        { "text": "close() zatvara jedan Stage, exit() cijelu aplikaciju", "isCorrect": true },
-        { "text": "close() može se cancelirati, exit() ne može", "isCorrect": true },
-        { "text": "exit() poziva stop() metodu, close() ne", "isCorrect": false },
-        { "text": "close() i exit() rade isto - synonyms", "isCorrect": false },
-        { "text": "implicitExit=false sprječava automatic shutdown", "isCorrect": true },
-        { "text": "System.exit() preskače JavaFX cleanup", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Što će ispisati TableView ako ObservableList nije postavljen?",
-      "codeSnippet": "import javafx.scene.control.*;\nimport javafx.collections.*;\n\npublic class TableViewEmptyTest {\n    public void setup() {\n        TableView<String> table = new TableView<>();\n        \n        TableColumn<String, String> col = new TableColumn<>(\"Data\");\n        table.getColumns().add(col);\n        \n        // NIJE pozvan setItems()!\n        \n        System.out.println(\"Items: \" + table.getItems());\n        System.out.println(\"Size: \" + table.getItems().size());\n    }\n}",
-      "explanation": "Ispisuje 'Items: []' i 'Size: 0'. TableView ima DEFAULT PRAZAN ObservableList! getItems() NIKAD ne vraća null - vraća prazan FXCollections.emptyObservableList(). Ako nije postavljen setItems(), koristi se default empty list. Za provjeru: table.getItems().isEmpty() ili size() == 0. setItems(null) ZAMJENJUJE s null - onda getItems() vraća null! Razlika: default empty list vs explicit null. Default list je UNMODIFIABLE - add() baca UnsupportedOperationException! Za modificiranje mora se setItems() s modifiable listom. PlaceholderNode se prikazuje kada je lista prazna.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Items: [], Size: 0 - default prazan ObservableList", "isCorrect": true },
-        { "text": "Baca NullPointerException - items je null", "isCorrect": false },
-        { "text": "Items: null, Size: 0", "isCorrect": false },
-        { "text": "Neće se kompilirati - mora biti setItems()", "isCorrect": false },
-        { "text": "Default list je unmodifiable - add() baca exception", "isCorrect": true }
+        { "text": "launch(args)", "isCorrect": true },
+        { "text": "Application.launch(args)", "isCorrect": true },
+        { "text": "start(args)", "isCorrect": false },
+        { "text": "run(args)", "isCorrect": false },
+        { "text": "Platform.startup()", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje CSS svojstvo postavlja font size u JavaFX-u? (Odaberite sve točne)",
-      "explanation": "JavaFX CSS koristi -fx-font-size, NE font-size! SVI CSS propertyi u JavaFX-u imaju -fx- PREFIX. Web CSS: font-size, JavaFX: -fx-font-size. Web: background-color, JavaFX: -fx-background-color. Web: padding, JavaFX: -fx-padding. Razlog: Izbjegavanje konflikta s web CSS-om. JavaFX CSS parser ignorira propertye BEZ -fx- prefixa! Compatibilnost: JavaFX CSS nije W3C standard. Jedinice: pt, px, em, % - iste kao web. -fx-font-family za font, -fx-text-fill za boju teksta. CSS file se učitava s scene.getStylesheets().add(). Inline stil: node.setStyle('-fx-font-size: 20px').",
-      "difficulty": "MEDIUM",
+      "prompt": "Koje lifecycle metode postoje u Application klasi? (Odaberite sve točne)",
+      "explanation": "Application klasa ima tri glavne lifecycle metode: init() koja se poziva prije start() na background thread-u, start() koja se izvršava na JavaFX Application Thread-u i prima primaryStage, te stop() koja se poziva pri zatvaranju aplikacije. Samo start() metoda je obavezna za override jer je abstract.",
+      "difficulty": "EASY",
       "options": [
-        { "text": "-fx-font-size - SA -fx- prefiksom", "isCorrect": true },
-        { "text": "font-size - kao u web CSS-u", "isCorrect": false },
-        { "text": "fontSize - camelCase stil", "isCorrect": false },
-        { "text": "Sva JavaFX CSS svojstva imaju -fx- prefiks", "isCorrect": true },
-        { "text": "CSS bez -fx- se ignorira", "isCorrect": true },
-        { "text": "-fx-text-fill za boju teksta", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Može li GridPane imati negativne row/column indekse?",
-      "codeSnippet": "import javafx.scene.layout.GridPane;\nimport javafx.scene.control.Button;\n\npublic class GridPaneNegativeTest {\n    public void setup() {\n        GridPane grid = new GridPane();\n        \n        Button b1 = new Button(\"Zero\");\n        Button b2 = new Button(\"Negative\");\n        Button b3 = new Button(\"Positive\");\n        \n        grid.add(b1, 0, 0);   // Normal\n        grid.add(b2, -1, -1); // Negativno?\n        grid.add(b3, 1, 1);   // Normal\n        \n        System.out.println(\"Added buttons!\");\n    }\n}",
-      "explanation": "Kod se KOMPILIRA i radi! GridPane DOZVOLJAVA negativne indekse! Row i column mogu biti bilo koji int vrijednosti (pozitivni, 0, negativni). GridPane automatski proširuje grid u svim smjerovima. Negativni indeksi postavljaju elemente 'lijevo od nule' ili 'iznad nule'. Koordinatni sustav: (0,0) je 'origin' ali ne mora biti lijevi gornji kut! getColumnIndex() i getRowIndex() mogu vratiti negativne vrijednosti. GridPane nema fiksnu veličinu - dinamički raste. Ovo omogućava CENTRIRANJE bez znanja ukupne veličine! Npr. srednji element na (0,0), ostali oko njega. columnSpan i rowSpan mogu biti samo pozitivni.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "DA - GridPane dozvoljava negativne indekse", "isCorrect": true },
-        { "text": "NE - baca IllegalArgumentException", "isCorrect": false },
-        { "text": "Kompilira se ali elementi se ne prikazuju", "isCorrect": false },
-        { "text": "GridPane automatski konvertira u pozitivne", "isCorrect": false },
-        { "text": "GridPane grid dinamički raste u svim smjerovima", "isCorrect": true }
+        { "text": "init()", "isCorrect": true },
+        { "text": "start(Stage primaryStage)", "isCorrect": true },
+        { "text": "stop()", "isCorrect": true },
+        { "text": "main(String[] args)", "isCorrect": false },
+        { "text": "render()", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što @FXML anotacija radi? (Odaberite sve točne)",
-      "explanation": "@FXML označava polja i metode koje FXMLLoader treba povezati s FXML elementima! (1) Polja: moraju imati ISTO ime kao fx:id u FXML-u. (2) Metode: povezuju se s event handlers (onAction='#methodName'). (3) @FXML MIJENJA vidljivost - private/package-private postaju dostupni FXMLLoader-u! (4) Bez @FXML, private polja nisu dostupna reflection-u. (5) initialize() metoda mora biti @FXML. (6) @FXML ne radi na static poljima! (7) Controller injection: @FXML se preskače ako se koristi setController(). Best practice: Držati @FXML polja private za encapsulation. FXMLLoader koristi reflection za pristup.",
-      "difficulty": "MEDIUM",
+      "prompt": "Što je Scene Builder? (Odaberite sve točne)",
+      "explanation": "Scene Builder je vizualni alat za dizajniranje JavaFX GUI-ja metodom drag-and-drop. Automatski generira FXML kod. Integrira se s IDE-ima poput IntelliJ IDEA i Eclipse. Instalira se zasebno od IDE-a i može se preuzeti s gluonhq.com. Omogućava live preview dizajna.",
+      "difficulty": "EASY",
       "options": [
-        { "text": "Označava polja/metode za FXMLLoader povezivanje", "isCorrect": true },
-        { "text": "Polja moraju imati isto ime kao fx:id", "isCorrect": true },
-        { "text": "Mijenja vidljivost - omogućava reflection pristup", "isCorrect": true },
-        { "text": "Mora biti na public poljima", "isCorrect": false },
-        { "text": "Ne radi na static poljima", "isCorrect": true },
-        { "text": "initialize() metoda mora biti @FXML", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Što vraća Parent.getChildren() za Region?",
-      "codeSnippet": "import javafx.scene.layout.*;\nimport javafx.scene.control.Button;\n\npublic class RegionChildrenTest {\n    public void test() {\n        // BorderPane extends Region extends Parent\n        BorderPane borderPane = new BorderPane();\n        borderPane.setCenter(new Button(\"Center\"));\n        \n        // Region metoda\n        System.out.println(\"Children: \" + borderPane.getChildren());\n        System.out.println(\"Size: \" + borderPane.getChildren().size());\n    }\n}",
-      "explanation": "Kod se NEĆE KOMPILIRATI! Region NE EKSPONIRA getChildren() metodu! Parent ima getChildren() ali je PROTECTED. Region je subclasa Parent-a ali ne otkriva children. BorderPane.setCenter() dodaje child interno ali getChildren() nije dostupno. Za pristup koristiti getChildrenUnmodifiable() - vraća READ-ONLY listu. Razlog: Region kontrolira svoj layout - ne dozvoljava direktno dodavanje. Pane extends Region i OTKRIVA getChildren(). HBox, VBox, StackPane, FlowPane nasljeđuju Pane. BorderPane, GridPane koriste specifične add() metode. Control također ne eksponira children.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "NEĆE se kompilirati - Region nema getChildren()", "isCorrect": true },
-        { "text": "Vraća children list s jednim Button-om", "isCorrect": false },
-        { "text": "Vraća prazan list", "isCorrect": false },
-        { "text": "Vraća null", "isCorrect": false },
-        { "text": "getChildrenUnmodifiable() vraća read-only listu", "isCorrect": true }
+        { "text": "Vizualni alat za dizajniranje GUI-ja", "isCorrect": true },
+        { "text": "Generira FXML kod automatski", "isCorrect": true },
+        { "text": "Drag-and-drop interface", "isCorrect": true },
+        { "text": "Dolazi ugrađen u JDK", "isCorrect": false },
+        { "text": "Kompajlira Java kod", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje layout containere imaju getChildren() metodu dostupnu? (Odaberite sve točne)",
-      "explanation": "Samo containeri koji nasljeđuju PANE imaju public getChildren()! (1) Pane - base class, direktan pristup. (2) HBox, VBox, StackPane, FlowPane - nasljeđuju Pane. (3) TilePane, AnchorPane - također Pane subclase. BorderPane i GridPane NE nasljeđuju Pane - imaju specijalizirane add() metode! BorderPane.setTop/Left/Center/Right/Bottom. GridPane.add(node, col, row). Region i Control također NEMAJU public getChildren(). Parent ima getChildren() ali je PROTECTED. Za read-only pristup koristiti getChildrenUnmodifiable(). Group ima public getChildren().",
-      "difficulty": "HARD",
+      "prompt": "Što je FXML? (Odaberite sve točne)",
+      "explanation": "FXML je XML-based markup language za deklarativno definiranje JavaFX korisničkih sučelja. Odvaja prezentacijsku logiku od programske logike. FXML datoteke se učitavaju pomoću FXMLLoader klase. Scene Builder automatski generira FXML kod. FXML omogućava lakše održavanje jer se UI dizajn može mijenjati bez diranja Java koda.",
+      "difficulty": "EASY",
       "options": [
-        { "text": "Pane i sve njegove subclase", "isCorrect": true },
-        { "text": "HBox, VBox, StackPane, FlowPane", "isCorrect": true },
-        { "text": "BorderPane", "isCorrect": false },
-        { "text": "GridPane", "isCorrect": false },
-        { "text": "TilePane, AnchorPane", "isCorrect": true },
-        { "text": "Group", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Što će ispisati kod s ObservableList i običnom listom?",
-      "codeSnippet": "import javafx.collections.*;\nimport java.util.*;\n\npublic class ObservableListTest {\n    public void test() {\n        List<String> normalList = new ArrayList<>();\n        normalList.add(\"A\");\n        normalList.add(\"B\");\n        \n        ObservableList<String> obsList = \n            FXCollections.observableArrayList(normalList);\n        \n        obsList.add(\"C\");\n        normalList.add(\"D\");\n        \n        System.out.println(\"Normal: \" + normalList.size());\n        System.out.println(\"Observable: \" + obsList.size());\n    }\n}",
-      "explanation": "Ispisuje 'Normal: 3' i 'Observable: 3'. ObservableList kreira KOPIJU normale liste, NE dijele podatke! observableArrayList() kopira elemente u novu listu. Promjene u normalList NE utječu na obsList i obrnuto. Za shared data koristiti observableList(List) - wrappa postojeću listu. Razlika: observableArrayList() = nova lista, observableList() = wrapper. Wrapped lista: promjene se reflektiraju u obje! observable liste šalju change notifikacije ListChangeListener-ima. Normal lista to ne radi. Za TableView/ListView MORA se koristiti ObservableList. FXCollections factory ima mnogo metoda: unmodifiableObservableList, synchronizedObservableList, emptyObservableList.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Normal: 3, Observable: 3 - kreira kopiju, ne dijele podatke", "isCorrect": true },
-        { "text": "Normal: 3, Observable: 4 - dijele podatke", "isCorrect": false },
-        { "text": "Normal: 4, Observable: 3 - obrnuto", "isCorrect": false },
-        { "text": "Oba 4 - potpuno sinkronizirani", "isCorrect": false },
-        { "text": "observableList(List) wrappa, observableArrayList() kopira", "isCorrect": true }
+        { "text": "XML format za JavaFX UI", "isCorrect": true },
+        { "text": "Odvaja prezentaciju od logike", "isCorrect": true },
+        { "text": "Učitava se s FXMLLoader", "isCorrect": true },
+        { "text": "Binary format za brzinu", "isCorrect": false },
+        { "text": "Zamjena za CSS", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Kada se poziva initialize() metoda u Controlleru? (Odaberite sve točne)",
-      "explanation": "initialize() se poziva NAKON što su sva @FXML polja inicijalizirana, ali PRIJE nego što je root node vraćen! Timing: FXMLLoader.load() → parse FXML → kreiraj controller → inject @FXML fields → pozovi initialize() → vrati root. initialize() mora biti @FXML annotated. initialize() može biti bez parametara ILI s parametrima (URL location, ResourceBundle resources). Parametri se automatski injektiraju. Koristi se za: event listener setup, data binding,初期 table data, validaciju. NE koristi se za GUI kreiranje - to radi FXML! initialize() je kao konstruktor ALI sa pristupom @FXML poljima. Construktor JOŠ NEMA @FXML polja inicijalizirana!",
-      "difficulty": "MEDIUM",
+      "prompt": "Kako se CSS datoteka dodaje na Scene? (Odaberite sve točne)",
+      "explanation": "CSS se dodaje na Scene pomoću getStylesheets().add() metode. Resource se učitava pomoću getClass().getResource() i konvertira u String URL s toExternalForm(). Može se dodati više CSS datoteka. CSS stilovi se primjenjuju hijerarhijski kroz Scene Graph. JavaFX CSS koristi -fx- prefiks za svojstva.",
+      "difficulty": "EASY",
       "options": [
-        { "text": "Nakon što su sva @FXML polja inicijalizirana", "isCorrect": true },
-        { "text": "Prije nego što je root node vraćen iz load()", "isCorrect": true },
-        { "text": "Prije konstruktora Controller klase", "isCorrect": false },
-        { "text": "Može imati URL i ResourceBundle parametre", "isCorrect": true },
-        { "text": "U konstruktoru @FXML polja su već dostupna", "isCorrect": false },
-        { "text": "Mora biti @FXML annotated", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Je li PropertyValueFactory case-sensitive?",
-      "codeSnippet": "class Person {\n    private String firstName;\n    \n    public String getFirstName() { return firstName; }\n    public void setFirstName(String name) { this.firstName = name; }\n}\n\nTableColumn<Person, String> col = new TableColumn<>(\"Name\");\n\n// Opcija 1\ncol.setCellValueFactory(new PropertyValueFactory<>(\"firstName\"));\n\n// Opcija 2\ncol.setCellValueFactory(new PropertyValueFactory<>(\"FirstName\"));\n\n// Opcija 3\ncol.setCellValueFactory(new PropertyValueFactory<>(\"FIRSTNAME\"));\n\n// Koja opcija radi?",
-      "explanation": "SAMO Opcija 1 radi! PropertyValueFactory JE CASE-SENSITIVE i traži EXACT property name! String mora matchati property ime (field ili getter/setter). PropertyValueFactory traži: (1) getFirstName() metodu, (2) firstNameProperty() metodu, (3) firstName field. Ime se konvertira: 'firstName' → 'getFirstName()', 'FirstName' → 'getFirstName()'. 'FirstName' NE radi jer traži 'getFirstName()' ali name mora biti 'firstName'. Java Bean konvencije: propertyName → getPropertyName(). Za custom logic koristiti Callback umjesto PropertyValueFactory. ObservableValue iz property() omogućava automatic updates.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "Samo Opcija 1 - case-sensitive exact match", "isCorrect": true },
-        { "text": "Sve tri opcije rade - case-insensitive", "isCorrect": false },
-        { "text": "Opcija 2 radi - capitalized", "isCorrect": false },
-        { "text": "Opcija 3 radi - uppercase", "isCorrect": false },
-        { "text": "PropertyValueFactory traži getter/property/field", "isCorrect": true }
+        { "text": "scene.getStylesheets().add(url)", "isCorrect": true },
+        { "text": "getClass().getResource() za učitavanje", "isCorrect": true },
+        { "text": "toExternalForm() konverzija", "isCorrect": true },
+        { "text": "stage.addCss()", "isCorrect": false },
+        { "text": "Ne može se dodati CSS na Scene", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što se događa ako fx:id u FXML-u ne matchira @FXML polje u Controlleru? (Odaberite sve točne)",
-      "explanation": "FXMLLoader NE baca exception ako fx:id ne postoji u Controlleru! Jednostavno PRESKAČE injektiranje. FXML element se kreira normalno ali @FXML polje ostaje null. Greška se javlja tek kad pokušate koristiti to polje - NullPointerException! FXML može imati VIŠE fx:id-eva nego što Controller ima @FXML polja. Obrnuto: Controller može imati @FXML polja koja ne postoje u FXML-u (ostaju null). Za debug: provjeriti null u initialize(). LoadException se baca samo za: syntax errors, missing classes, invalid attributes. Typo u fx:id je SILENT failure! Best practice: Konzistentno imenovanje (camelCase).",
+      "prompt": "Koje prefiks JavaFX CSS svojstva koriste? (Odaberite sve točne)",
+      "explanation": "Sva JavaFX CSS svojstva koriste -fx- prefiks. Primjeri: -fx-font-size, -fx-background-color, -fx-text-fill, -fx-padding. Razlog je razlikovanje od standardnog web CSS-a. CSS parser ignorira svojstva bez -fx- prefiksa. Ovo sprječava konflikte s web CSS svojstvima.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "-fx-", "isCorrect": true },
+        { "text": "Sva svojstva moraju imati ovaj prefiks", "isCorrect": true },
+        { "text": "Primjer: -fx-font-size", "isCorrect": true },
+        { "text": "-javafx-", "isCorrect": false },
+        { "text": "Bez prefiksa kao web CSS", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Koji layout raspoređuje elemente horizontalno? (Odaberite sve točne)",
+      "explanation": "HBox je layout koji raspoređuje child node-ove horizontalno u jednom redu. Spacing parametar kontrolira razmak između elemenata. HBox automatski prilagođava veličinu pri promjeni prozora. Padding se može postaviti za unutarnji razmak. HBox nasljeđuje Pane pa ima public getChildren().",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "HBox", "isCorrect": true },
+        { "text": "Raspoređuje u jedan red", "isCorrect": true },
+        { "text": "Može imati spacing", "isCorrect": true },
+        { "text": "VBox", "isCorrect": false },
+        { "text": "BorderPane", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Koji layout raspoređuje elemente vertikalno? (Odaberite sve točne)",
+      "explanation": "VBox je layout koji raspoređuje child node-ove vertikalno u jednoj koloni. Kao i HBox, podržava spacing i padding. VBox je idealan za forme i vertikalne toolbar-e. Automatski prilagođava visinu children. Nasljeđuje Pane klasu.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "VBox", "isCorrect": true },
+        { "text": "Raspoređuje u jednu kolonu", "isCorrect": true },
+        { "text": "Podržava spacing i padding", "isCorrect": true },
+        { "text": "HBox", "isCorrect": false },
+        { "text": "GridPane", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je FlowPane? (Odaberite sve točne)",
+      "explanation": "FlowPane raspoređuje elemente u 'tok' - horizontalno dok ima mjesta, zatim wrap na novi red. Slično HTML flex wrappingu. Podržava alignment pozicioniranje. HGap i VGap kontroliraju razmake. Korisno za grupe gumbi ili ikonice koje treba prilagoditi različitim širinama prozora.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Raspoređuje u tok s wrap-om", "isCorrect": true },
+        { "text": "Lijevo-desno pa novi red", "isCorrect": true },
+        { "text": "Podržava HGap i VGap", "isCorrect": true },
+        { "text": "Fiksna pozicija bez wrapa", "isCorrect": false },
+        { "text": "Samo za tablice", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Koliko regija BorderPane ima? (Odaberite sve točne)",
+      "explanation": "BorderPane ima točno 5 regija: TOP, LEFT, CENTER, RIGHT i BOTTOM. Svaka regija može sadržavati samo jedan Node. Za više elemenata u regiji koristi se container (HBox, VBox). CENTER zauzima preostali prostor. TOP i BOTTOM se rastežu horizontalno, LEFT i RIGHT vertikalno.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "5 regija", "isCorrect": true },
+        { "text": "TOP, LEFT, CENTER, RIGHT, BOTTOM", "isCorrect": true },
+        { "text": "Svaka regija prima jedan Node", "isCorrect": true },
+        { "text": "3 regije", "isCorrect": false },
+        { "text": "Neograničen broj regija", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je GridPane? (Odaberite sve točne)",
+      "explanation": "GridPane je layout koji raspoređuje elemente u mrežu s redovima i stupcima. Elementi se pozicioniraju s add(node, columnIndex, rowIndex). HGap i VGap kontroliraju razmake. ColumnConstraints i RowConstraints omogućavaju fine-tuning veličina. Idealan za forme i tablične prikaze.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Mreža s redovima i stupcima", "isCorrect": true },
+        { "text": "Pozicioniranje s (col, row)", "isCorrect": true },
+        { "text": "Idealan za forme", "isCorrect": true },
+        { "text": "Samo horizontalni raspored", "isCorrect": false },
+        { "text": "Ne podržava razmake", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je @FXML anotacija? (Odaberite sve točne)",
+      "explanation": "@FXML označava polja i metode za FXMLLoader injection. Omogućava pristup private poljima kroz reflection. Ime polja mora odgovarati fx:id u FXML-u. Metode se povezuju s event handlerima. Ne radi na static poljima jer svaki Controller instance ima svoje field vrijednosti.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Označava injection targets", "isCorrect": true },
+        { "text": "Omogućava reflection pristup", "isCorrect": true },
+        { "text": "Povezuje fx:id s poljima", "isCorrect": true },
+        { "text": "Mijenja compile-time vidljivost", "isCorrect": false },
+        { "text": "Radi na static poljima", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što fx:id označava u FXML-u? (Odaberite sve točne)",
+      "explanation": "fx:id je jedinstveni identifikator elementa u FXML-u. Koristi se za povezivanje s @FXML poljima u Controlleru. Mora biti unique unutar FXML dokumenta. Ime mora odgovarati varijabli u Controlleru. Slično HTML id atributu ali specifično za JavaFX injection.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Jedinstveni identifikator elementa", "isCorrect": true },
+        { "text": "Povezuje s @FXML poljima", "isCorrect": true },
+        { "text": "Mora biti unique u dokumentu", "isCorrect": true },
+        { "text": "Isto kao CSS class", "isCorrect": false },
+        { "text": "Ne mora biti unique", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je MVC arhitektura u JavaFX-u? (Odaberite sve točne)",
+      "explanation": "MVC (Model-View-Controller) razdvaja aplikaciju na tri dijela: Model su domenski podaci (POJO klase), View je FXML/UI prezentacija, Controller povezuje View s logikom. Omogućava bolju organizaciju koda, lakše testiranje i održavanje. Svaki ekran ima svoju FXML i Controller klasu.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Model = domenski podaci", "isCorrect": true },
+        { "text": "View = FXML/UI prezentacija", "isCorrect": true },
+        { "text": "Controller = logika i event handling", "isCorrect": true },
+        { "text": "Model = baza podataka", "isCorrect": false },
+        { "text": "View = Java kod za UI", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je ObservableList? (Odaberite sve točne)",
+      "explanation": "ObservableList je lista koja šalje notifikacije o promjenama. Koristi se s TableView, ListView i drugim kontrolama za automatsko ažuriranje UI-a. FXCollections.observableArrayList() kreira instance. Podržava ListChangeListener za praćenje promjena. Ključni dio JavaFX data binding mehanizma.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Šalje notifikacije o promjenama", "isCorrect": true },
+        { "text": "Za automatsko UI ažuriranje", "isCorrect": true },
+        { "text": "Koristi se s TableView/ListView", "isCorrect": true },
+        { "text": "Immutable lista", "isCorrect": false },
+        { "text": "Ne podržava listenere", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što FXCollections klasa pruža? (Odaberite sve točne)",
+      "explanation": "FXCollections je factory klasa za observable kolekcije. Metode uključuju observableArrayList(), observableHashMap(), unmodifiableObservableList(). Omogućava kreiranje synchronized i empty observable kolekcija. Svi UI containeri koji prikazuju podatke koriste observable kolekcije za binding.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Factory za observable kolekcije", "isCorrect": true },
+        { "text": "observableArrayList() metoda", "isCorrect": true },
+        { "text": "observableHashMap() metoda", "isCorrect": true },
+        { "text": "Utility za sortiranje", "isCorrect": false },
+        { "text": "Zamjena za java.util.Collections", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TableView prikazuje? (Odaberite sve točne)",
+      "explanation": "TableView prikazuje podatke u tabličnom formatu s redovima i stupcima. Svaki stupac je TableColumn objekt. Koristi ObservableList za podatke. PropertyValueFactory povezuje stupce s objektnim poljima. Podržava sortiranje, selekciju i cell customization.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Tablični prikaz podataka", "isCorrect": true },
+        { "text": "Redovi i stupci", "isCorrect": true },
+        { "text": "Koristi ObservableList", "isCorrect": true },
+        { "text": "Samo jedan stupac", "isCorrect": false },
+        { "text": "Ne podržava sortiranje", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što PropertyValueFactory radi? (Odaberite sve točne)",
+      "explanation": "PropertyValueFactory povezuje TableColumn s property-jem objekta. Traži getter metode (getPropertyName) ili property metode (propertyNameProperty). Case-sensitive je i mora matchati točan naziv polja. Koristi Java Bean konvencije. Alternativa je custom Callback za kompleksniju logiku.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Povezuje stupac s objektnim poljem", "isCorrect": true },
+        { "text": "Traži getter metode", "isCorrect": true },
+        { "text": "Case-sensitive je", "isCorrect": true },
+        { "text": "Automatski kreira polja", "isCorrect": false },
+        { "text": "Ne koristi Bean konvencije", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što MenuBar sadrži? (Odaberite sve točne)",
+      "explanation": "MenuBar je top-level container za menije. Sadrži Menu objekte koji predstavljaju dropdown kategorije (File, Edit). Svaki Menu sadrži MenuItem objekte koji su pojedinačne akcije. Podržava keyboard shortcuts kroz setAccelerator(). MenuBar se tipično postavlja na TOP BorderPane-a.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Menu objekte", "isCorrect": true },
+        { "text": "Top-level container za menije", "isCorrect": true },
+        { "text": "Dobavlja se s getMenus()", "isCorrect": true },
+        { "text": "MenuItem objekte direktno", "isCorrect": false },
+        { "text": "Samo TextField kontrole", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što MenuItem predstavlja? (Odaberite sve točne)",
+      "explanation": "MenuItem je pojedinačna akcija u meniju. Može imati tekst, ikonu i keyboard shortcut. Povezuje se s ActionEvent handlerom. Podržava disabled stanje. Može biti u obliku CheckMenuItem ili RadioMenuItem za toggle funkcionalnost. Menu može sadržavati i submenu (Menu unutar Menu-a).",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Pojedinačna akcija u meniju", "isCorrect": true },
+        { "text": "Može imati shortcut", "isCorrect": true },
+        { "text": "Povezuje se s handlerima", "isCorrect": true },
+        { "text": "Top-level container", "isCorrect": false },
+        { "text": "Ne može biti disabled", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je Alert dijalog? (Odaberite sve točne)",
+      "explanation": "Alert je ugrađeni dijalog za poruke korisniku. Tipovi uključuju INFORMATION, WARNING, ERROR, CONFIRMATION. showAndWait() je blocking metoda koja čeka korisnikov odgovor. Vraća Optional<ButtonType>. Može imati custom buttons. setHeaderText i setContentText postavljaju sadržaj.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Ugrađeni dijalog za poruke", "isCorrect": true },
+        { "text": "showAndWait() čeka odgovor", "isCorrect": true },
+        { "text": "Vraća Optional<ButtonType>", "isCorrect": true },
+        { "text": "Samo INFORMATION tip", "isCorrect": false },
+        { "text": "Ne može imati custom buttons", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TabPane sadrži? (Odaberite sve točne)",
+      "explanation": "TabPane je kontejner za Tab objekte koji prikazuje kartice. Svaki Tab ima tekst, ikonu i content (Node). Samo jedan Tab može biti selektiran istovremeno. Tab.setClosable() kontrolira može li se zatvoriti. SelectionModel upravlja trenutnom selekcijom. getTabs() vraća ObservableList.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Tab objekte", "isCorrect": true },
+        { "text": "Prikazuje kartice", "isCorrect": true },
+        { "text": "Svaki Tab ima content", "isCorrect": true },
+        { "text": "Menu objekte", "isCorrect": false },
+        { "text": "Ne podržava closable tabove", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Accordion prikazuje? (Odaberite sve točne)",
+      "explanation": "Accordion je kontejner s TitledPane elementima gdje samo jedan može biti proširen istovremeno. Klik na expanded pane ga zatvara (collapse). setExpandedPane() kontrolira koji je otvoren. Može biti null (svi zatvoreni). Korisno za FAQ sekcije i konfiguracijske panele.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "TitledPane elemente", "isCorrect": true },
+        { "text": "Samo jedan otvoren istovremeno", "isCorrect": true },
+        { "text": "Toggle collapsed/expanded", "isCorrect": true },
+        { "text": "Svi otvoreni istovremeno", "isCorrect": false },
+        { "text": "Ne može biti prazan", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TreeView prikazuje? (Odaberite sve točne)",
+      "explanation": "TreeView prikazuje hijerarhijske podatke u tree strukturi. Root je TreeItem<T> objekt. setShowRoot(false) skriva root i prikazuje samo children. TreeItem može imati grafiku (ikonu). Podržava multiple selection mode. getSelectionModel() upravlja selekcijom. Expanded/collapsed state se kontrolira na TreeItem-u.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Hijerarhijske podatke", "isCorrect": true },
+        { "text": "TreeItem strukturu", "isCorrect": true },
+        { "text": "Može sakriti root", "isCorrect": true },
+        { "text": "Samo flat listu", "isCorrect": false },
+        { "text": "Ne podržava ikone", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ListView prikazuje? (Odaberite sve točne)",
+      "explanation": "ListView prikazuje skrolabilnu listu stavki u jednoj koloni. Koristi ObservableList za podatke. Podržava single i multiple selection mode. CellFactory omogućava custom cell prikaz. Slično kao TableView ali jednostavnije bez stupaca. getSelectionModel().getSelectedItem() vraća selection.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Skrolabilnu listu stavki", "isCorrect": true },
+        { "text": "Jedna kolona", "isCorrect": true },
+        { "text": "Koristi ObservableList", "isCorrect": true },
+        { "text": "Multiple stupaca", "isCorrect": false },
+        { "text": "Ne podržava selection", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što SplitPane radi? (Odaberite sve točne)",
+      "explanation": "SplitPane dijeli prostor između više node-ova s pomičnim dividerom. Korisnik može pomicati divider za resizing. Podržava horizontal i vertical orientation. setDividerPosition() postavlja poziciju (0.0-1.0). Više od 2 itema ima multiple dividere. ResizableWithParent kontrolira koji side raste.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Dijeli prostor s dividerom", "isCorrect": true },
+        { "text": "Pomični divider", "isCorrect": true },
+        { "text": "Podržava više node-ova", "isCorrect": true },
+        { "text": "Fiksna pozicija bez pomicanja", "isCorrect": false },
+        { "text": "Samo 2 node-a maksimalno", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ScrollPane radi? (Odaberite sve točne)",
+      "explanation": "ScrollPane omogućava scrollanje sadržaja većeg od viewport-a. Podržava vertical i horizontal scroll barove. Policy: AS_NEEDED, ALWAYS, NEVER. setContent() postavlja scrollable content. setFitToWidth/Height prilagođava content. setPannable(true) omogućava drag scrolling. getViewportBounds() vraća visible area.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Omogućava scrollanje", "isCorrect": true },
+        { "text": "Podržava scroll bar policy", "isCorrect": true },
+        { "text": "setContent() postavlja content", "isCorrect": true },
+        { "text": "Ne može imati veliku content", "isCorrect": false },
+        { "text": "Uvijek prikazuje scrollbars", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Button kontrola predstavlja? (Odaberite sve točne)",
+      "explanation": "Button je klasa za klikabilan gumb. Može imati tekst i/ili grafiku (ikonu). setOnAction() postavlja event handler. Podržava disabled stanje. Može biti default button (reagira na Enter) ili cancel button (reagira na Escape). fire() metoda programski trigera klik.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Klikabilan gumb", "isCorrect": true },
+        { "text": "Može imati tekst i grafiku", "isCorrect": true },
+        { "text": "setOnAction() za event", "isCorrect": true },
+        { "text": "Ne može biti disabled", "isCorrect": false },
+        { "text": "Samo tekst, bez grafike", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TextField omogućava? (Odaberite sve točne)",
+      "explanation": "TextField je single-line text input kontrola. getText() dohvaća sadržaj, setText() postavlja. textProperty() omogućava binding. setPromptText() postavlja placeholder. Podržava input validation. Keyboard events se mogu handleati. prefColumnCount kontrolira preferiranu širinu.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Single-line text input", "isCorrect": true },
+        { "text": "getText() i setText() metode", "isCorrect": true },
+        { "text": "Podržava binding", "isCorrect": true },
+        { "text": "Multi-line text", "isCorrect": false },
+        { "text": "Ne može imati placeholder", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što CheckBox omogućava? (Odaberite sve točne)",
+      "explanation": "CheckBox je kontrola za binary selection (checked/unchecked). isSelected() vraća state, setSelected() postavlja. Podržava indeterminate state (tri stanja). Može se grupirati ali svaki je independent. selectedProperty() omogućava binding. ActionEvent se triggera pri promjeni.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Binary selection", "isCorrect": true },
+        { "text": "Checked/unchecked state", "isCorrect": true },
+        { "text": "Podržava indeterminate", "isCorrect": true },
+        { "text": "Samo jedan može biti checked", "isCorrect": false },
+        { "text": "Ne može biti tri-state", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što RadioButton omogućava? (Odaberite sve točne)",
+      "explanation": "RadioButton omogućava selection jedne opcije iz grupe. Mora biti u ToggleGroup-i za mutual exclusion. setToggleGroup() povezuje s grupom. Samo jedan u grupi može biti selected. selectedProperty() vraća Observable za binding. ToggleGroup.getSelectedToggle() dohvaća trenutni selection.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Selection jedne opcije", "isCorrect": true },
+        { "text": "Koristi ToggleGroup", "isCorrect": true },
+        { "text": "Mutual exclusion u grupi", "isCorrect": true },
+        { "text": "Multiple selection", "isCorrect": false },
+        { "text": "Ne treba grupu", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što DatePicker omogućava? (Odaberite sve točne)",
+      "explanation": "DatePicker omogućava odabir LocalDate vrijednosti. getValue() vraća odabrani datum (može biti null). Prikazuje calendar popup. setDayCellFactory() omogućava custom cell rendering (npr. disabled dates). Podržava custom date converter. valueProperty() za binding. Koristi java.time.LocalDate, ne java.util.Date.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Odabir LocalDate", "isCorrect": true },
+        { "text": "Calendar popup", "isCorrect": true },
+        { "text": "getValue() može biti null", "isCorrect": true },
+        { "text": "Koristi java.util.Date", "isCorrect": false },
+        { "text": "Ne može biti null", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ColorPicker omogućava? (Odaberite sve točne)",
+      "explanation": "ColorPicker omogućava odabir Color objekta. Default je Color.WHITE. Prikazuje color palette dialog. getValue() vraća Color (javafx.scene.paint.Color). Podržava custom colors koje se spremaju. Color.web() parsira hex stringove. valueProperty() za binding.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Odabir boje", "isCorrect": true },
+        { "text": "Vraća Color objekt", "isCorrect": true },
+        { "text": "Default je WHITE", "isCorrect": true },
+        { "text": "Vraća String hex", "isCorrect": false },
+        { "text": "Ne podržava custom colors", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ProgressBar prikazuje? (Odaberite sve točne)",
+      "explanation": "ProgressBar prikazuje napredak operacije. setProgress() prima vrijednost 0.0-1.0 (0-100%). INDETERMINATE_PROGRESS (-1.0) prikazuje spinning animaciju. Vrijednosti izvan raspona se clampuju (< 0 = 0, > 1 = 1). progressProperty() za binding. ProgressIndicator je base class (circular).",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Napredak operacije", "isCorrect": true },
+        { "text": "Vrijednost 0.0-1.0", "isCorrect": true },
+        { "text": "Podržava indeterminate mode", "isCorrect": true },
+        { "text": "Vrijednosti u pikselima", "isCorrect": false },
+        { "text": "Ne može biti indeterminate", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Slider omogućava? (Odaberite sve točne)",
+      "explanation": "Slider omogućava odabir numeričke vrijednosti pomicanjem. setMin/Max/Value postavljaju raspon i vrijednost. Podržava horizontal i vertical orientation. setShowTickLabels/Marks prikazuje oznake. setMajorTickUnit/MinorTickCount kontrolira tickove. valueProperty() za binding. valueChanging() pokazuje je li user još uvijek pomicanje.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Odabir numeričke vrijednosti", "isCorrect": true },
+        { "text": "Pomicanje klizača", "isCorrect": true },
+        { "text": "setMin/Max/Value metode", "isCorrect": true },
+        { "text": "Samo za tekst", "isCorrect": false },
+        { "text": "Ne može biti vertical", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Label prikazuje? (Odaberite sve točne)",
+      "explanation": "Label prikazuje read-only tekst. Može imati grafiku (ikonu). setText() mijenja tekst, getText() čita. Podržava text wrapping. Može biti mnemonicParsing enabled za keyboard shortcuts. setWrapText(true) omogućava multi-line. Ne prima user input.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Read-only tekst", "isCorrect": true },
+        { "text": "Može imati grafiku", "isCorrect": true },
+        { "text": "Podržava text wrapping", "isCorrect": true },
+        { "text": "User input kontrola", "isCorrect": false },
+        { "text": "Samo za slike", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je PasswordField? (Odaberite sve točne)",
+      "explanation": "PasswordField je TextField koji maskira input karaktere. Prikazuje bullet points ili asteriske umjesto stvarnih karaktera. getText() vraća actual password text. Sve TextField metode su dostupne. Nema built-in caps lock indicator. Nasljeđuje TextField.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "TextField koji maskira input", "isCorrect": true },
+        { "text": "Prikazuje bullets/asterisks", "isCorrect": true },
+        { "text": "getText() vraća actual text", "isCorrect": true },
+        { "text": "Ne može čitati tekst", "isCorrect": false },
+        { "text": "Enkriptira tekst automatski", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Koje su prednosti korištenja JavaFX? (Odaberite sve točne)",
+      "explanation": "JavaFX prednosti: Scene Builder za vizualni dizajn, CSS styling za izgled, FXML za separation of concerns, moderna arhitektura s binding-om, hardware accelerated graphics, multithreading podrška, animacije i efekti, cross-platform compatibilnost, integracija s Java SE.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Scene Builder za vizualni dizajn", "isCorrect": true },
+        { "text": "CSS styling", "isCorrect": true },
+        { "text": "FXML separation", "isCorrect": true },
+        { "text": "Samo za desktop aplikacije", "isCorrect": false },
+        { "text": "Nema binding podrške", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Koja je razlika između AWT, Swing i JavaFX? (Odaberite sve točne)",
+      "explanation": "AWT je prvi GUI toolkit (heavyweight components), Swing je lightweight swing components (maintenance mode od Java SE 7), JavaFX je moderni toolkit s boljim dizajnom, CSS supportom, FXML-om i Scene Builder-om. JavaFX je preporučen za nove aplikacije.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "AWT = prvi toolkit", "isCorrect": true },
+        { "text": "Swing = lightweight components", "isCorrect": true },
+        { "text": "JavaFX = moderni toolkit", "isCorrect": true },
+        { "text": "Svi su isti", "isCorrect": false },
+        { "text": "Swing je preporučen za nove app", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je ToolBar? (Odaberite sve točne)",
+      "explanation": "ToolBar prikazuje horizontalnu ili vertikalnu traku alata s kontrolama. Može sadržavati Button, ToggleButton, Separator i druge node-ove. setOrientation() mijenja smjer. Separator razdvaja grupe kontrola. ToolBar može biti 'floating' ili fixiran na poziciji.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Traka alata s kontrolama", "isCorrect": true },
+        { "text": "Može biti horizontal/vertical", "isCorrect": true },
+        { "text": "Može sadržavati Separator", "isCorrect": true },
+        { "text": "Samo za MenuItem", "isCorrect": false },
+        { "text": "Ne može imati Button", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Hyperlink omogućava? (Odaberite sve točne)",
+      "explanation": "Hyperlink je kontrola nalik web linku. Prikazuje podvučeni tekst (obično plav). setOnAction() definira što se događa pri kliku. Može se disable-ati. setVisited(true) mijenja appearance u 'visited' state. Korisno za navigaciju i help links.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Klikabilan link", "isCorrect": true },
+        { "text": "Podvučeni tekst", "isCorrect": true },
+        { "text": "setOnAction() handler", "isCorrect": true },
+        { "text": "Otvara URL automatski", "isCorrect": false },
+        { "text": "Ne može se disable-ati", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je Separator? (Odaberite sve točne)",
+      "explanation": "Separator je vizualna linija za razdvajanje UI elemenata. Podržava horizontal i vertical orientation. Koristi se u ToolBar, Menu i layoutima. Može imati custom stil putem CSS. Ne prima user input. Separator(Orientation.VERTICAL) kreira okomiti separator.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Vizualna razdjelnica", "isCorrect": true },
+        { "text": "Horizontal/vertical orientation", "isCorrect": true },
+        { "text": "Koristi se u ToolBar/Menu", "isCorrect": true },
+        { "text": "User input kontrola", "isCorrect": false },
+        { "text": "Samo u Menu", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je ChoiceBox? (Odaberite sve točne)",
+      "explanation": "ChoiceBox je dropdown selection kontrola. Prikazuje listu opcija kada se klikne. getValue() vraća selected item. getItems() vraća ObservableList. Može biti single selection only. Slično kao ComboBox ali jednostavnije (ne omogućava typing).",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Dropdown selection", "isCorrect": true },
+        { "text": "getValue() za selection", "isCorrect": true },
+        { "text": "Koristi ObservableList", "isCorrect": true },
+        { "text": "Omogućava typing", "isCorrect": false },
+        { "text": "Multiple selection", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je TextArea? (Odaberite sve točne)",
+      "explanation": "TextArea je multi-line text input kontrola. Podržava text wrapping i scrolling. getText() i setText() kao TextField. appendText() dodaje text na kraj. prefRowCount i prefColumnCount kontroliraju veličinu. Podržava undo/redo. setWrapText(true) omogućava wrapping.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Multi-line text input", "isCorrect": true },
+        { "text": "Podržava wrapping", "isCorrect": true },
+        { "text": "Podržava scrolling", "isCorrect": true },
+        { "text": "Single-line only", "isCorrect": false },
+        { "text": "Ne može imati scroll", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ToggleButton omogućava? (Odaberite sve točne)",
+      "explanation": "ToggleButton je button koji može biti selected/unselected. isSelected() vraća state. Može biti u ToggleGroup-i za mutual exclusion. Bez grupe, klik toggle-a state. selectedProperty() za binding. Koristi se za on/off state, formatting buttons (bold, italic).",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Selected/unselected state", "isCorrect": true },
+        { "text": "Može biti u ToggleGroup", "isCorrect": true },
+        { "text": "Toggle state na klik", "isCorrect": true },
+        { "text": "Ne može biti grouped", "isCorrect": false },
+        { "text": "Samo single use", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TitledPane prikazuje? (Odaberite sve točne)",
+      "explanation": "TitledPane je panel s naslovom koji se može expand/collapse. setText() postavlja title, setContent() postavlja content node. setCollapsible(false) onemogućava collapsing. Može postojati samostalno ili u Accordion-u. Expanded/collapsed state kontrolira isExpanded().",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Panel s naslovom", "isCorrect": true },
+        { "text": "Expand/collapse funkcionalnost", "isCorrect": true },
+        { "text": "setText() za title", "isCorrect": true },
+        { "text": "Ne može imati content", "isCorrect": false },
+        { "text": "Uvijek collapsible", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ComboBox omogućava? (Odaberite sve točne)",
+      "explanation": "ComboBox kombinira dropdown listu s text fieldom. Može biti editable (typing) ili non-editable (selection only). getValue() vraća selection. getItems() vraća ObservableList. setEditable(true) omogućava typing. Podržava custom cell factory.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Dropdown s optional typing", "isCorrect": true },
+        { "text": "Može biti editable", "isCorrect": true },
+        { "text": "getValue() za selection", "isCorrect": true },
+        { "text": "Uvijek editable", "isCorrect": false },
+        { "text": "Ne koristi ObservableList", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je StackPane? (Odaberite sve točne)",
+      "explanation": "StackPane slaže child node-ove jedan preko drugog (z-order). Default alignment je CENTER. getChildren() vraća listu gdje zadnji element je top-most. Korisno za overlay-e, ikone preko slika, loading indicators. Može imati multiple children stacked.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Slaže node-ove jedan preko drugog", "isCorrect": true },
+        { "text": "Default center alignment", "isCorrect": true },
+        { "text": "Z-order stacking", "isCorrect": true },
+        { "text": "Samo jedan child", "isCorrect": false },
+        { "text": "Ne podržava alignment", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je AnchorPane? (Odaberite sve točne)",
+      "explanation": "AnchorPane omogućava anchoranje child node-ova na rubove. setTopAnchor/BottomAnchor/LeftAnchor/RightAnchor postavljaju udaljenosti. Node ostaje na fiksnoj udaljenosti od ruba pri resizingu. Korisno za responsive layouts. Nasljeđuje Pane.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Anchoranje na rubove", "isCorrect": true },
+        { "text": "setTopAnchor/BottomAnchor metode", "isCorrect": true },
+        { "text": "Responsive layout", "isCorrect": true },
+        { "text": "Samo center pozicioniranje", "isCorrect": false },
+        { "text": "Ne podržava anchoring", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TilePane omogućava? (Odaberite sve točne)",
+      "explanation": "TilePane raspoređuje child node-ove u uniform grid cells. Sve ćelije imaju istu veličinu. Podržava horizontal i vertical orientation. prefTileWidth/Height kontrolira cell veličinu. Automatski wrap na novi red/kolonu. Slično FlowPane ali s uniform cells.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Uniform grid cells", "isCorrect": true },
+        { "text": "Sve ćelije iste veličine", "isCorrect": true },
+        { "text": "Automatski wrap", "isCorrect": true },
+        { "text": "Variable cell veličine", "isCorrect": false },
+        { "text": "Ne podržava orientation", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je Group? (Odaberite sve točne)",
+      "explanation": "Group je lightweight container bez layouta. Samo drži children u listi. Ne mijenja veličine ili pozicije children. Koristi se za transformacije na grupi node-ova. getChildren() je public. Ne nasljeđuje Region/Pane. Bounds su union svih children bounds.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Lightweight container", "isCorrect": true },
+        { "text": "Ne provodi layout", "isCorrect": true },
+        { "text": "Za grupiranje transformacija", "isCorrect": true },
+        { "text": "Nasljeđuje Pane", "isCorrect": false },
+        { "text": "Automatski layouta children", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Platform.runLater() radi? (Odaberite sve točne)",
+      "explanation": "Platform.runLater() šalje Runnable na JavaFX Application Thread za izvršavanje. Koristi se za UI updates iz background thread-a. Dodaje u event queue. Izvršava se na sljedećem pulse. Omogućava thread-safe UI updates. runLater() pozivi se izvršavaju redom (FIFO).",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Izvršava na JavaFX thread-u", "isCorrect": true },
+        { "text": "Za UI updates iz background-a", "isCorrect": true },
+        { "text": "FIFO red izvršavanja", "isCorrect": true },
+        { "text": "Izvršava odmah", "isCorrect": false },
+        { "text": "Ne koristi event queue", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je Scene Graph? (Odaberite sve točne)",
+      "explanation": "Scene Graph je hijerarhija node-ova u Scene-u. Root node je na vrhu, children su ispod. Svaki node može imati svoje children (osim Leaf nodes). Graph se traversea za layout, rendering i event handling. Parent node-ovi kontroliraju children transforms i visibility.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Hijerarhija node-ova", "isCorrect": true },
+        { "text": "Root na vrhu", "isCorrect": true },
+        { "text": "Za layout i rendering", "isCorrect": true },
+        { "text": "Flat struktura", "isCorrect": false },
+        { "text": "Ne koristi hijerarhiju", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Node klasa predstavlja? (Odaberite sve točne)",
+      "explanation": "Node je base class za sve Scene Graph elemente. Svaki UI element je Node. Definira zajedničke properties: id, style, transforms, event handlers. Node može biti u samo jednom Parent-u istovremeno. getParent() vraća trenutni parent ili null.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Base class za UI elemente", "isCorrect": true },
+        { "text": "Definira zajedničke properties", "isCorrect": true },
+        { "text": "Može biti u jednom Parent-u", "isCorrect": true },
+        { "text": "Može biti u više Parent-a", "isCorrect": false },
+        { "text": "Ne može imati transforms", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Parent klasa predstavlja? (Odaberite sve točne)",
+      "explanation": "Parent je abstract base class za sve node-ove koji mogu imati children. getChildren() je protected. Subclase odlučuju da li eksponiraju children. Parent provodi layout svoje djece. Region i Pane nasljeđuju Parent. Group također nasljeđuje Parent.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Base za node-ove s children", "isCorrect": true },
+        { "text": "getChildren() je protected", "isCorrect": true },
+        { "text": "Provodi layout", "isCorrect": true },
+        { "text": "Ne može imati children", "isCorrect": false },
+        { "text": "getChildren() je uvijek public", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Region klasa predstavlja? (Odaberite sve točne)",
+      "explanation": "Region je base class za layoute i kontrole. Nasljeđuje Parent. Ne eksponira getChildren() public-no. Dodaje CSS styling support, background, borders, padding. Ima preferredSize, minSize, maxSize properties. BorderPane i GridPane nasljeđuju Region.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Base za layoute i kontrole", "isCorrect": true },
+        { "text": "Ne eksponira public getChildren()", "isCorrect": true },
+        { "text": "Dodaje CSS support", "isCorrect": true },
+        { "text": "Eksponira public getChildren()", "isCorrect": false },
+        { "text": "Ne podržava CSS", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Pane klasa omogućava? (Odaberite sve točne)",
+      "explanation": "Pane nasljeđuje Region i eksponira public getChildren(). Ne provodi layout - children su na fiksnim pozicijama. HBox, VBox, StackPane, FlowPane nasljeđuju Pane. Korisno kao base layout kada ne trebaš specifičan layout algoritam.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Eksponira public getChildren()", "isCorrect": true },
+        { "text": "Ne provodi layout", "isCorrect": true },
+        { "text": "Base za HBox/VBox/StackPane", "isCorrect": true },
+        { "text": "Provodi automatic layout", "isCorrect": false },
+        { "text": "Ne može imati children", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Control klasa predstavlja? (Odaberite sve točne)",
+      "explanation": "Control je base class za UI kontrole (Button, TextField, Label). Nasljeđuje Region. Ima Skin za rendering. Podržava CSS pseudo-classes (:hover, :pressed, :focused). Ne eksponira getChildren(). Skin kontrolira visual appearance.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Base za UI kontrole", "isCorrect": true },
+        { "text": "Ima Skin za rendering", "isCorrect": true },
+        { "text": "Podržava CSS pseudo-classes", "isCorrect": true },
+        { "text": "Eksponira getChildren()", "isCorrect": false },
+        { "text": "Ne koristi CSS", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je Tooltip? (Odaberite sve točne)",
+      "explanation": "Tooltip prikazuje hint tekst na hover. setTooltip() postavlja na bilo koji Control. Podržava tekst i grafiku. Install delay je konfigurabilan. Može imati custom styling. Tooltip.install() za non-Control node-ove. Automatski se prikazuje/skriva.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Hint tekst na hover", "isCorrect": true },
+        { "text": "setTooltip() na Control", "isCorrect": true },
+        { "text": "Može imati grafiku", "isCorrect": true },
+        { "text": "Ne može se stilizirati", "isCorrect": false },
+        { "text": "Samo na Button", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ContextMenu omogućava? (Odaberite sve točne)",
+      "explanation": "ContextMenu je popup menu s MenuItem-ima. Prikazuje se na right-click (ili programski). setContextMenu() postavlja na Node. Može imati separatore i submenije. show() i hide() kontroliraju vidljivost. Automatski se pozicionira blizu kursora.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Popup menu", "isCorrect": true },
+        { "text": "Right-click menu", "isCorrect": true },
+        { "text": "Može imati MenuItem", "isCorrect": true },
+        { "text": "Ne može imati separatore", "isCorrect": false },
+        { "text": "Samo left-click", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ImageView prikazuje? (Odaberite sve točne)",
+      "explanation": "ImageView prikazuje Image objekt. setImage() postavlja image. Podržava scaling i preserving aspect ratio. setFitWidth/Height kontrolira veličinu. Image se učitava iz file, URL, InputStream ili classpath. Može biti smooth scaling.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Prikazuje Image objekt", "isCorrect": true },
+        { "text": "Podržava scaling", "isCorrect": true },
+        { "text": "setFitWidth/Height metode", "isCorrect": true },
+        { "text": "Ne može biti resizean", "isCorrect": false },
+        { "text": "Samo PNG format", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što MediaView omogućava? (Odaberite sve točne)",
+      "explanation": "MediaView prikazuje Media (video/audio). Media objekt se učitava iz MediaPlayer-a. Podržava playback kontrole. setMediaPlayer() povezuje s playerom. Može se resize-ati i aspect ratio preservation. Podržava različite video formate.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Prikazuje video/audio", "isCorrect": true },
+        { "text": "Koristi MediaPlayer", "isCorrect": true },
+        { "text": "Podržava resize", "isCorrect": true },
+        { "text": "Ne može playback", "isCorrect": false },
+        { "text": "Samo audio", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što WebView omogućava? (Odaberite sve točne)",
+      "explanation": "WebView embedda WebEngine za HTML/CSS/JavaScript prikaz. getEngine() vraća WebEngine. load() učitava URL. loadContent() učitava HTML string. Podržava JavaScript execution. Može komunicirati s Java kodom. Koristi WebKit engine.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Embedda web content", "isCorrect": true },
+        { "text": "Podržava HTML/CSS/JavaScript", "isCorrect": true },
+        { "text": "Koristi WebKit", "isCorrect": true },
+        { "text": "Ne podržava JavaScript", "isCorrect": false },
+        { "text": "Samo statički HTML", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "CODE_WILL_COMPILE",
+      "prompt": "Hoće li se sljedeći kod kompilirati?",
+      "codeSnippet": "import javafx.application.Application;\nimport javafx.stage.Stage;\nimport javafx.scene.Scene;\nimport javafx.scene.layout.VBox;\nimport javafx.scene.control.Button;\n\npublic class MyApp extends Application {\n    public void start(Stage stage) {\n        VBox root = new VBox();\n        root.getChildren().add(new Button(\"Click\"));\n        stage.setScene(new Scene(root, 300, 200));\n        stage.show();\n    }\n}",
+      "explanation": "Kod se neće kompilirati jer start() metoda nema @Override anotaciju ali to nije problem - pravi problem je što start() ne označava throws Exception ili ima try-catch. Međutim, u ovom slučaju kod se HOĆE kompilirati jer start() ne mora bacati exception. Primjer je potpuno validan JavaFX kod.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Da, kompilira se i radi normalno", "isCorrect": true },
+        { "text": "Ne, nedostaje main metoda", "isCorrect": false },
+        { "text": "Ne, VBox ne može biti root", "isCorrect": false },
+        { "text": "Ne, Button ne može biti u VBox", "isCorrect": false },
+        { "text": "Ne, mora imati @Override", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "CODE_WILL_COMPILE",
+      "prompt": "Hoće li se sljedeći kod kompilirati?",
+      "codeSnippet": "import javafx.scene.layout.HBox;\nimport javafx.scene.control.Label;\n\npublic class Test {\n    public void create() {\n        HBox box = new HBox(10);\n        box.getChildren().addAll(\n            new Label(\"A\"),\n            new Label(\"B\"),\n            new Label(\"C\")\n        );\n    }\n}",
+      "explanation": "Kod se kompilira bez problema. HBox konstruktor prima spacing parametar. getChildren() vraća ObservableList koji ima addAll() metodu. Label objekti se mogu dodati u HBox. Kod kreira HBox s tri Label-a i spacing-om od 10 piksela između njih.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Da, kompilira se", "isCorrect": true },
+        { "text": "Ne, HBox(10) nije validan konstruktor", "isCorrect": false },
+        { "text": "Ne, Label ne može biti u HBox", "isCorrect": false },
+        { "text": "Ne, addAll() ne postoji", "isCorrect": false },
+        { "text": "Ne, nedostaje spacing parametar", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "CODE_WILL_COMPILE",
+      "prompt": "Hoće li se sljedeći kod kompilirati?",
+      "codeSnippet": "import javafx.scene.control.Button;\nimport javafx.scene.layout.BorderPane;\n\npublic class BorderTest {\n    public BorderPane makeLayout() {\n        BorderPane pane = new BorderPane();\n        pane.setTop(new Button(\"Top\"));\n        pane.setCenter(new Button(\"Center\"));\n        return pane;\n    }\n}",
+      "explanation": "Kod se kompilira bez problema. BorderPane metode setTop(), setCenter() itd. primaju Node parametre. Button nasljeđuje Node. BorderPane je validan return type. Kod kreira BorderPane s dva Button-a na TOP i CENTER pozicijama.",
+      "difficulty": "EASY",
+      "options": [
+        { "text": "Da, kompilira se", "isCorrect": true },
+        { "text": "Ne, Button ne može biti u BorderPane", "isCorrect": false },
+        { "text": "Ne, setTop() ne prima Button", "isCorrect": false },
+        { "text": "Ne, mora vratiti Node", "isCorrect": false },
+        { "text": "Ne, mora biti void metoda", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što initialize() metoda radi u Controlleru? (Odaberite sve točne)",
+      "explanation": "initialize() se automatski poziva nakon što FXMLLoader injektira sve @FXML polja. Poziva se PRIJE nego što je root node vraćen. Koristi se za setup (event listeners, initial data). Može primati URL i ResourceBundle parametre. Mora biti @FXML annotated.",
       "difficulty": "MEDIUM",
       "options": [
-        { "text": "NE baca exception - preskače injektiranje", "isCorrect": true },
-        { "text": "@FXML polje ostaje null", "isCorrect": true },
-        { "text": "NullPointerException tek pri korištenju", "isCorrect": true },
+        { "text": "Poziva se nakon injection", "isCorrect": true },
+        { "text": "Prije vraćanja root node-a", "isCorrect": true },
+        { "text": "Za initial setup", "isCorrect": true },
+        { "text": "Poziva se prije injection", "isCorrect": false },
+        { "text": "Ne mora biti @FXML", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što FXMLLoader.load() radi? (Odaberite sve točne)",
+      "explanation": "FXMLLoader.load() parsira FXML i kreira Scene Graph. Instancira Controller s reflection. Injektira @FXML polja. Poziva initialize() metodu. Vraća root Parent node. Baca IOException za greške. URL parametar pokazuje na FXML resource.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Parsira FXML dokument", "isCorrect": true },
+        { "text": "Kreira Scene Graph", "isCorrect": true },
+        { "text": "Instancira Controller", "isCorrect": true },
+        { "text": "Ne poziva initialize()", "isCorrect": false },
+        { "text": "Vraća Stage objekt", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Kada se Controller instancira? (Odaberite sve točne)",
+      "explanation": "Controller se instancira tijekom FXMLLoader.load() poziva. Koristi se reflection (Class.newInstance() ili Constructor). Zato je potreban no-arg konstruktor. Može se koristiti custom ControllerFactory za dependency injection. setControllerFactory() postavlja custom factory. Svaki load() poziv kreira novu Controller instancu.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Tijekom FXMLLoader.load()", "isCorrect": true },
+        { "text": "Koristi reflection", "isCorrect": true },
+        { "text": "Potreban no-arg konstruktor", "isCorrect": true },
+        { "text": "Prije parsiranja FXML-a", "isCorrect": false },
+        { "text": "Automatski singleton", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što getClass().getResource() vraća? (Odaberite sve točne)",
+      "explanation": "getResource() vraća URL za resource iz classpath-a. Vraća null ako resource ne postoji. Path je relativan prema calling class package-u. '/' prefix traži od root classpath-a. toExternalForm() konvertira URL u String. Resource mora biti u classpath-u (npr. src/main/resources).",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "URL za resource", "isCorrect": true },
+        { "text": "null ako ne postoji", "isCorrect": true },
+        { "text": "Relativan prema package-u", "isCorrect": true },
+        { "text": "Baca exception ako ne postoji", "isCorrect": false },
+        { "text": "Vraća String path", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što se događa ako fx:id ne matchira @FXML polje? (Odaberite sve točne)",
+      "explanation": "FXMLLoader ne baca exception odmah. Polje ostaje null jer se ne može injektirati. Element se i dalje kreira u UI-u. NullPointerException nastaje tek pri pokušaju korištenja polja. LoadException se baca samo za syntax errors. Ovo je silent failure što otežava debugging.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Polje ostaje null", "isCorrect": true },
+        { "text": "NE baca exception odmah", "isCorrect": true },
+        { "text": "Element se kreira u UI-u", "isCorrect": true },
         { "text": "Baca LoadException odmah", "isCorrect": false },
-        { "text": "FXML može imati više fx:id nego @FXML polja", "isCorrect": true },
-        { "text": "Controller može imati više @FXML polja nego fx:id", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Može li BorderPane imati više od 5 children?",
-      "codeSnippet": "import javafx.scene.layout.BorderPane;\nimport javafx.scene.control.*;\n\npublic class BorderPaneMaxTest {\n    public void test() {\n        BorderPane pane = new BorderPane();\n        \n        pane.setTop(new Button(\"Top1\"));\n        pane.setTop(new Button(\"Top2\")); // Drugi top?\n        \n        pane.setLeft(new Button(\"Left\"));\n        pane.setCenter(new Button(\"Center\"));\n        pane.setRight(new Button(\"Right\"));\n        pane.setBottom(new Button(\"Bottom\"));\n        \n        // Koliko children ima?\n        System.out.println(pane.getChildrenUnmodifiable().size());\n    }\n}",
-      "explanation": "Ispisuje '5' - drugi setTop() ZAMJENJUJE prvi! BorderPane ima MAKSIMALNO 5 pozicija (TOP, LEFT, CENTER, RIGHT, BOTTOM). Svaka pozicija može imati SAMO JEDAN node. Drugi setTop() overwritea prethodni - Top1 se uklanja. getChildrenUnmodifiable() vraća trenutne children (max 5). Za više elemenata na jednoj poziciji koristiti container (HBox, VBox): pane.setTop(new HBox(button1, button2)). set*() s null UKLANJA child iz te pozicije. BorderPane automatski resizea children prema poziciji. TOP/BOTTOM rastežu horizontalno, LEFT/RIGHT vertikalno, CENTER uzima sav preostali prostor.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "5 - drugi setTop() zamjenjuje prvi", "isCorrect": true },
-        { "text": "6 - oba Top buttona ostaju", "isCorrect": false },
-        { "text": "Baca IllegalStateException - već ima Top", "isCorrect": false },
-        { "text": "4 - drugi Top se ignorira", "isCorrect": false },
-        { "text": "Za više elemenata koristiti container (HBox/VBox)", "isCorrect": true }
+        { "text": "Aplikacija ne može startati", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je razlika između Scene.getRoot() i Scene.setRoot()? (Odaberite sve točne)",
-      "explanation": "getRoot() VRAĆA trenutni root node, setRoot() POSTAVLJA novi root i ZAMJENJUJE stari! setRoot() omogućava dynamic content switching BEZ mijenjanja Scene objekta. setRoot(null) UKLANJA sve children iz Scene-a - prazan prozor! Root mora biti Parent subclasa (Pane, Region, Group). setRoot() triggera layout recalculation. Scene može postojati BEZ root-a (temporary state). getRoot() vraća null ako nije postavljen. Za preserving state koristiti multiple scenes umjesto setRoot(). setRoot() je brži od kreiranja nove Scene. CSS stylesheets ostaju nakon setRoot() - vezani su za Scene, ne root!",
+      "prompt": "Što observableArrayList() radi? (Odaberite sve točne)",
+      "explanation": "observableArrayList() kreira NOVU ObservableList i KOPIRA elemente iz source liste. Originalna lista i observable lista NE dijele podatke. Promjene u jednoj ne utječu na drugu. Za shared data koristiti observableList() koji wrappa. Kopija omogućava independent tracking.",
       "difficulty": "MEDIUM",
       "options": [
-        { "text": "getRoot() vraća root, setRoot() mijenja root", "isCorrect": true },
-        { "text": "setRoot() zamjenjuje postojeći root", "isCorrect": true },
-        { "text": "setRoot(null) kreira prazan prozor", "isCorrect": true },
-        { "text": "getRoot() ne može vratiti null", "isCorrect": false },
-        { "text": "CSS ostaju nakon setRoot() - vezani za Scene", "isCorrect": true },
-        { "text": "Root mora biti Parent subclasa", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Što vraća FlowPane sa spacing = -5?",
-      "codeSnippet": "import javafx.scene.layout.FlowPane;\nimport javafx.scene.control.Button;\n\npublic class FlowPaneNegativeSpacingTest {\n    public void test() {\n        FlowPane flow = new FlowPane();\n        \n        // Negativan spacing?\n        flow.setHgap(-5);\n        flow.setVgap(-5);\n        \n        flow.getChildren().addAll(\n            new Button(\"A\"),\n            new Button(\"B\"),\n            new Button(\"C\")\n        );\n        \n        System.out.println(\"HGap: \" + flow.getHgap());\n        System.out.println(\"VGap: \" + flow.getVgap());\n    }\n}",
-      "explanation": "Ispisuje 'HGap: -5.0' i 'VGap: -5.0'. Negativan spacing JE DOZVOLJEN i radi! Elementi se PREKLAPAJU za negativne vrijednosti. Negativan spacing koristin za: overlapping effects, compact layouts, custom positioning. HGap = horizontal gap između children. VGap = vertical gap između children. Alignment još uvijek radi s negativnim spacing-om. FlowPane layout: lijevo-desno s wrap-om, top-bottom. setHgap() prima double vrijednost (može biti negative, 0, positive). Default spacing je 0. Za fine-tuning koristiti setMargin() na individual nodes.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "HGap: -5, VGap: -5 - negativan spacing je dozvoljen", "isCorrect": true },
-        { "text": "HGap: 0, VGap: 0 - konvertira u 0", "isCorrect": false },
-        { "text": "Baca IllegalArgumentException", "isCorrect": false },
-        { "text": "HGap: 5, VGap: 5 - absolute value", "isCorrect": false },
-        { "text": "Elementi se preklapaju s negativnim spacing-om", "isCorrect": true }
+        { "text": "Kreira novu listu", "isCorrect": true },
+        { "text": "Kopira elemente", "isCorrect": true },
+        { "text": "NE dijele podatke", "isCorrect": true },
+        { "text": "Wrappa postojeću listu", "isCorrect": false },
+        { "text": "Dijele iste podatke", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što Alert.showAndWait() vraća? (Odaberite sve točne)",
-      "explanation": "showAndWait() vraća Optional<ButtonType> - result korisnikovog izbora! showAndWait() je BLOCKING - čeka dok korisnik ne zatvori dialog. show() je NON-BLOCKING - nastavlja izvršavanje odmah. ButtonType može biti: OK, CANCEL, YES, NO, CLOSE, APPLY, FINISH, NEXT, PREVIOUS, ili custom. Optional.empty() ako je dialog zatvoren bez button klika (X button ili ESC). Optional.get() vraća ButtonType - mora se provjeriti isPresent()! Optional.orElse(ButtonType.CANCEL) za default. showAndWait() mora biti na JavaFX thread-u! Za non-JavaFX thread koristiti Platform.runLater(). Custom buttons: new ButtonType('Custom', ButtonBar.ButtonData.OK_DONE).",
+      "prompt": "Što observableList() radi? (Odaberite sve točne)",
+      "explanation": "observableList() WRAPPA postojeću listu. Observable lista i source lista dijele ISTE podatke. Promjene se reflektiraju u obje. Wrapper dodaje change listening. Ne kopira elemente. Sync je automatski jer koriste istu backing storage.",
       "difficulty": "MEDIUM",
       "options": [
-        { "text": "Optional<ButtonType> - result korisnikovog izbora", "isCorrect": true },
-        { "text": "showAndWait() je BLOCKING, show() non-blocking", "isCorrect": true },
-        { "text": "Optional.empty() ako je zatvoren bez klika", "isCorrect": true },
-        { "text": "Vraća boolean true/false", "isCorrect": false },
-        { "text": "Vraća null ako je canceled", "isCorrect": false },
-        { "text": "Mora biti na JavaFX thread-u", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Može li se MenuItem dodati direktno u MenuBar?",
-      "codeSnippet": "import javafx.scene.control.*;\n\npublic class MenuItemDirectTest {\n    public void test() {\n        MenuBar menuBar = new MenuBar();\n        \n        MenuItem item1 = new MenuItem(\"File\");\n        MenuItem item2 = new MenuItem(\"Edit\");\n        \n        // Direktno dodavanje MenuItem?\n        menuBar.getMenus().addAll(item1, item2);\n    }\n}",
-      "explanation": "Kod se NEĆE KOMPILIRATI! MenuBar.getMenus() vraća ObservableList<Menu>, NE MenuItem! MenuItem se mora dodati u Menu, zatim Menu u MenuBar. Hijerarhija: MenuBar → Menu → MenuItem. Menu je container, MenuItem je akcija. Primjer: Menu fileMenu = new Menu('File'); fileMenu.getItems().add(new MenuItem('Open')); menuBar.getMenus().add(fileMenu). Menu može sadržavati: MenuItem, CheckMenuItem, RadioMenuItem, SeparatorMenuItem, Menu (submenu). MenuBar je samo top-level container. MenuItem.setOnAction() za event handling. Accelerator za keyboard shortcuts.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "NEĆE se kompilirati - MenuBar prima Menu, ne MenuItem", "isCorrect": true },
-        { "text": "Kompilira se i prikazuje items kao top-level", "isCorrect": false },
-        { "text": "Kompilira se ali ne prikazuje ništa", "isCorrect": false },
-        { "text": "MenuItem mora biti u Menu, Menu u MenuBar", "isCorrect": true },
-        { "text": "getMenus() vraća ObservableList<Menu>", "isCorrect": true }
+        { "text": "Wrappa postojeću listu", "isCorrect": true },
+        { "text": "Dijele iste podatke", "isCorrect": true },
+        { "text": "Promjene se reflektiraju", "isCorrect": true },
+        { "text": "Kreira novu kopiju", "isCorrect": false },
+        { "text": "Ne dijele podatke", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Kada se ToggleButton automatski deselektira? (Odaberite sve točne)",
-      "explanation": "ToggleButton u ToggleGroup se deselektira kada se DRUGI button u istoj grupi selektira! ToggleGroup omogućava 'one selected at a time' ponašanje (radio button style). Klik na selektirani button u grupi NE deselektira ga! Za deselect mora se kliknuti drugi button ili pozvati setSelected(false). ToggleButton BEZ grupe: klik toggle-a između selected/deselected. setSelected(false) eksplicitno deselektira. clearSelection() na ToggleGroup deselektira sve. selectToggle(null) također deselektira. Toggle event: selectedProperty().addListener(). ToggleGroup može biti prazna (no selected button).",
+      "prompt": "Što PropertyValueFactory traži u klasi? (Odaberite sve točne)",
+      "explanation": "PropertyValueFactory traži: (1) getter metodu prema Bean konvenciji (getPropertyName), (2) property metodu (propertyNameProperty) koja vraća ObservableValue, (3) public field s tim imenom. Property metoda ima prioritet jer omogućava automatic updates. Case-sensitive search. Ime mora exact matchati.",
       "difficulty": "MEDIUM",
       "options": [
-        { "text": "Kada se drugi button u ToggleGroup-i selektira", "isCorrect": true },
-        { "text": "Klik na selektirani button ga NE deselektira", "isCorrect": true },
-        { "text": "setSelected(false) eksplicitno deselektira", "isCorrect": true },
-        { "text": "Automatski nakon 2 sekunde", "isCorrect": false },
-        { "text": "ToggleGroup.clearSelection() deselektira sve", "isCorrect": true },
-        { "text": "Bez grupe: klik toggle-a state", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Što vraća TabPane.getSelectionModel().getSelectedItem() ako nema tab-ova?",
-      "codeSnippet": "import javafx.scene.control.*;\n\npublic class TabPaneEmptyTest {\n    public void test() {\n        TabPane tabPane = new TabPane();\n        \n        // NEMA tab-ova!\n        \n        Tab selected = tabPane.getSelectionModel().getSelectedItem();\n        \n        System.out.println(\"Selected: \" + selected);\n        System.out.println(\"Index: \" + \n            tabPane.getSelectionModel().getSelectedIndex());\n    }\n}",
-      "explanation": "Ispisuje 'Selected: null' i 'Index: -1'. Prazan TabPane nema selected tab-a! getSelectedItem() vraća null. getSelectedIndex() vraća -1 (no selection). Dodavanje prvog tab-a automatski ga selektira. Tab.setClosable(false) sprječava zatvaranje. TabPane.getTabs() vraća ObservableList<Tab>. SelectionModel omogućava programmatic selection: select(int), selectFirst(), selectLast(), selectNext(), selectPrevious(). Tab.setOnSelectionChanged() za event kad se tab selektira. Tab.setOnCloseRequest() za custom close logic. Tab.setContent() postavlja Node.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Selected: null, Index: -1 - nema tab-ova", "isCorrect": true },
-        { "text": "Baca IndexOutOfBoundsException", "isCorrect": false },
-        { "text": "Selected: empty Tab object", "isCorrect": false },
-        { "text": "Index: 0 - default", "isCorrect": false },
-        { "text": "Prvi dodan tab se automatski selektira", "isCorrect": true }
+        { "text": "Getter metodu (Bean konvencija)", "isCorrect": true },
+        { "text": "Property metodu (ObservableValue)", "isCorrect": true },
+        { "text": "Public field", "isCorrect": true },
+        { "text": "Setter metodu", "isCorrect": false },
+        { "text": "Case-insensitive search", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što Accordion.setExpandedPane(null) radi? (Odaberite sve točne)",
-      "explanation": "setExpandedPane(null) ZATVARA sve TitledPane-ove - nema expanded pane-a! Accordion dozvoljava null expanded pane. Korisnik može kliknuti na expanded pane da ga zatvori (toggle behaviour). getExpandedPane() vraća null ako su svi zatvoreni. Accordion omogućava SAMO JEDAN expanded pane u bilo kojem trenutku. Klik na drugi TitledPane zatvara prethodni. expandedPaneProperty() za binding. TitledPane.setCollapsible(false) sprječava zatvaranje. TitledPane može postojati izvan Accordiona (samostalno). Multiple Accordions mogu imati iste TitledPane objekte? NE - node može imati samo jednog parenta!",
+      "prompt": "Što TableColumn.setCellValueFactory() prima? (Odaberite sve točne)",
+      "explanation": "setCellValueFactory() prima Callback<CellDataFeatures, ObservableValue>. PropertyValueFactory je implementacija Callback-a. Custom callback omogućava kompleksnu logiku. CellDataFeatures sadrži row object. ObservableValue omogućava automatic cell updates. Lambda ili method reference također mogu biti used.",
       "difficulty": "MEDIUM",
       "options": [
-        { "text": "Zatvara sve TitledPane-ove - nema expanded", "isCorrect": true },
-        { "text": "Accordion dozvoljava null expanded pane", "isCorrect": true },
-        { "text": "Korisnik može toggle expanded pane", "isCorrect": true },
-        { "text": "Baca NullPointerException", "isCorrect": false },
-        { "text": "Samo jedan expanded pane u bilo kojem trenutku", "isCorrect": true },
-        { "text": "TitledPane.setCollapsible(false) sprječava zatvaranje", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Je li TreeView root node vidljiv po defaultu?",
-      "codeSnippet": "import javafx.scene.control.*;\n\npublic class TreeViewRootTest {\n    public void test() {\n        TreeItem<String> root = new TreeItem<>(\"Root\");\n        root.getChildren().addAll(\n            new TreeItem<>(\"Child1\"),\n            new TreeItem<>(\"Child2\")\n        );\n        \n        TreeView<String> tree = new TreeView<>(root);\n        \n        System.out.println(\"Root visible: \" + tree.isShowRoot());\n        System.out.println(\"Root: \" + tree.getRoot().getValue());\n    }\n}",
-      "explanation": "Ispisuje 'Root visible: true' i 'Root: Root'. TreeView PO DEFAULTU prikazuje root node! setShowRoot(false) skriva root - prikazuje samo children. Root je TreeItem<T>, ne String direktno. TreeItem.setExpanded(true) za expanding. TreeItem može imati grafiku: setGraphic(Node). TreeView.getSelectionModel() za selection handling. Multiple selection: setSelectionMode(SelectionMode.MULTIPLE). Root je OBAVEZAN - TreeView zahtijeva root čak i kad je skriven! getRoot() vraća null ako nije postavljen. TreeItem nije Node - wrappa value i children.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Root visible: true - default prikazuje root", "isCorrect": true },
-        { "text": "Root visible: false - default skriva root", "isCorrect": false },
-        { "text": "setShowRoot(false) skriva root", "isCorrect": true },
-        { "text": "Baca NullPointerException - mora biti setShowRoot()", "isCorrect": false },
-        { "text": "Root je obavezan čak i kad je skriven", "isCorrect": true }
+        { "text": "Callback interface", "isCorrect": true },
+        { "text": "PropertyValueFactory je Callback", "isCorrect": true },
+        { "text": "Vraća ObservableValue", "isCorrect": true },
+        { "text": "Prima samo String", "isCorrect": false },
+        { "text": "Ne podržava lambda", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što SplitPane.setDividerPosition() prima kao parametar? (Odaberite sve točne)",
-      "explanation": "setDividerPosition() ima DVA overloada: (1) setDividerPosition(int dividerIndex, double position) - position je 0.0 do 1.0 (percentage)! (2) Pozicija 0.5 = 50% prostora. (3) dividerIndex = koji divider (0-based, jer može biti više). (4) SplitPane s 3 itema ima 2 dividera (indeksi 0 i 1). (5) getDividerPositions() vraća array sa svim pozicijama. (6) setDividerPositions(double... positions) postavlja sve odjednom. Percentage je RELATIVNO na available space. setOrientation(Orientation.VERTICAL/HORIZONTAL) mijenja smjer. ResizableWithParent kontrolira koje područje raste.",
+      "prompt": "Što Platform.exit() radi? (Odaberite sve točne)",
+      "explanation": "Platform.exit() zatvara cijelu JavaFX aplikaciju. Poziva stop() lifecycle metodu. Zatvara Application Thread. Force quit bez mogućnosti cancela. Za pojedine prozore koristiti Stage.close(). System.exit() također zatvara ali preskače JavaFX cleanup. implicitExit property kontrolira automatic shutdown.",
       "difficulty": "MEDIUM",
       "options": [
-        { "text": "dividerIndex (int) i position (double 0.0-1.0)", "isCorrect": true },
-        { "text": "Position je percentage (0.5 = 50%)", "isCorrect": true },
+        { "text": "Zatvara cijelu aplikaciju", "isCorrect": true },
+        { "text": "Poziva stop() metodu", "isCorrect": true },
+        { "text": "Force quit bez cancela", "isCorrect": true },
+        { "text": "Zatvara samo jedan Stage", "isCorrect": false },
+        { "text": "Može se cancelirati", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Stage.close() radi? (Odaberite sve točne)",
+      "explanation": "Stage.close() zatvara jedan Stage. Poziva onCloseRequest handler koji može cancelirati zatvaranje. Ako je primaryStage i implicitExit=true, zatvara aplikaciju. Ako nisu svi Stage-ovi zatvoreni, aplikacija nastavlja. Multiple stages mogu postojati istovremeno. close() ne poziva stop() osim ako je zadnji Stage.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Zatvara jedan Stage", "isCorrect": true },
+        { "text": "Može se cancelirati", "isCorrect": true },
+        { "text": "Poziva onCloseRequest", "isCorrect": true },
+        { "text": "Uvijek zatvara aplikaciju", "isCorrect": false },
+        { "text": "Ne može imati multiple stages", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što setOnCloseRequest() omogućava? (Odaberite sve točne)",
+      "explanation": "setOnCloseRequest() postavlja handler za close event. Handler prima WindowEvent. event.consume() cancelira zatvaranje. Može prikazati 'Are you sure?' dialog. Poziva se prije close()-a. Ne poziva se za Platform.exit(). Koristi se za unsaved changes handling.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Handler za close event", "isCorrect": true },
+        { "text": "event.consume() cancelira", "isCorrect": true },
+        { "text": "Za 'Are you sure?' dialog", "isCorrect": true },
+        { "text": "Poziva se za Platform.exit()", "isCorrect": false },
+        { "text": "Ne može cancelirati", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što GridPane.setHgap() i setVgap() rade? (Odaberite sve točne)",
+      "explanation": "setHgap() postavlja horizontal razmak između stupaca. setVgap() postavlja vertical razmak između redaka. Vrijednost je u pikselima. Može biti 0, pozitivna ili negativna. Negativne vrijednosti uzrokuju overlapping. Primjenjuje se na sve cells.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Horizontal razmak između stupaca", "isCorrect": true },
+        { "text": "Vertical razmak između redaka", "isCorrect": true },
+        { "text": "Mogu biti negativne", "isCorrect": true },
+        { "text": "Samo pozitivne vrijednosti", "isCorrect": false },
+        { "text": "Samo za prvi red/stupac", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ColumnConstraints omogućava? (Odaberite sve točne)",
+      "explanation": "ColumnConstraints kontrolira stupac properties. Može postaviti min/pref/max width. setHgrow(Priority) kontrolira rastezanje. Priority.ALWAYS znači stupac uzima extra space. Priority.SOMETIMES raste samo ako postoji prostor. Priority.NEVER se ne mijenja. percentWidth postavlja width kao postotak.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Kontrolira width properties", "isCorrect": true },
+        { "text": "setHgrow() za rastezanje", "isCorrect": true },
+        { "text": "Priority.ALWAYS uzima extra space", "isCorrect": true },
+        { "text": "Ne može biti percent", "isCorrect": false },
+        { "text": "Samo fiksne vrijednosti", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što GridPane.setColumnSpan() radi? (Odaberite sve točne)",
+      "explanation": "setColumnSpan() omogućava elementu da zauzme više stupaca. Static metoda na GridPane-u. Prima node i broj stupaca. Slično HTML colspan. rowSpan radi isto za retke. Element se proširuje preko multiple cells. Span mora biti pozitivan broj.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Element zauzima više stupaca", "isCorrect": true },
+        { "text": "Static metoda na GridPane", "isCorrect": true },
+        { "text": "Slično HTML colspan", "isCorrect": true },
+        { "text": "Može biti negativan", "isCorrect": false },
+        { "text": "Ne postoji rowSpan", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što GridPane.setHalignment() radi? (Odaberite sve točne)",
+      "explanation": "setHalignment() postavlja horizontal alignment elementa u cell-u. Opcije: LEFT, CENTER, RIGHT. Static metoda na GridPane-u. Prima node i HPos. setValignment() radi isto za vertical (TOP, CENTER, BOTTOM). Alignment je unutar cell-a, ne globalno.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Horizontal alignment u cell-u", "isCorrect": true },
+        { "text": "Opcije: LEFT, CENTER, RIGHT", "isCorrect": true },
+        { "text": "Static metoda na GridPane", "isCorrect": true },
+        { "text": "Globalni alignment", "isCorrect": false },
+        { "text": "Ne postoji valignment", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što FlowPane.setAlignment() radi? (Odaberite sve točne)",
+      "explanation": "setAlignment() kontrolira kako su djeca pozicionirana unutar FlowPane-a. Pos enum vrijednosti: TOP_LEFT, TOP_CENTER, TOP_RIGHT, CENTER_LEFT, CENTER, CENTER_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT. Utječe na početnu poziciju flow-a. Default je TOP_LEFT.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Kontrolira pozicioniranje djece", "isCorrect": true },
+        { "text": "Koristi Pos enum", "isCorrect": true },
+        { "text": "Default je TOP_LEFT", "isCorrect": true },
+        { "text": "Samo CENTER opcija", "isCorrect": false },
+        { "text": "Ne utječe na flow", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što setOnAction() radi? (Odaberite sve točne)",
+      "explanation": "setOnAction() postavlja ActionEvent handler na kontrolu. Prima EventHandler<ActionEvent> ili lambda. Poziva se pri user action (klik, Enter na Button). event objekt sadrži source i informacije. Jedan handler po kontroli. removeEventHandler() briše handler.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Postavlja ActionEvent handler", "isCorrect": true },
+        { "text": "Prima lambda ili EventHandler", "isCorrect": true },
+        { "text": "Poziva se pri user action", "isCorrect": true },
+        { "text": "Multiple handlers po kontroli", "isCorrect": false },
+        { "text": "Ne može se remove", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što event.getSource() vraća? (Odaberite sve točne)",
+      "explanation": "getSource() vraća Object koji je generirao event. Cast na specifičan tip je potreban. Za ActionEvent, source je tipično Control. event.getTarget() vraća node na kojem je event nastao. Source i target mogu biti različiti zbog event bubbling.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Objekt koji je generirao event", "isCorrect": true },
+        { "text": "Vraća Object (cast potreban)", "isCorrect": true },
+        { "text": "Za ActionEvent tipično Control", "isCorrect": true },
+        { "text": "Uvijek String", "isCorrect": false },
+        { "text": "Isto kao getTarget()", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TabPane.getSelectionModel() omogućava? (Odaberite sve točne)",
+      "explanation": "getSelectionModel() vraća SingleSelectionModel za TabPane. select(int) selektira tab po indeksu. selectFirst/Last/Next/Previous metode za navigaciju. getSelectedItem() vraća trenutni Tab ili null. getSelectedIndex() vraća indeks ili -1. selectedItemProperty() za binding.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Programska kontrola selekcije", "isCorrect": true },
+        { "text": "select(int) selektira tab", "isCorrect": true },
+        { "text": "getSelectedItem() vraća Tab", "isCorrect": true },
+        { "text": "Ne može biti null", "isCorrect": false },
+        { "text": "Multiple selection moguć", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Tab.setOnSelectionChanged() radi? (Odaberite sve točne)",
+      "explanation": "setOnSelectionChanged() postavlja handler koji se poziva kad se tab selektira ili deselektira. Prima EventHandler<Event>. event ne sadrži old/new state - koristiti isSelected() na Tab-u. Poziva se samo za promjene selekcije. Različito od setOnClosed().",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Handler za selection promjene", "isCorrect": true },
+        { "text": "Poziva se pri select/deselect", "isCorrect": true },
+        { "text": "Prima EventHandler<Event>", "isCorrect": true },
+        { "text": "Sadrži old/new state", "isCorrect": false },
+        { "text": "Isto kao setOnClosed()", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Accordion.setExpandedPane() radi? (Odaberite sve točne)",
+      "explanation": "setExpandedPane() programski proširuje TitledPane. Prima TitledPane objekt ili null. null zatvara sve pane-ove. Samo jedan može biti expanded. Klik na expanded pane ga zatvara. expandedPaneProperty() za binding. getExpandedPane() vraća trenutni ili null.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Programski proširuje TitledPane", "isCorrect": true },
+        { "text": "null zatvara sve", "isCorrect": true },
+        { "text": "Samo jedan expanded", "isCorrect": true },
+        { "text": "Multiple expanded moguće", "isCorrect": false },
+        { "text": "Ne može biti null", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TreeView.setShowRoot() radi? (Odaberite sve točne)",
+      "explanation": "setShowRoot(false) skriva root node i prikazuje samo children. Root je još uvijek obavezan - TreeView mora imati root. Korisno za flat-looking hijerarhiju gdje ne želiš vidjeti top-level node. Default je true (root vidljiv). isShowRoot() vraća trenutni state.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Kontrolira vidljivost root-a", "isCorrect": true },
+        { "text": "false skriva root, pokazuje children", "isCorrect": true },
+        { "text": "Root je još uvijek obavezan", "isCorrect": true },
+        { "text": "Briše root iz TreeView-a", "isCorrect": false },
+        { "text": "Ne mora imati root", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TreeItem.setExpanded() radi? (Odaberite sve točne)",
+      "explanation": "setExpanded(true) proširuje TreeItem i prikazuje children. setExpanded(false) kolapsa TreeItem. Samo za node-ove s children. expandedProperty() za binding. TreeView ima expanded event handlers. Expanded state se čuva na TreeItem-u, ne na TreeView-u.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Proširuje/kolapsa TreeItem", "isCorrect": true },
+        { "text": "true prikazuje children", "isCorrect": true },
+        { "text": "Samo za node-ove s children", "isCorrect": true },
+        { "text": "State na TreeView-u", "isCorrect": false },
+        { "text": "Ne radi za leaf node-ove", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što SplitPane.setDividerPosition() radi? (Odaberite sve točne)",
+      "explanation": "setDividerPosition(dividerIndex, position) postavlja poziciju dividera. dividerIndex je 0-based (SplitPane s 3 itema ima 2 dividera: indeksi 0 i 1). position je 0.0-1.0 (postotak prostora). getDividerPositions() vraća array svih pozicija. setDividerPositions() postavlja sve odjednom.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Postavlja poziciju dividera", "isCorrect": true },
+        { "text": "position je 0.0-1.0 postotak", "isCorrect": true },
         { "text": "dividerIndex je 0-based", "isCorrect": true },
-        { "text": "Position je pixels (int vrijednost)", "isCorrect": false },
-        { "text": "3 itema = 2 dividera", "isCorrect": true },
-        { "text": "getDividerPositions() vraća array", "isCorrect": true }
+        { "text": "position je u pikselima", "isCorrect": false },
+        { "text": "Samo jedan divider", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što SplitPane.setOrientation() radi? (Odaberite sve točne)",
+      "explanation": "setOrientation() mijenja smjer split-a. Orientation.HORIZONTAL = lijevo-desno split (vertical divider). Orientation.VERTICAL = gore-dolje split (horizontal divider). Default je HORIZONTAL. getOrientation() vraća trenutni. Može se mijenjati u runtime-u.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Mijenja smjer split-a", "isCorrect": true },
+        { "text": "HORIZONTAL = lijevo-desno", "isCorrect": true },
+        { "text": "VERTICAL = gore-dolje", "isCorrect": true },
+        { "text": "Ne može se mijenjati u runtime", "isCorrect": false },
+        { "text": "HORIZONTAL = gore-dolje", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ScrollPane.setVbarPolicy() radi? (Odaberite sve točne)",
+      "explanation": "setVbarPolicy() kontrolira vertical scrollbar policy. AS_NEEDED = prikazuje samo kad je potrebno. ALWAYS = uvijek prikazan. NEVER = nikad ne prikazuje. setHbarPolicy() radi isto za horizontal. Default je AS_NEEDED. getVbarPolicy() vraća trenutni.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Kontrolira vertical scrollbar", "isCorrect": true },
+        { "text": "AS_NEEDED = samo kad treba", "isCorrect": true },
+        { "text": "ALWAYS/NEVER opcije", "isCorrect": true },
+        { "text": "Ne može biti NEVER", "isCorrect": false },
+        { "text": "Samo AS_NEEDED", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ScrollPane.setFitToWidth() radi? (Odaberite sve točne)",
+      "explanation": "setFitToWidth(true) prilagođava content width na viewport width. Ne dodaje horizontal scrollbar. Content se resize-a da fit. Koristi se za responsive layouts. setFitToHeight() radi isto za height. Default je false. Content mora podržavati resizing.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Prilagođava content width", "isCorrect": true },
+        { "text": "Ne dodaje horizontal scrollbar", "isCorrect": true },
+        { "text": "Content se resize-a", "isCorrect": true },
+        { "text": "Dodaje scrollbar", "isCorrect": false },
+        { "text": "Ne radi za height", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ScrollPane.setPannable() radi? (Odaberite sve točne)",
+      "explanation": "setPannable(true) omogućava scroll-anje draganjem content-a. Korisnik može kliknuti i povući za scroll. Alternative za scrollbar korištenje. Slično touch/mobile panning. Default je false. Radi s mouse drag event-ima.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Omogućava scroll draganjem", "isCorrect": true },
+        { "text": "Alternative za scrollbar", "isCorrect": true },
+        { "text": "Slično mobile panning", "isCorrect": true },
+        { "text": "Default je true", "isCorrect": false },
+        { "text": "Ne radi s mouse-om", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što ToggleGroup omogućava? (Odaberite sve točne)",
+      "explanation": "ToggleGroup osigurava mutual exclusion za Toggle-e (RadioButton, ToggleButton). Samo jedan može biti selected. setToggleGroup() na svakom Toggle-u. getSelectedToggle() vraća trenutni selection ili null. selectToggle() programski selektira. clearSelection() deselektira sve.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Mutual exclusion za Toggle-e", "isCorrect": true },
+        { "text": "Samo jedan selected", "isCorrect": true },
+        { "text": "getSelectedToggle() vraća selection", "isCorrect": true },
+        { "text": "Multiple selection moguć", "isCorrect": false },
+        { "text": "Ne radi s RadioButton", "isCorrect": false }
       ]
     },
     {
       "type": "CODE_WILL_COMPILE",
-      "prompt": "Može li DatePicker imati null vrijednost?",
-      "codeSnippet": "import javafx.scene.control.DatePicker;\nimport java.time.LocalDate;\n\npublic class DatePickerNullTest {\n    public void test() {\n        DatePicker picker1 = new DatePicker();\n        DatePicker picker2 = new DatePicker(LocalDate.now());\n        \n        System.out.println(\"Picker1: \" + picker1.getValue());\n        System.out.println(\"Picker2: \" + picker2.getValue());\n        \n        picker2.setValue(null);\n        System.out.println(\"After null: \" + picker2.getValue());\n    }\n}",
-      "explanation": "Ispisuje 'Picker1: null', 'Picker2: [current date]', 'After null: null'. DatePicker DOZVOLJAVA null vrijednost! No-arg konstruktor postavlja null. getValue() vraća null ako nije odabran datum. setValue(null) UKLANJA odabrani datum - picker postaje prazan. DatePicker prikazuje prazan field za null. setPromptText() postavlja placeholder. DatePickerSkin upravlja prikazom. valueProperty() za binding. setDayCellFactory() za custom cell rendering (npr. disabled dates). setConverter() za custom date formatting. DatePicker koristi LocalDate, NE java.util.Date!",
+      "prompt": "Hoće li se sljedeći kod kompilirati?",
+      "codeSnippet": "import javafx.scene.control.Alert;\nimport javafx.scene.control.Alert.AlertType;\nimport javafx.scene.control.ButtonType;\nimport java.util.Optional;\n\npublic class AlertTest {\n    public void show() {\n        Alert alert = new Alert(AlertType.CONFIRMATION);\n        alert.setTitle(\"Confirm\");\n        alert.setContentText(\"Are you sure?\");\n        Optional<ButtonType> result = alert.showAndWait();\n        if (result.isPresent() && result.get() == ButtonType.OK) {\n            System.out.println(\"OK clicked\");\n        }\n    }\n}",
+      "explanation": "Kod se kompilira bez problema. Alert konstruktor prima AlertType. showAndWait() vraća Optional<ButtonType>. result.isPresent() provjerava je li odgovorio. result.get() vraća ButtonType. Usporedba s ButtonType.OK je validna. Kod demonstrira standardan pattern za handling Alert rezultata.",
       "difficulty": "MEDIUM",
       "options": [
-        { "text": "DA - picker1: null, picker2: today, after: null", "isCorrect": true },
-        { "text": "NE - baca NullPointerException na setValue(null)", "isCorrect": false },
-        { "text": "No-arg konstruktor postavlja today", "isCorrect": false },
-        { "text": "setValue(null) se ignorira", "isCorrect": false },
-        { "text": "getValue() nikad ne vraća null", "isCorrect": false }
+        { "text": "Da, kompilira se", "isCorrect": true },
+        { "text": "Ne, showAndWait() ne vraća Optional", "isCorrect": false },
+        { "text": "Ne, ButtonType.OK ne postoji", "isCorrect": false },
+        { "text": "Ne, result.get() nije validan", "isCorrect": false },
+        { "text": "Ne, AlertType.CONFIRMATION ne postoji", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "CODE_WILL_COMPILE",
+      "prompt": "Hoće li se sljedeći kod kompilirati?",
+      "codeSnippet": "import javafx.scene.control.TableView;\nimport javafx.scene.control.TableColumn;\nimport javafx.scene.control.cell.PropertyValueFactory;\nimport javafx.collections.FXCollections;\n\nclass Person {\n    private String name;\n    public String getName() { return name; }\n}\n\npublic class TableTest {\n    public TableView<Person> create() {\n        TableView<Person> table = new TableView<>();\n        TableColumn<Person, String> col = new TableColumn<>(\"Name\");\n        col.setCellValueFactory(new PropertyValueFactory<>(\"name\"));\n        table.getColumns().add(col);\n        table.setItems(FXCollections.observableArrayList());\n        return table;\n    }\n}",
+      "explanation": "Kod se kompilira bez problema. Person klasa ima getName() getter. PropertyValueFactory prima 'name' string koji matchira property. TableColumn je generički s Person i String tipovima. observableArrayList() kreira praznu listu. table.getColumns() vraća ObservableList na koji se može addati column.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Da, kompilira se", "isCorrect": true },
+        { "text": "Ne, PropertyValueFactory ne prima String", "isCorrect": false },
+        { "text": "Ne, Person mora implementirati interface", "isCorrect": false },
+        { "text": "Ne, getColumns() ne postoji", "isCorrect": false },
+        { "text": "Ne, generički tipovi nisu validni", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "CODE_WILL_COMPILE",
+      "prompt": "Hoće li se sljedeći kod kompilirati?",
+      "codeSnippet": "import javafx.scene.control.MenuBar;\nimport javafx.scene.control.Menu;\nimport javafx.scene.control.MenuItem;\n\npublic class MenuTest {\n    public MenuBar create() {\n        MenuItem item1 = new MenuItem(\"New\");\n        MenuItem item2 = new MenuItem(\"Open\");\n        Menu menu = new Menu(\"File\");\n        menu.getItems().addAll(item1, item2);\n        MenuBar bar = new MenuBar();\n        bar.getMenus().add(menu);\n        return bar;\n    }\n}",
+      "explanation": "Kod se kompilira bez problema. MenuItem se dodaje u Menu s getItems().addAll(). Menu se dodaje u MenuBar s getMenus().add(). Hijerarhija je ispravna: MenuBar → Menu → MenuItem. Svi objekti su ispravno kreirani. Return type MenuBar je validan.",
+      "difficulty": "MEDIUM",
+      "options": [
+        { "text": "Da, kompilira se", "isCorrect": true },
+        { "text": "Ne, MenuItem ne može biti u Menu", "isCorrect": false },
+        { "text": "Ne, Menu ne može biti u MenuBar", "isCorrect": false },
+        { "text": "Ne, getItems() ne postoji", "isCorrect": false },
+        { "text": "Ne, addAll() ne prima MenuItem", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što se događa ako postavite BorderPane.setTop() dva puta? (Odaberite sve točne)",
+      "explanation": "Drugi setTop() poziv ZAMJENJUJE prvi node. BorderPane pozicija može imati samo jedan node istovremeno. Prvi node se automatski uklanja iz Scene Graph-a. Za više node-ova u TOP koristiti container (HBox, VBox). set*() s null uklanja node s pozicije.",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "Drugi poziv zamjenjuje prvi", "isCorrect": true },
+        { "text": "Samo jedan node po poziciji", "isCorrect": true },
+        { "text": "Prvi se automatski uklanja", "isCorrect": true },
+        { "text": "Oba node-a ostaju", "isCorrect": false },
+        { "text": "Baca IllegalStateException", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Može li GridPane imati negativne row/column indekse? (Odaberite sve točne)",
+      "explanation": "GridPane DOZVOLJAVA negativne indekse! Row i column mogu biti bilo koji int. GridPane automatski proširuje grid u svim smjerovima. (0,0) je origin ali ne mora biti lijevi gornji kut. Negativni indeksi postavljaju elemente 'lijevo/iznad' nule. getColumnIndex/getRowIndex mogu vratiti negativne vrijednosti.",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "DA, dozvoljeni su negativni indeksi", "isCorrect": true },
+        { "text": "Grid se proširuje u svim smjerovima", "isCorrect": true },
+        { "text": "(0,0) ne mora biti lijevi gornji", "isCorrect": true },
+        { "text": "NE, baca IllegalArgumentException", "isCorrect": false },
+        { "text": "Samo pozitivni indeksi", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što je razlika između Region.getChildren() i Pane.getChildren()? (Odaberite sve točne)",
+      "explanation": "Region ima getChildren() ali je PROTECTED - nije javno dostupan. Pane OVERRIDE-a getChildren() kao PUBLIC metodu. BorderPane i GridPane nasljeđuju Region pa NE eksponiraju getChildren(). HBox, VBox, StackPane nasljeđuju Pane pa IMAJU public getChildren(). Za Region koristiti getChildrenUnmodifiable().",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "Region: protected getChildren()", "isCorrect": true },
+        { "text": "Pane: public getChildren()", "isCorrect": true },
+        { "text": "BorderPane nema public getChildren()", "isCorrect": true },
+        { "text": "Region eksponira public", "isCorrect": false },
+        { "text": "Pane ne nasljeđuje Region", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što se događa s FlowPane spacing-om ako je negativan? (Odaberite sve točne)",
+      "explanation": "FlowPane DOZVOLJAVA negativan spacing! Elementi se PREKLAPAJU za negativne vrijednosti. setHgap(-5) i setVgap(-5) su validni. Negativan spacing je koristin za overlapping effects i compact layouts. Alignment i dalje radi normalno. Default spacing je 0.",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "Dozvoljava negativan spacing", "isCorrect": true },
+        { "text": "Elementi se preklapaju", "isCorrect": true },
+        { "text": "Korisno za overlapping effects", "isCorrect": true },
+        { "text": "Baca IllegalArgumentException", "isCorrect": false },
+        { "text": "Automatski konvertira u 0", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što TableView.getItems() vraća ako nije postavljen setItems()? (Odaberite sve točne)",
+      "explanation": "TableView ima DEFAULT PRAZAN ObservableList! getItems() NIKAD ne vraća null - vraća FXCollections.emptyObservableList(). Default list je UNMODIFIABLE - add() baca UnsupportedOperationException. Za modificiranje mora se setItems() s modifiable listom. PlaceholderNode se prikazuje za prazne table.",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "Vraća prazan ObservableList", "isCorrect": true },
+        { "text": "NIKAD ne vraća null", "isCorrect": true },
+        { "text": "Default list je unmodifiable", "isCorrect": true },
+        { "text": "Vraća null", "isCorrect": false },
+        { "text": "Baca NullPointerException", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što se događa ako fx:controller klasa nema no-arg konstruktor? (Odaberite sve točne)",
+      "explanation": "FXMLLoader će baciti InstantiationException u runtime-u! Controller mora imati no-arg konstruktor (public ili package-private). FXMLLoader koristi reflection (Constructor.newInstance()). Rješenje: (1) dodati prazan konstruktor, (2) koristiti setControllerFactory() za custom instantiation, (3) dependency injection framework.",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "Baca InstantiationException", "isCorrect": true },
+        { "text": "Mora imati no-arg konstruktor", "isCorrect": true },
+        { "text": "Koristi reflection", "isCorrect": true },
+        { "text": "Automatski kreira konstruktor", "isCorrect": false },
+        { "text": "Ne mora imati konstruktor", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što se događa ako Application.launch() pozovete VIŠE PUTA? (Odaberite sve točne)",
+      "explanation": "launch() može se pozvati SAMO JEDNOM po JVM procesu! Drugi poziv baca IllegalStateException. launch() pokreće JavaFX Application Thread koji može postojati samo jednom. Za ponovno pokretanje mora se kreirati NOVI JVM proces. launch() je BLOCKING - vraća kontrolu tek pri zatvaranju.",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "Baca IllegalStateException", "isCorrect": true },
+        { "text": "Može se pozvati samo jednom", "isCorrect": true },
+        { "text": "Za ponovno pokretanje novi JVM", "isCorrect": true },
+        { "text": "Kreira novi Stage", "isCorrect": false },
+        { "text": "Resetira aplikaciju", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što Platform.runLater() odgađa izvršavanje? (Odaberite sve točne)",
+      "explanation": "runLater() ODGAĐA izvršavanje na SLJEDEĆI JavaFX pulse! Dodaje Runnable u JavaFX event queue. Izvršava se NAKON što trenutna metoda završi. Redoslijed runLater() poziva je GARANTIRAN (FIFO). Pulse = JavaFX render cycle (~60 FPS). Koristi se za UI updates iz background thread-a.",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "Odgađa na sljedeći pulse", "isCorrect": true },
+        { "text": "Dodaje u event queue", "isCorrect": true },
+        { "text": "FIFO redoslijed", "isCorrect": true },
+        { "text": "Izvršava odmah", "isCorrect": false },
+        { "text": "Ne koristi queue", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Je li PropertyValueFactory case-sensitive? (Odaberite sve točne)",
+      "explanation": "PropertyValueFactory JE case-sensitive! Mora exact matchati property ime. 'firstName' traži getFirstName() ili firstNameProperty(). 'FirstName' NE radi jer traži getFirstName() ali property mora biti 'firstName'. Java Bean konvencije: propertyName → getPropertyName(). Za custom logic koristiti Callback.",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "DA, case-sensitive je", "isCorrect": true },
+        { "text": "Mora exact matchati ime", "isCorrect": true },
+        { "text": "Java Bean konvencije", "isCorrect": true },
+        { "text": "NE, case-insensitive", "isCorrect": false },
+        { "text": "Sve varijante rade", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "MULTIPLE_CHOICE",
+      "prompt": "Što DatePicker.getValue() vraća po defaultu? (Odaberite sve točne)",
+      "explanation": "DatePicker no-arg konstruktor postavlja getValue() na NULL! Nije postavljen datum po defaultu. setValue(null) također je validan - uklanja odabrani datum. DatePicker prikazuje prazan field za null. setPromptText() postavlja placeholder. Koristi LocalDate, NE java.util.Date.",
+      "difficulty": "HARD",
+      "options": [
+        { "text": "null po defaultu", "isCorrect": true },
+        { "text": "setValue(null) je validan", "isCorrect": true },
+        { "text": "Koristi LocalDate", "isCorrect": true },
+        { "text": "Današnji datum", "isCorrect": false },
+        { "text": "Ne može biti null", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
       "prompt": "Što ColorPicker.getValue() vraća po defaultu? (Odaberite sve točne)",
-      "explanation": "ColorPicker po defaultu vraća Color.WHITE! No-arg konstruktor: new ColorPicker() = bijela boja. Konstruktor s bojom: new ColorPicker(Color.RED). getValue() vraća Color objekt, NE String! Color je immutable - rgba vrijednosti. Color.web('#FF0000') parsira hex string. Color.rgb(255, 0, 0) iz RGB. Color.hsb() iz HSB. getCustomColors() vraća ObservableList<Color> za palette. setOnAction() za change event. valueProperty() za binding. ColorPicker prikazuje palette dialog s preset bojama. Custom colors se spremaju između otvaranja.",
-      "difficulty": "MEDIUM",
+      "explanation": "ColorPicker po defaultu vraća Color.WHITE! No-arg konstruktor postavlja bijelu boju. getValue() vraća Color objekt, NE String. Color je immutable - rgba vrijednosti. Color.web('#FF0000') parsira hex. getCustomColors() vraća ObservableList<Color>.",
+      "difficulty": "HARD",
       "options": [
-        { "text": "Color.WHITE - default bijela boja", "isCorrect": true },
-        { "text": "Color.BLACK - default crna", "isCorrect": false },
-        { "text": "null - nema default", "isCorrect": false },
-        { "text": "getValue() vraća Color objekt, ne String", "isCorrect": true },
-        { "text": "Color.web() parsira hex string", "isCorrect": true },
-        { "text": "getCustomColors() vraća ObservableList", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Što se događa s ProgressBar.setProgress() vrijednostima izvan 0-1?",
-      "codeSnippet": "import javafx.scene.control.ProgressBar;\n\npublic class ProgressBarRangeTest {\n    public void test() {\n        ProgressBar bar = new ProgressBar();\n        \n        bar.setProgress(-0.5);\n        System.out.println(\"Negative: \" + bar.getProgress());\n        \n        bar.setProgress(1.5);\n        System.out.println(\"Over 1: \" + bar.getProgress());\n        \n        bar.setProgress(0.5);\n        System.out.println(\"Valid: \" + bar.getProgress());\n        \n        bar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);\n        System.out.println(\"Indeterminate: \" + bar.getProgress());\n    }\n}",
-      "explanation": "Ispisuje 'Negative: 0.0', 'Over 1: 1.0', 'Valid: 0.5', 'Indeterminate: -1.0'. ProgressBar CLAMPUJE vrijednosti: < 0 postaje 0, > 1 postaje 1. Validan range: 0.0 (0%) do 1.0 (100%). INDETERMINATE_PROGRESS = -1.0 za 'in progress' animaciju (spinning). Default progress je 0.0. progressProperty() za binding: bar.progressProperty().bind(model.progressProperty()). ProgressIndicator je base class (circular). ProgressBar extends ProgressIndicator (linear). setProgress(Double.NaN) NE radi kao indeterminate - koristi INDETERMINATE_PROGRESS konstanlu!",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "0.0, 1.0, 0.5, -1.0 - clampuje na 0-1 range", "isCorrect": true },
-        { "text": "Baca IllegalArgumentException za invalid range", "isCorrect": false },
-        { "text": "-0.5, 1.5, 0.5, -1.0 - prima sve vrijednosti", "isCorrect": false },
-        { "text": "INDETERMINATE_PROGRESS = -1.0 za spinning animaciju", "isCorrect": true },
-        { "text": "Default progress je 0.5", "isCorrect": false }
+        { "text": "Color.WHITE", "isCorrect": true },
+        { "text": "Vraća Color objekt", "isCorrect": true },
+        { "text": "Color je immutable", "isCorrect": true },
+        { "text": "Color.BLACK", "isCorrect": false },
+        { "text": "Vraća String hex", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Kada ScrollPane prikazuje scrollbar-ove? (Odaberite sve točne)",
-      "explanation": "ScrollPane ima 4 policy opcije: (1) AS_NEEDED (default) - prikazuje scrollbar samo kad je content veći od viewport-a. (2) ALWAYS - uvijek prikazuje scrollbar. (3) NEVER - nikad ne prikazuje scrollbar. (4) VbarPolicy za vertical, HbarPolicy za horizontal. setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED). Content može biti veći od viewport-a pa korisnik ne može vidjeti sve. setFitToWidth(true) prilagođava content širini. setFitToHeight(true) za visinu. setPannable(true) omogućava drag scrolling. Content je setContent(Node). getViewportBounds() vraća visible area.",
-      "difficulty": "MEDIUM",
+      "prompt": "Što ProgressBar.setProgress() radi s vrijednostima izvan 0-1? (Odaberite sve točne)",
+      "explanation": "ProgressBar CLAMPUJE vrijednosti! < 0 postaje 0, > 1 postaje 1. Validan range: 0.0-1.0 (0-100%). INDETERMINATE_PROGRESS (-1.0) je specijalni za spinning animaciju. Default progress je 0.0. ProgressIndicator je base class (circular).",
+      "difficulty": "HARD",
       "options": [
-        { "text": "AS_NEEDED - samo kad je content veći", "isCorrect": true },
-        { "text": "ALWAYS - uvijek prikazuje", "isCorrect": true },
-        { "text": "NEVER - nikad ne prikazuje", "isCorrect": true },
-        { "text": "Automatski prikazuje bez policy", "isCorrect": false },
-        { "text": "AS_NEEDED je default", "isCorrect": true },
-        { "text": "Odvojeni policy za vertical i horizontal", "isCorrect": true }
+        { "text": "Clampuje na 0-1 range", "isCorrect": true },
+        { "text": "< 0 postaje 0", "isCorrect": true },
+        { "text": "> 1 postaje 1", "isCorrect": true },
+        { "text": "Baca IllegalArgumentException", "isCorrect": false },
+        { "text": "Prima bilo koju vrijednost", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što znači GUI?",
-      "explanation": "GUI je Graphical User Interface – grafičko korisničko sučelje koje koristi kontrole/widgete.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Graphical User Interface", "isCorrect": true },
-        { "text": "General User Input", "isCorrect": false },
-        { "text": "Global Utility Interface", "isCorrect": false },
-        { "text": "Graphics Under Instruction", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji su GUI toolkiti spomenuti u predavanju? (Odaberite sve točne)",
-      "explanation": "U materijalu su navedeni AWT, Swing i JavaFX.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "AWT", "isCorrect": true },
-        { "text": "Swing", "isCorrect": true },
-        { "text": "JavaFX", "isCorrect": true },
-        { "text": "React", "isCorrect": false },
-        { "text": "Qt", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji alat se koristi za vizualno dizajniranje JavaFX sučelja?",
-      "explanation": "Scene Builder je vizualni alat (drag & drop) koji generira FXML.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Scene Builder", "isCorrect": true },
-        { "text": "Maven Surefire", "isCorrect": false },
-        { "text": "JUnit", "isCorrect": false },
-        { "text": "Gradle Wrapper", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je FXML?",
-      "explanation": "FXML je XML format (FX Markup Language) za definiranje izgleda GUI-ja i odvajanje prikaza od logike.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "XML format za definiranje JavaFX GUI-ja", "isCorrect": true },
-        { "text": "Binarni format za spremanje Scene-a", "isCorrect": false },
-        { "text": "JavaScript framework", "isCorrect": false },
-        { "text": "Alat za testiranje UI-ja", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja metoda u JavaFX aplikaciji služi za pokretanje GUI-ja?",
-      "explanation": "start(Stage primaryStage) je glavna metoda gdje se postavlja Scene i prikazuje Stage.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "start(Stage primaryStage)", "isCorrect": true },
-        { "text": "run()", "isCorrect": false },
-        { "text": "render()", "isCorrect": false },
-        { "text": "initGUI()", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što predstavlja Stage u JavaFX-u?",
-      "explanation": "Stage je glavni prozor aplikacije (window).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Glavni prozor aplikacije", "isCorrect": true },
-        { "text": "Lista podataka za TableView", "isCorrect": false },
-        { "text": "CSS datoteka", "isCorrect": false },
-        { "text": "Controller klasa", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što predstavlja Scene u JavaFX-u?",
-      "explanation": "Scene je sadržaj prozora (sadrži root node i graf elemenata).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Sadržaj prozora (UI sadržaj na Stage-u)", "isCorrect": true },
-        { "text": "Drugi naziv za Stage", "isCorrect": false },
-        { "text": "Obavezna CSS tema", "isCorrect": false },
-        { "text": "Thread za renderiranje", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja naredba pokreće JavaFX aplikaciju iz main metode?",
-      "explanation": "launch(args) pokreće JavaFX aplikaciju.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "launch(args)", "isCorrect": true },
-        { "text": "start(args)", "isCorrect": false },
-        { "text": "runLater(args)", "isCorrect": false },
-        { "text": "openStage(args)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Kako se dodaje CSS datoteka na Scene? (Odaberite sve točne)",
-      "explanation": "U primjeru se koristi scene.getStylesheets().add(getClass().getResource(...).toExternalForm()).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "scene.getStylesheets().add(getClass().getResource(\"application.css\").toExternalForm())", "isCorrect": true },
-        { "text": "primaryStage.setStylesheet(\"application.css\")", "isCorrect": false },
-        { "text": "Scene.loadCss(\"application.css\")", "isCorrect": false },
-        { "text": "scene.getCss().add(\"application.css\")", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje je važno pravilo za CSS svojstva u JavaFX-u?",
-      "explanation": "JavaFX CSS svojstva trebaju imati -fx- prefiks.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "CSS svojstva moraju imati -fx- prefiks", "isCorrect": true },
-        { "text": "CSS svojstva moraju biti camelCase", "isCorrect": false },
-        { "text": "CSS se ne može koristiti u JavaFX-u", "isCorrect": false },
-        { "text": "CSS radi samo inline, ne iz datoteke", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji layout postavlja elemente jedan iza drugog horizontalno?",
-      "explanation": "HBox je horizontalni raspored.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "HBox", "isCorrect": true },
-        { "text": "VBox", "isCorrect": false },
-        { "text": "GridPane", "isCorrect": false },
-        { "text": "BorderPane", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji layout postavlja elemente jedan ispod drugog vertikalno?",
-      "explanation": "VBox je vertikalni raspored.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "VBox", "isCorrect": true },
-        { "text": "HBox", "isCorrect": false },
-        { "text": "FlowPane", "isCorrect": false },
-        { "text": "SplitPane", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji layout ima 5 područja (TOP, LEFT, CENTER, RIGHT, BOTTOM)?",
-      "explanation": "BorderPane omogućava raspored u 5 područja.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "BorderPane", "isCorrect": true },
-        { "text": "GridPane", "isCorrect": false },
-        { "text": "FlowPane", "isCorrect": false },
-        { "text": "HBox", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji layout raspoređuje elemente u mrežu (tablicu) s koordinatama (stupac, redak)?",
-      "explanation": "GridPane postavlja elemente u tablicu po (col, row) koordinatama.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "GridPane", "isCorrect": true },
-        { "text": "BorderPane", "isCorrect": false },
-        { "text": "FlowPane", "isCorrect": false },
-        { "text": "StackPane", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je osnovna ideja MVC arhitekture? (Odaberite sve točne)",
-      "explanation": "MVC dijeli aplikaciju na Model (podaci), View (prikaz) i Controller (povezuje UI i logiku).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Model = domenski podaci (npr. Knjiga)", "isCorrect": true },
-        { "text": "View = FXML ili Java klase koje definiraju izgled", "isCorrect": true },
-        { "text": "Controller = reagira na akcije i povezuje UI s logikom", "isCorrect": true },
-        { "text": "Controller = baza podataka", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Čemu služi anotacija @FXML?",
-      "explanation": "@FXML označava polja i metode koje se povezuju s elementima iz FXML-a (fx:id i handleri).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Označava polja/metode koje FXMLLoader povezuje s FXML-om", "isCorrect": true },
-        { "text": "Automatski sprema podatke u bazu", "isCorrect": false },
-        { "text": "Zamjenjuje potrebu za Controllerom", "isCorrect": false },
-        { "text": "Povećava performanse renderiranja", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što mora vrijediti za povezivanje @FXML polja i elementa u FXML-u?",
-      "explanation": "Naziv varijable u Controlleru mora odgovarati fx:id u FXML-u (i tip mora biti kompatibilan).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Naziv @FXML varijable mora odgovarati fx:id", "isCorrect": true },
-        { "text": "fx:id mora biti isti kao naziv klase", "isCorrect": false },
-        { "text": "fx:id nije bitan, sve se mapira automatski", "isCorrect": false },
-        { "text": "@FXML mora biti na static poljima", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je ObservableList?",
-      "explanation": "ObservableList je JavaFX lista koja šalje obavijesti o promjenama (listenerima) pa se UI može automatski ažurirati.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Lista koja automatski obavještava o promjenama", "isCorrect": true },
-        { "text": "Lista koja se ne može mijenjati", "isCorrect": false },
-        { "text": "Mapa (key-value) struktura", "isCorrect": false },
-        { "text": "Thread-safe kolekcija po defaultu", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja klasa se koristi kao factory za kreiranje Observable kolekcija?",
-      "explanation": "FXCollections je factory klasa za kreiranje ObservableList/ObservableMap itd.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "FXCollections", "isCorrect": true },
-        { "text": "Collections", "isCorrect": false },
-        { "text": "ObservableFactory", "isCorrect": false },
-        { "text": "JavaFXCollections", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Čemu služi TableView?",
-      "explanation": "TableView prikazuje podatke u tablici (redci i stupci).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Prikaz podataka u tablici", "isCorrect": true },
-        { "text": "Prikaz HTML stranice", "isCorrect": false },
-        { "text": "Uređivanje CSS-a", "isCorrect": false },
-        { "text": "Navigacija kroz scene", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja klasa se često koristi za povezivanje stupca TableView-a s propertyjem (npr. \"firstName\")?",
-      "explanation": "U primjeru je korišten PropertyValueFactory(\"firstName\").",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "PropertyValueFactory", "isCorrect": true },
-        { "text": "FXMLLoader", "isCorrect": false },
-        { "text": "SceneBuilder", "isCorrect": false },
-        { "text": "TableRowFactory", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Od kojih se elemenata sastoji izbornik u JavaFX-u? (Odaberite sve točne)",
-      "explanation": "MenuBar sadrži Menu, a Menu sadrži MenuItem.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "MenuBar", "isCorrect": true },
-        { "text": "Menu", "isCorrect": true },
-        { "text": "MenuItem", "isCorrect": true },
-        { "text": "StageItem", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi showAndWait() kod Alert dijaloga?",
-      "explanation": "Alert.showAndWait() prikazuje dijalog i čeka da korisnik zatvori/odabere opciju (blocking).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Prikazuje dijalog i čeka korisnikov odgovor", "isCorrect": true },
-        { "text": "Prikazuje dijalog ali se odmah nastavlja izvršavanje", "isCorrect": false },
-        { "text": "Automatski zatvara aplikaciju", "isCorrect": false },
-        { "text": "Mijenja Scene na Stage-u", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koliko TitledPane-ova može biti otvoreno u Accordion-u u isto vrijeme?",
-      "explanation": "Accordion tipično dopušta samo jedan prošireni (expanded) pane u jednom trenutku.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Samo jedan", "isCorrect": true },
-        { "text": "Neograničeno", "isCorrect": false },
-        { "text": "Točno dva", "isCorrect": false },
-        { "text": "Nijedan (uvijek su zatvoreni)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi TreeView.setShowRoot(false)?",
-      "explanation": "Skriva root element i prikazuje samo njegovu djecu (children).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Skriva root i prikazuje samo children", "isCorrect": true },
-        { "text": "Briše root iz memorije", "isCorrect": false },
-        { "text": "Onemogućava selekciju u TreeView-u", "isCorrect": false },
-        { "text": "Pretvara TreeView u ListView", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je SplitPane?",
-      "explanation": "SplitPane prikazuje više komponenti razdvojenih pomičnim dividerom.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Kontejner s više područja odvojenih dividerom", "isCorrect": true },
-        { "text": "Komponenta za unos datuma", "isCorrect": false },
-        { "text": "Layout s 5 područja", "isCorrect": false },
-        { "text": "Dijalog za potvrdu", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Kada ScrollPane prikazuje scroll barove po defaultu?",
-      "explanation": "Default policy je AS_NEEDED – prikazuje se kad je sadržaj veći od vidljivog dijela (viewport).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "AS_NEEDED (kad je sadržaj veći od viewport-a)", "isCorrect": true },
-        { "text": "ALWAYS (uvijek)", "isCorrect": false },
-        { "text": "NEVER (nikad)", "isCorrect": false },
-        { "text": "RANDOM (nasumično)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se sljedeći JavaFX kod kompilirati?",
-      "codeSnippet": "import javafx.application.Application;\nimport javafx.stage.Stage;\n\npublic class App1 extends Application {\n  @Override\n  public void start(Stage primaryStage) {\n    primaryStage.setTitle(\"Hello JavaFX\");\n    primaryStage.show();\n  }\n\n  public static void main(String[] args) {\n    launch(args);\n  }\n}",
-      "explanation": "Da. Klasa nasljeđuje Application, implementira start(Stage) i poziva launch(args).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Da, kompilira se", "isCorrect": true },
-        { "text": "Ne, mora se koristiti FXMLLoader", "isCorrect": false },
-        { "text": "Ne, ne smije postojati main metoda", "isCorrect": false },
-        { "text": "Ne, Stage se ne može koristiti u start()", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: učitavanje CSS-a na scenu?",
-      "codeSnippet": "import javafx.scene.Scene;\nimport javafx.scene.layout.BorderPane;\n\npublic class CssTest {\n  public Scene make() {\n    BorderPane root = new BorderPane();\n    Scene scene = new Scene(root, 400, 400);\n    scene.getStylesheets().add(\n      getClass().getResource(\"application.css\").toExternalForm()\n    );\n    return scene;\n  }\n}",
-      "explanation": "Da, sintaksa je ispravna (pretpostavljajući da resource postoji u runtime-u).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Da, kompilira se", "isCorrect": true },
-        { "text": "Ne, Scene nema getStylesheets()", "isCorrect": false },
-        { "text": "Ne, CSS se može dodati samo na Stage", "isCorrect": false },
-        { "text": "Ne, toExternalForm() ne postoji", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: GridPane.add(node, col, row)?",
-      "codeSnippet": "import javafx.scene.control.Label;\nimport javafx.scene.control.TextField;\nimport javafx.scene.layout.GridPane;\n\npublic class GridForm {\n  public GridPane make() {\n    GridPane grid = new GridPane();\n    Label lbl = new Label(\"First Name\");\n    TextField tf = new TextField();\n    grid.add(lbl, 0, 0);\n    grid.add(tf, 1, 0);\n    return grid;\n  }\n}",
-      "explanation": "Da. GridPane.add(Node child, int columnIndex, int rowIndex) je standardni način dodavanja elemenata.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Da, kompilira se", "isCorrect": true },
-        { "text": "Ne, GridPane nema add()", "isCorrect": false },
-        { "text": "Ne, mora se koristiti setCenter()", "isCorrect": false },
-        { "text": "Ne, koordinate moraju biti double", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: MenuBar → Menu → MenuItem hijerarhija?",
-      "codeSnippet": "import javafx.scene.control.*;\n\npublic class MenuOk {\n  public MenuBar make() {\n    MenuItem itemSave = new MenuItem(\"Save\");\n    Menu menuFile = new Menu(\"File\");\n    menuFile.getItems().add(itemSave);\n\n    MenuBar bar = new MenuBar();\n    bar.getMenus().add(menuFile);\n    return bar;\n  }\n}",
-      "explanation": "Da. MenuBar sadrži Menu, a Menu sadrži MenuItem.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Da, kompilira se", "isCorrect": true },
-        { "text": "Ne, MenuBar prima MenuItem direktno", "isCorrect": false },
-        { "text": "Ne, MenuItem mora biti u ToolBar-u", "isCorrect": false },
-        { "text": "Ne, Menu ne smije imati Items", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: TabPane s Tab-ovima?",
-      "codeSnippet": "import javafx.scene.control.*;\n\npublic class Tabs {\n  public TabPane make() {\n    Tab t1 = new Tab(\"One\");\n    t1.setClosable(false);\n    Tab t2 = new Tab(\"Two\");\n\n    TabPane pane = new TabPane();\n    pane.getTabs().addAll(t1, t2);\n    return pane;\n  }\n}",
-      "explanation": "Da. TabPane.getTabs() vraća listu Tab-ova.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Da, kompilira se", "isCorrect": true },
-        { "text": "Ne, TabPane prima samo Scene", "isCorrect": false },
-        { "text": "Ne, Tab mora naslijediti Node", "isCorrect": false },
-        { "text": "Ne, setClosable(false) ne postoji", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "U kojem je razdoblju JavaFX postao standardni GUI toolkit integriran s Javom 8?",
-      "explanation": "U materijalu piše da je JavaFX 8 (2014) integriran s Javom 8 i postaje standardni GUI toolkit.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "2014 (JavaFX 8)", "isCorrect": true },
-        { "text": "2007 (početak JavaFX-a)", "isCorrect": false },
-        { "text": "2008 (JavaFX 1.0)", "isCorrect": false },
-        { "text": "2011 (JavaFX 2.0)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje su prednosti JavaFX-a navedene u predavanju? (Odaberite sve točne)",
-      "explanation": "U prednostima su nabrojani Scene Builder, CSS Styling, Multithreading i Animacije.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Scene Builder", "isCorrect": true },
-        { "text": "CSS Styling", "isCorrect": true },
-        { "text": "Multithreading", "isCorrect": true },
-        { "text": "Animacije", "isCorrect": true },
-        { "text": "Automatsko generiranje baze podataka", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji panel u Scene Builderu prikazuje stablo elemenata (hijerarhiju)?",
-      "explanation": "Hierarchy panel (lijevo dolje) prikazuje stablo elemenata.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Hierarchy", "isCorrect": true },
-        { "text": "Inspector", "isCorrect": false },
-        { "text": "Content Area", "isCorrect": false },
-        { "text": "Library", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji panel u Scene Builderu služi za podešavanje Properties/Layout/Code?",
-      "explanation": "Inspector (desno) ima kartice Properties, Layout i Code.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Inspector", "isCorrect": true },
-        { "text": "Library", "isCorrect": false },
-        { "text": "Hierarchy", "isCorrect": false },
-        { "text": "Content Area", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Kako se u CSS-u (JavaFX) cilja root element scene (root node)?",
-      "explanation": "U primjeru se koristi selektor .root u application.css.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": ".root", "isCorrect": true },
-        { "text": "#root", "isCorrect": false },
-        { "text": "root()", "isCorrect": false },
-        { "text": "Stage.root", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji selektor u JavaFX CSS-u cilja sve gumbe (Button)?",
-      "explanation": "U primjeru se stilizira .button klasa.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": ".button", "isCorrect": true },
-        { "text": ".btn", "isCorrect": false },
-        { "text": "#button", "isCorrect": false },
-        { "text": "Button{}", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što znači da CSS svojstva u JavaFX-u imaju prefiks -fx-?",
-      "explanation": "JavaFX CSS koristi svoj prefiks (npr. -fx-font-size, -fx-background).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Da se razlikuju JavaFX CSS svojstva (npr. -fx-font-size)", "isCorrect": true },
-        { "text": "Da CSS radi samo u FXML-u", "isCorrect": false },
-        { "text": "Da se CSS može koristiti samo za Button", "isCorrect": false },
-        { "text": "Da je CSS obavezan u svakoj aplikaciji", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je uloga metode launch(args) u JavaFX aplikaciji?",
-      "explanation": "launch(args) pokreće JavaFX aplikaciju iz main metode.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Pokreće JavaFX aplikaciju", "isCorrect": true },
-        { "text": "Učitava CSS datoteku", "isCorrect": false },
-        { "text": "Dodaje kontrolu u layout", "isCorrect": false },
-        { "text": "Kreira FXML datoteku", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što znači 'Scene Graph' u kontekstu JavaFX-a?",
-      "explanation": "Scene Graph je koncept organizacije elemenata UI-a u hijerarhiju (graf/stablo) u sceni.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Hijerarhija (graf) UI elemenata unutar Scene-a", "isCorrect": true },
-        { "text": "Datoteka za CSS stilove", "isCorrect": false },
-        { "text": "Poseban tip baze podataka", "isCorrect": false },
-        { "text": "Thread koji renderira UI", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji layout u primjeru koristi razmak (spacing) 5px pri kreiranju?",
-      "explanation": "U primjerima piše: new HBox(5) i new VBox(5).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "HBox i VBox", "isCorrect": true },
-        { "text": "BorderPane", "isCorrect": false },
-        { "text": "GridPane", "isCorrect": false },
-        { "text": "SplitPane", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi setPadding(new Insets(1)) u primjerima HBox/VBox?",
-      "explanation": "Padding dodaje unutarnji razmak (rub) oko sadržaja layouta.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Dodaje unutarnji razmak (padding) oko sadržaja", "isCorrect": true },
-        { "text": "Dodaje razmak između child elemenata", "isCorrect": false },
-        { "text": "Postavlja marginu na prozoru (Stage)", "isCorrect": false },
-        { "text": "Skriva elemente iz layouta", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je FlowPane (u jednoj rečenici)?",
-      "explanation": "FlowPane slaže elemente u 'tok' — ide lijevo-desno dok ima mjesta pa prelazi u novi red.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Layout u kojem elementi 'teku' i prelaze u novi red kad ponestane mjesta", "isCorrect": true },
-        { "text": "Layout s 5 fiksnih područja", "isCorrect": false },
-        { "text": "Layout u kojem su elementi uvijek jedan ispod drugog", "isCorrect": false },
-        { "text": "Layout koji radi samo s tablicama", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "U BorderPane-u, koja je pozicija namijenjena glavnom sadržaju?",
-      "explanation": "BorderPane ima TOP/LEFT/CENTER/RIGHT/BOTTOM, a glavni sadržaj ide u CENTER.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "CENTER", "isCorrect": true },
-        { "text": "TOP", "isCorrect": false },
-        { "text": "LEFT", "isCorrect": false },
-        { "text": "BOTTOM", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "GridPane postavlja elemente pomoću kojih koordinata?",
-      "explanation": "GridPane koristi koordinate (stupac, redak) tj. (column, row).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "(stupac, redak)", "isCorrect": true },
-        { "text": "(x, y u pikselima)", "isCorrect": false },
-        { "text": "(redak, veličina)", "isCorrect": false },
-        { "text": "(širina, visina)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje metode u GridPane-u iz primjera postavljaju razmak između ćelija?",
-      "explanation": "U primjeru se koristi gridpane.setHgap(5) i gridpane.setVgap(5).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "setHgap(...) i setVgap(...)", "isCorrect": true },
-        { "text": "setPadding(...)", "isCorrect": false },
-        { "text": "setSpacing(...)", "isCorrect": false },
-        { "text": "setMargin(...)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što znači Priority.ALWAYS u ColumnConstraints primjeru?",
-      "explanation": "Stupac se širi i zauzima maksimalno dostupnog prostora kad se prozor proširi.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Stupac se uvijek širi i uzima dostupni prostor", "isCorrect": true },
-        { "text": "Stupac se nikad ne smije mijenjati", "isCorrect": false },
-        { "text": "Stupac se uvijek skriva", "isCorrect": false },
-        { "text": "Stupac dobiva fiksnu širinu 100px", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja dva tipa Alert dijaloga su prikazana u materijalu?",
-      "explanation": "Primjeri prikazuju Information (INFORMATION) i Confirmation (CONFIRMATION) dijalog.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "INFORMATION i CONFIRMATION", "isCorrect": true },
-        { "text": "ERROR i WARNING", "isCorrect": false },
-        { "text": "INPUT i FILECHOOSER", "isCorrect": false },
-        { "text": "DIALOG i MODAL", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što showAndWait() radi kod Alert-a?",
-      "explanation": "Prikazuje dijalog i čeka korisnikov odgovor (blocking).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Prikazuje dijalog i čeka da ga korisnik zatvori/odabere opciju", "isCorrect": true },
-        { "text": "Prikazuje dijalog i odmah nastavlja bez čekanja", "isCorrect": false },
-        { "text": "Samo logira poruku u konzolu", "isCorrect": false },
-        { "text": "Automatski klikne OK", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je rezultat confirm.showAndWait() u primjeru s potvrdom?",
-      "explanation": "U primjeru je rezultat spremljen u Optional<ButtonType>.",
-      "difficulty": "EASY",
+      "prompt": "Što Alert.showAndWait() vraća? (Odaberite sve točne)",
+      "explanation": "showAndWait() vraća Optional<ButtonType>! Je BLOCKING - čeka korisnikov odgovor. Optional.empty() ako je zatvoren bez klika (X ili ESC). Optional.get() vraća ButtonType - mora provjeriti isPresent()! show() je NON-BLOCKING alternativa. Mora biti na JavaFX thread-u.",
+      "difficulty": "HARD",
       "options": [
         { "text": "Optional<ButtonType>", "isCorrect": true },
-        { "text": "boolean", "isCorrect": false },
-        { "text": "String", "isCorrect": false },
-        { "text": "int", "isCorrect": false }
+        { "text": "Je BLOCKING", "isCorrect": true },
+        { "text": "empty() za X/ESC", "isCorrect": true },
+        { "text": "Vraća boolean", "isCorrect": false },
+        { "text": "Vraća null za cancel", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je hijerarhija izbornika u JavaFX-u?",
-      "explanation": "Izbornik se sastoji od MenuBar (gore), Menu (npr. File) i MenuItem (npr. Save).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "MenuBar → Menu → MenuItem", "isCorrect": true },
-        { "text": "MenuItem → Menu → MenuBar", "isCorrect": false },
-        { "text": "Stage → Menu → MenuItem", "isCorrect": false },
-        { "text": "MenuBar → MenuItem → Menu", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi setAccelerator(KeyCombination.keyCombination(\"Ctrl+N\")) na MenuItem-u?",
-      "explanation": "Dodaje tipkovnički prečac (npr. Ctrl+N) za tu opciju izbornika.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Dodaje tipkovnički prečac (shortcut)", "isCorrect": true },
-        { "text": "Mijenja tekst MenuItem-a", "isCorrect": false },
-        { "text": "Otvara novi Stage automatski", "isCorrect": false },
-        { "text": "Dodaje CSS klasu elementu", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Čemu služi ToolBar u JavaFX-u?",
-      "explanation": "ToolBar prikazuje skup gumbi/akcija (često s ikonama i separatorima) na jednom mjestu.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Za prikaz skupa gumbi/akcija u traci alata", "isCorrect": true },
-        { "text": "Za prikaz tablice podataka", "isCorrect": false },
-        { "text": "Za odabir datuma", "isCorrect": false },
-        { "text": "Za prikaz stabla (Tree)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi new Separator(Orientation.VERTICAL) u ToolBar-u?",
-      "explanation": "Separator vizualno razdvaja grupe kontrola; VERTICAL znači okomiti separator.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Razdvaja kontrole okomitim separatorom", "isCorrect": true },
-        { "text": "Okreće cijeli ToolBar vertikalno", "isCorrect": false },
-        { "text": "Sakriva gumbe u ToolBar-u", "isCorrect": false },
-        { "text": "Automatski dodaje novi Tab", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što Tab.setClosable(false) radi?",
-      "explanation": "Onemogućuje zatvaranje taba (ne prikazuje X ili ga deaktivira).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Onemogućuje zatvaranje taba", "isCorrect": true },
-        { "text": "Skriva sadržaj taba", "isCorrect": false },
-        { "text": "Automatski selektira tab", "isCorrect": false },
-        { "text": "Prebacuje tab u novi prozor", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja se metoda koristi za dodavanje više tabova u TabPane?",
-      "explanation": "U primjeru je: tabPane.getTabs().addAll(tableTab, accordionTab, webViewTab).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "tabPane.getTabs().addAll(...)", "isCorrect": true },
-        { "text": "tabPane.addTabs(...)", "isCorrect": false },
-        { "text": "tabPane.setTabs(...)", "isCorrect": false },
-        { "text": "tabPane.addChildren(...)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja komponenta u primjeru prikazuje podatke u stupcima First Name / Last Name / Phone?",
-      "explanation": "To je TableView s više TableColumn stupaca.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "TableView", "isCorrect": true },
-        { "text": "ListView", "isCorrect": false },
-        { "text": "TreeView", "isCorrect": false },
-        { "text": "ScrollPane", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Kako se u primjeru povezuju stupci TableView-a s property nazivima (npr. \"firstName\")?",
-      "explanation": "U primjeru se koristi new PropertyValueFactory<>(\"firstName\").",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "PropertyValueFactory(\"firstName\")", "isCorrect": true },
-        { "text": "FXMLLoader.load(\"firstName\")", "isCorrect": false },
-        { "text": "setText(\"firstName\")", "isCorrect": false },
-        { "text": "setId(\"firstName\")", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koliko TitledPane-ova može biti otvoreno u Accordion-u prema opisu u materijalu?",
-      "explanation": "U materijalu piše: 'Accordion - samo jedan otvoren'.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Samo jedan", "isCorrect": true },
-        { "text": "Sva odjednom", "isCorrect": false },
-        { "text": "Točno dva", "isCorrect": false },
-        { "text": "Nijedan (uvijek su zatvoreni)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi treeView.setShowRoot(false) u primjeru TreeView-a?",
-      "explanation": "Skriva root čvor u prikazu i prikazuje samo djecu (children).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Skriva root u prikazu", "isCorrect": true },
-        { "text": "Briše root iz TreeView-a", "isCorrect": false },
-        { "text": "Zaključava TreeView (no selection)", "isCorrect": false },
-        { "text": "Pretvara TreeView u TableView", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje dvije komponente su u primjeru spojene unutar SplitPane-a?",
-      "explanation": "U SplitPane primjeru su dodani TreeView i ListView.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "TreeView i ListView", "isCorrect": true },
-        { "text": "TableView i MenuBar", "isCorrect": false },
-        { "text": "Accordion i ToolBar", "isCorrect": false },
-        { "text": "DatePicker i ColorPicker", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je svrha ObservableList u JavaFX-u?",
-      "explanation": "ObservableList šalje obavijesti o promjenama, pa se UI (npr. TableView) automatski osvježava.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Automatski ažurira GUI kad se lista promijeni", "isCorrect": true },
-        { "text": "Sprema podatke u datoteku", "isCorrect": false },
-        { "text": "Ubrzava kompilaciju", "isCorrect": false },
-        { "text": "Zamjenjuje Controller u MVC-u", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je factory klasa za kreiranje ObservableList iz obične liste?",
-      "explanation": "U primjeru se koristi FXCollections.observableArrayList(...).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "FXCollections", "isCorrect": true },
-        { "text": "Collections", "isCorrect": false },
-        { "text": "ObservableFactory", "isCorrect": false },
-        { "text": "ListFactory", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što u MVC arhitekturi predstavlja 'Controller' u JavaFX kontekstu?",
-      "explanation": "Controller povezuje GUI elemente s poslovnom logikom i reagira na korisničke akcije.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Povezuje UI s logikom i obrađuje akcije korisnika", "isCorrect": true },
-        { "text": "Samo definira izgled ekrana", "isCorrect": false },
-        { "text": "Samo predstavlja domenske podatke (npr. Knjiga)", "isCorrect": false },
-        { "text": "Samo učitava CSS datoteku", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je JavaFX?",
-      "explanation": "JavaFX je GUI toolkit za izradu grafičkih sučelja u Java aplikacijama.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "GUI toolkit za izradu grafičkih sučelja u Javi", "isCorrect": true },
-        { "text": "Baza podataka za Java aplikacije", "isCorrect": false },
-        { "text": "Biblioteka za mrežnu komunikaciju", "isCorrect": false },
-        { "text": "Alat za pisanje unit testova", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja klasa se nasljeđuje za JavaFX aplikaciju?",
-      "explanation": "Tipično se nasljeđuje javafx.application.Application.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "javafx.application.Application", "isCorrect": true },
-        { "text": "javafx.stage.Stage", "isCorrect": false },
-        { "text": "javafx.scene.Scene", "isCorrect": false },
-        { "text": "javafx.fxml.FXMLLoader", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što predstavlja 'root' node u Scene-u?",
-      "explanation": "Root je vršni čvor Scene Grapha i roditelj svih ostalih UI elemenata u toj sceni.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Vršni čvor hijerarhije elemenata (Scene Graph)", "isCorrect": true },
-        { "text": "CSS datoteka koja stilizira aplikaciju", "isCorrect": false },
-        { "text": "Glavni thread JavaFX-a", "isCorrect": false },
-        { "text": "Kontroler (Controller) u MVC-u", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji alat se koristi za drag & drop izradu FXML sučelja?",
-      "explanation": "Scene Builder služi za vizualno dizajniranje i generiranje FXML-a.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Scene Builder", "isCorrect": true },
-        { "text": "Maven", "isCorrect": false },
-        { "text": "JUnit", "isCorrect": false },
-        { "text": "Postman", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji panel u Scene Builderu sadrži sve kontrole (Button, Label...)?",
-      "explanation": "Library panel sadrži kategorije Controls/Containers/Shapes itd.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Library", "isCorrect": true },
-        { "text": "Hierarchy", "isCorrect": false },
-        { "text": "Inspector", "isCorrect": false },
-        { "text": "Console", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi FXMLLoader u JavaFX-u?",
-      "explanation": "FXMLLoader učitava FXML datoteku i kreira UI hijerarhiju (root node), te povezuje controller.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Učitava FXML i kreira UI (Scene Graph)", "isCorrect": true },
-        { "text": "Kompilira Java kod", "isCorrect": false },
-        { "text": "Kreira CSS stilove", "isCorrect": false },
-        { "text": "Spaja aplikaciju na bazu", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji layout je najbolji za jednostavnu formu (label + textfield u redovima)?",
-      "explanation": "GridPane je idealan za forme jer raspoređuje elemente u mrežu (col,row).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "GridPane", "isCorrect": true },
-        { "text": "StackPane", "isCorrect": false },
-        { "text": "FlowPane", "isCorrect": false },
-        { "text": "Group", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji layout slaže elemente jedan preko drugog (stack)?",
-      "explanation": "StackPane slaže djecu jedno preko drugog, centrirano po defaultu.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "StackPane", "isCorrect": true },
-        { "text": "HBox", "isCorrect": false },
-        { "text": "VBox", "isCorrect": false },
-        { "text": "GridPane", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi VBox.setSpacing(10)?",
-      "explanation": "Spacing postavlja razmak između djece unutar VBox-a.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Postavlja razmak između elemenata u VBox-u", "isCorrect": true },
-        { "text": "Postavlja padding oko VBox-a", "isCorrect": false },
-        { "text": "Mijenja font size u VBox-u", "isCorrect": false },
-        { "text": "Postavlja marginu prozora (Stage)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja komponenta prikazuje listu elemenata (jedan stupac)?",
-      "explanation": "ListView prikazuje listu stavki (vertikalno).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "ListView", "isCorrect": true },
-        { "text": "TableView", "isCorrect": false },
-        { "text": "TreeView", "isCorrect": false },
-        { "text": "MenuBar", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja komponenta prikazuje hijerarhiju (stablo)?",
-      "explanation": "TreeView prikazuje TreeItem hijerarhiju (npr. kategorije i podkategorije).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "TreeView", "isCorrect": true },
-        { "text": "TableView", "isCorrect": false },
-        { "text": "ScrollPane", "isCorrect": false },
-        { "text": "ToolBar", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja komponenta služi za prikaz više kartica (tabova)?",
-      "explanation": "TabPane sadrži Tab-ove.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "TabPane", "isCorrect": true },
-        { "text": "Accordion", "isCorrect": false },
-        { "text": "SplitPane", "isCorrect": false },
-        { "text": "BorderPane", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja komponenta koristi 'pane-ove' koji se mogu proširiti/sažeti?",
-      "explanation": "Accordion sadrži TitledPane-ove.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Accordion", "isCorrect": true },
-        { "text": "TabPane", "isCorrect": false },
-        { "text": "MenuBar", "isCorrect": false },
-        { "text": "GridPane", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je MenuBar?",
-      "explanation": "MenuBar je traka izbornika koja sadrži Menu objekte (npr. File, Edit).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Traka izbornika koja sadrži Menu", "isCorrect": true },
-        { "text": "Dijalog za potvrdu", "isCorrect": false },
-        { "text": "Layout s 5 područja", "isCorrect": false },
-        { "text": "Kontrola za odabir datuma", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je ToolBar?",
-      "explanation": "ToolBar je traka alata koja sadrži gumbe i druge kontrole za brzi pristup akcijama.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Traka s gumbima/akcijama (toolbar)", "isCorrect": true },
-        { "text": "Layout za mrežu", "isCorrect": false },
-        { "text": "Baza podataka", "isCorrect": false },
-        { "text": "Thread za renderiranje", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja komponenta omogućava scrollanje sadržaja koji je veći od prikaza?",
-      "explanation": "ScrollPane omata (wrap) neki Node i omogućava scroll barove.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "ScrollPane", "isCorrect": true },
-        { "text": "BorderPane", "isCorrect": false },
-        { "text": "HBox", "isCorrect": false },
-        { "text": "ToggleGroup", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja kontrola služi za odabir datuma?",
-      "explanation": "DatePicker omogućava odabir LocalDate vrijednosti.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "DatePicker", "isCorrect": true },
-        { "text": "ColorPicker", "isCorrect": false },
-        { "text": "Slider", "isCorrect": false },
-        { "text": "ProgressBar", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja kontrola služi za odabir boje?",
-      "explanation": "ColorPicker vraća javafx.scene.paint.Color.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "ColorPicker", "isCorrect": true },
-        { "text": "DatePicker", "isCorrect": false },
-        { "text": "ChoiceBox", "isCorrect": false },
-        { "text": "PasswordField", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što prikazuje ProgressBar?",
-      "explanation": "ProgressBar prikazuje napredak (0-100%) ili indeterminate stanje.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Napredak izvršavanja (progress)", "isCorrect": true },
-        { "text": "Listu elemenata", "isCorrect": false },
-        { "text": "Hijerarhiju (stablo)", "isCorrect": false },
-        { "text": "Odabir boje", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi Slider?",
-      "explanation": "Slider omogućava odabir numeričke vrijednosti pomicanjem klizača.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Odabir numeričke vrijednosti klizačem", "isCorrect": true },
-        { "text": "Odabir datuma", "isCorrect": false },
-        { "text": "Prikaz tablice", "isCorrect": false },
-        { "text": "Prikaz izbornika", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je MVC? (Odaberite sve točne)",
-      "explanation": "MVC dijeli aplikaciju na Model, View i Controller.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Model sadrži domenske podatke", "isCorrect": true },
-        { "text": "View definira izgled (FXML/Java UI)", "isCorrect": true },
-        { "text": "Controller obrađuje akcije i povezuje UI s logikom", "isCorrect": true },
-        { "text": "Controller je isto što i baza podataka", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji atribut u FXML-u definira controller klasu?",
-      "explanation": "fx:controller navodi punu putanju do controller klase.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "fx:controller", "isCorrect": true },
-        { "text": "fx:id", "isCorrect": false },
-        { "text": "onAction", "isCorrect": false },
-        { "text": "xmlns", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Čemu služi fx:id u FXML-u?",
-      "explanation": "fx:id služi za povezivanje elementa iz FXML-a s @FXML poljem u controlleru.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Povezuje FXML element s @FXML poljem", "isCorrect": true },
-        { "text": "Postavlja CSS klasu elementu", "isCorrect": false },
-        { "text": "Pokreće aplikaciju", "isCorrect": false },
-        { "text": "Definira veličinu Stage-a", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja anotacija se koristi za povezivanje polja/metoda s FXML-om?",
-      "explanation": "@FXML označava članove koje FXMLLoader injektira ili poziva.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "@FXML", "isCorrect": true },
-        { "text": "@Override", "isCorrect": false },
-        { "text": "@Autowired", "isCorrect": false },
-        { "text": "@Entity", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je factory klasa za ObservableList/ObservableMap?",
-      "explanation": "FXCollections je factory klasa za observable kolekcije.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "FXCollections", "isCorrect": true },
-        { "text": "Collections", "isCorrect": false },
-        { "text": "Arrays", "isCorrect": false },
-        { "text": "Streams", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što TableView prikazuje?",
-      "explanation": "TableView prikazuje podatke u redcima i stupcima.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Tablicu (redci i stupci)", "isCorrect": true },
-        { "text": "Samo jedan stupac listu", "isCorrect": false },
-        { "text": "Hijerarhiju (stablo)", "isCorrect": false },
-        { "text": "Web stranicu", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Kako se najčešće povezuje stupac TableView-a s getterom propertyja (npr. firstName)?",
-      "explanation": "Često se koristi PropertyValueFactory s nazivom propertyja.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "new PropertyValueFactory<>('firstName')", "isCorrect": true },
-        { "text": "FXMLLoader.load('firstName')", "isCorrect": false },
-        { "text": "table.setId('firstName')", "isCorrect": false },
-        { "text": "new TableColumnFactory<>('firstName')", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji selektor u JavaFX CSS-u cilja sve Button kontrole?",
-      "explanation": "U primjerima se koristi .button selektor.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": ".button", "isCorrect": true },
-        { "text": "#button", "isCorrect": false },
-        { "text": "Button()", "isCorrect": false },
-        { "text": ".btn-primary", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji selektor u JavaFX CSS-u cilja root element Scene-a?",
-      "explanation": "Root se često cilja selektorom .root.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": ".root", "isCorrect": true },
-        { "text": "#root", "isCorrect": false },
-        { "text": "Stage.root", "isCorrect": false },
-        { "text": "scene-root", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što znači da JavaFX CSS svojstva imaju prefiks -fx-?",
-      "explanation": "JavaFX CSS koristi vlastita svojstva s prefiksom -fx- (npr. -fx-font-size).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Koristi se JavaFX specifičan prefiks za CSS svojstva", "isCorrect": true },
-        { "text": "CSS radi samo ako je u FXML-u", "isCorrect": false },
-        { "text": "Svojstva moraju biti camelCase", "isCorrect": false },
-        { "text": "CSS je obavezan za svaku kontrolu", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi Alert dijalog tipa INFORMATION?",
-      "explanation": "Prikazuje informativnu poruku korisniku.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Prikazuje informativnu poruku", "isCorrect": true },
-        { "text": "Odabire boju", "isCorrect": false },
-        { "text": "Otvara novi Stage automatski", "isCorrect": false },
-        { "text": "Renderira HTML", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji tip Alert dijaloga se koristi za potvrdu (Yes/No ili OK/Cancel)?",
-      "explanation": "Za potvrdu se koristi AlertType.CONFIRMATION.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "AlertType.CONFIRMATION", "isCorrect": true },
-        { "text": "AlertType.INFORMATION", "isCorrect": false },
-        { "text": "AlertType.NONE", "isCorrect": false },
-        { "text": "AlertType.PROGRESS", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je SplitPane?",
-      "explanation": "SplitPane dijeli prostor na više područja razdvojenih dividerima koje korisnik može pomicati.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Kontejner s područjima razdvojenim dividerom", "isCorrect": true },
-        { "text": "Kontrola za odabir datuma", "isCorrect": false },
-        { "text": "Traka izbornika", "isCorrect": false },
-        { "text": "Layout s 5 fiksnih područja", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što se u GridPane.add(node, col, row) znači 'col'?",
-      "explanation": "col je indeks stupca (column) u mreži.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Indeks stupca (column)", "isCorrect": true },
-        { "text": "Indeks retka (row)", "isCorrect": false },
-        { "text": "Širina u pikselima", "isCorrect": false },
-        { "text": "Visina u pikselima", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja dva layouta iz materijala koriste new HBox(5) / new VBox(5) za spacing?",
-      "explanation": "U primjerima su HBox i VBox kreirani s parametrom razmaka 5.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "HBox i VBox", "isCorrect": true },
-        { "text": "BorderPane i GridPane", "isCorrect": false },
-        { "text": "FlowPane i StackPane", "isCorrect": false },
-        { "text": "SplitPane i ScrollPane", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi PasswordField?",
-      "explanation": "PasswordField je TextField koji skriva unesene znakove.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Unos lozinke uz skrivanje znakova", "isCorrect": true },
-        { "text": "Odabir datuma", "isCorrect": false },
-        { "text": "Prikaz napretka", "isCorrect": false },
-        { "text": "Prikaz tabova", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi CheckBox?",
-      "explanation": "CheckBox je kontrola za on/off odabir (true/false).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Omogućava odabir da/ne (boolean)", "isCorrect": true },
-        { "text": "Odabire jedan od više (radio)", "isCorrect": false },
-        { "text": "Prikazuje tablicu", "isCorrect": false },
-        { "text": "Učitava FXML", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što radi RadioButton (u kontekstu grupe)?",
-      "explanation": "RadioButton u ToggleGroup omogućava da je odabran samo jedan od više.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Omogućava odabir jedne opcije među više (uz ToggleGroup)", "isCorrect": true },
-        { "text": "Uvijek omogućava multi-select", "isCorrect": false },
-        { "text": "Prikazuje napredak", "isCorrect": false },
-        { "text": "Otvara dijalog", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je Hyperlink u JavaFX-u?",
-      "explanation": "Hyperlink je kontrola nalik web linku koja se može kliknuti i okinuti akciju.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Klikabilni link koji okida akciju", "isCorrect": true },
-        { "text": "Kontrola za izbor boje", "isCorrect": false },
-        { "text": "Layout s 5 područja", "isCorrect": false },
-        { "text": "Kontejner za tabove", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je uloga MenuItem-a?",
-      "explanation": "MenuItem predstavlja jednu akciju unutar Menu-a (npr. Save, Open).",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "Predstavlja pojedinačnu opciju/akciju u izborniku", "isCorrect": true },
-        { "text": "Predstavlja cijeli MenuBar", "isCorrect": false },
-        { "text": "Predstavlja layout mreže", "isCorrect": false },
-        { "text": "Predstavlja root Scene-a", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je osnovna razlika između HBox i VBox?",
-      "explanation": "HBox raspoređuje elemente horizontalno, VBox vertikalno.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "HBox = horizontalno, VBox = vertikalno", "isCorrect": true },
-        { "text": "HBox = vertikalno, VBox = horizontalno", "isCorrect": false },
-        { "text": "Oba rade samo u FXML-u", "isCorrect": false },
-        { "text": "Oba su dijalozi", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "U BorderPane-u, gdje ide zaglavlje aplikacije (header)?",
-      "explanation": "Zaglavlje se tipično stavlja u TOP.",
-      "difficulty": "EASY",
-      "options": [
-        { "text": "TOP", "isCorrect": true },
-        { "text": "CENTER", "isCorrect": false },
-        { "text": "BOTTOM", "isCorrect": false },
-        { "text": "RIGHT", "isCorrect": false }
-      ]
-    },
-
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koja je razlika između padding i spacing? (Odaberite sve točne)",
-      "explanation": "Padding je unutarnji rub kontejnera, spacing je razmak između djece.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Padding = razmak između ruba kontejnera i sadržaja", "isCorrect": true },
-        { "text": "Spacing = razmak između child elemenata", "isCorrect": true },
-        { "text": "Padding i spacing su ista stvar", "isCorrect": false },
-        { "text": "Spacing postavlja marginu na Stage-u", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Kako se u FXML-u povezuje Button na metodu u controlleru? (Odaberite sve točne)",
-      "explanation": 'Najčešće se koristi onAction="#imeMetode" u FXML-u, a metoda u controlleru je @FXML.',
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": 'U FXML-u: onAction="#handleClick"', "isCorrect": true },
-        { "text": 'U controlleru: @FXML void handleClick() { ... }', "isCorrect": true },
-        { "text": 'U FXML-u: fx:id="#handleClick"', "isCorrect": false },
-        { "text": 'U controlleru: metoda mora biti static', "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se sljedeći kod kompilirati (FXML učitavanje i postavljanje na scenu)?",
-      "codeSnippet": 'import javafx.fxml.FXMLLoader;\nimport javafx.scene.Parent;\nimport javafx.scene.Scene;\nimport javafx.stage.Stage;\n\npublic class LoadFx {\n public void open(Stage stage) throws Exception {\n Parent root = FXMLLoader.load(getClass().getResource(" / view / main.fxml"));\n stage.setScene(new Scene(root));\n stage.show();\n }\n}',
-      "explanation": 'Da, kod se kompilira. U runtime-u će raditi ako resource " / view / main.fxml" stvarno postoji u classpathu.',
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Da, kompilira se (runtime ovisi o postojanju resursa)", "isCorrect": true },
-        { "text": "Ne, FXMLLoader.load ne postoji", "isCorrect": false },
-        { "text": "Ne, Scene ne može primiti Parent", "isCorrect": false },
-        { "text": "Ne, Stage se ne može show() iz metode", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što se dogodi ako u FXML-u postoji fx:id, ali u controlleru nema odgovarajućeg @FXML polja? (Odaberite sve točne)",
-      "explanation": "FXMLLoader neće odmah baciti grešku; polje se jednostavno neće injektirati (a u controlleru tog polja ni nema). Problem nastaje tek ako očekuješ to polje u kodu.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "FXMLLoader obično ne baca grešku samo zbog viška fx:id", "isCorrect": true },
-        { "text": "Element se i dalje kreira u UI hijerarhiji", "isCorrect": true },
-        { "text": "Aplikacija se ne može pokrenuti (uvijek)", "isCorrect": false },
-        { "text": "FXML se neće parsirati uopće", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje su prednosti FXML-a? (Odaberite sve točne)",
-      "explanation": "FXML odvaja izgled (View) od logike, olakšava održavanje i rad sa Scene Builderom.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Odvajanje prikaza od programske logike", "isCorrect": true },
-        { "text": "Lakše mijenjanje dizajna bez diranja Java koda", "isCorrect": true },
-        { "text": "Automatsko generiranje SQL sheme", "isCorrect": false },
-        { "text": "Obavezno ubrzava aplikaciju", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što ColumnConstraints(min/pref/max) predstavlja u GridPane-u? (Odaberite sve točne)",
-      "explanation": "ColumnConstraints definira ograničenja širine stupca (minimalna, preferirana, maksimalna).",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Minimalnu širinu stupca", "isCorrect": true },
-        { "text": "Preferiranu širinu stupca", "isCorrect": true },
-        { "text": "Maksimalnu širinu stupca", "isCorrect": true },
-        { "text": "Broj redaka u GridPane-u", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Za što se koristi Priority.ALWAYS u ColumnConstraints? (Odaberite sve točne)",
-      "explanation": "Priority.ALWAYS znači da se stupac širi (hgrow) i uzima dodatni prostor kad postoji.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Stupac može rasti i uzeti dodatni prostor", "isCorrect": true },
-        { "text": "Stupac se nikad ne mijenja", "isCorrect": false },
-        { "text": "Korisno kad se prozor povećava", "isCorrect": true },
-        { "text": "Postavlja boju stupca", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: dodavanje Separatora u ToolBar?",
-      "codeSnippet": 'import javafx.scene.control.;\nimport javafx.geometry.Orientation;\n\npublic class Tb {\n public ToolBar make() {\n return new ToolBar(\n new Button("A"),\n new Separator(Orientation.VERTICAL),\n new Button("B")\n );\n }\n}',
-      "explanation": "Da, ToolBar može sadržavati Separator, a Orientation.VERTICAL je validan.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Da, kompilira se", "isCorrect": true },
-        { "text": "Ne, Separator se ne smije koristiti u ToolBar-u", "isCorrect": false },
-        { "text": "Ne, Orientation ne postoji u javafx.geometry", "isCorrect": false },
-        { "text": "Ne, ToolBar prima samo MenuItem", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Kako se u JavaFX-u tipično postavlja keyboard shortcut na MenuItem? (Odaberite sve točne)",
-      "explanation": "Koristi se setAccelerator(KeyCombination.keyCombination('Ctrl+ N')).",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "menuItem.setAccelerator(KeyCombination.keyCombination('Ctrl+ N'))", "isCorrect": true },
-        { "text": "menuItem.setShortcut('Ctrl+ N')", "isCorrect": false },
-        { "text": "setAccelerator radi na MenuItem-u, ne na MenuBar-u", "isCorrect": true },
-        { "text": "Shortcut se postavlja samo u CSS-u", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što Tab.setClosable(false) utječe? (Odaberite sve točne)",
-      "explanation": "Onemogućuje zatvaranje taba (korisnik ne može kliknuti X).",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Korisnik ne može zatvoriti tab (nema/disabled X)", "isCorrect": true },
-        { "text": "Tab se automatski selektira", "isCorrect": false },
-        { "text": "Sadržaj taba se briše", "isCorrect": false },
-        { "text": "Utječe samo na taj Tab, ne na cijeli TabPane", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: stvaranje TableView i postavljanje ObservableList?",
-      "codeSnippet": 'import javafx.scene.control.;\nimport javafx.collections.;\n\npublic class T {\n public TableView<String> make() {\n TableView<String> tv = new TableView<>();\n ObservableList<String> items = FXCollections.observableArrayList("A", "B");\n tv.setItems(items);\n return tv;\n }\n}',
-      "explanation": "Da, kompilira se. TableView očekuje ObservableList za automatsko osvježavanje.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Da, kompilira se", "isCorrect": true },
-        { "text": "Ne, TableView ne radi s ObservableList", "isCorrect": false },
-        { "text": "Ne, FXCollections nema observableArrayList varijantu s varargs", "isCorrect": false },
-        { "text": "Ne, TableView mora imati stupce da bi se kompilirao", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje su dvije glavne politike scroll barova u ScrollPane-u prema primjerima? (Odaberite sve točne)",
-      "explanation": "Najčešće: AS_NEEDED (default) i ALWAYS/NEVER ovisno o potrebi.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "AS_NEEDED", "isCorrect": true },
-        { "text": "ALWAYS", "isCorrect": true },
-        { "text": "AUTO_HIDE", "isCorrect": false },
-        { "text": "DYNAMIC_ONLY", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što znači 'Scene Graph' u JavaFX-u? (Odaberite sve točne)",
-      "explanation": "Scene Graph je hijerarhija Node-ova unutar Scene-a (root i njegova djeca).",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Hijerarhija UI elemenata (Node) unutar Scene-a", "isCorrect": true },
-        { "text": "Samo graf animacija (frames)", "isCorrect": false },
-        { "text": "Povezanost Stage → Scene → root → children", "isCorrect": true },
-        { "text": "Služi samo za CSS", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: korištenje ToggleGroup s RadioButton-ima?",
-      "codeSnippet": 'import javafx.scene.control.;\n\npublic class R {\n public void setup() {\n ToggleGroup g = new ToggleGroup();\n RadioButton r1 = new RadioButton("A");\n RadioButton r2 = new RadioButton("B");\n r1.setToggleGroup(g);\n r2.setToggleGroup(g);\n }\n}',
-      "explanation": "Da, kompilira se. ToggleGroup osigurava da je odabran najviše jedan RadioButton u grupi.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Da, kompilira se", "isCorrect": true },
-        { "text": "Ne, RadioButton ne može u ToggleGroup", "isCorrect": false },
-        { "text": "Ne, ToggleGroup radi samo s ToggleButton", "isCorrect": false },
-        { "text": "Ne, mora se koristiti ButtonGroup", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je ObservableList u kontekstu UI-a? (Odaberite sve točne)",
-      "explanation": "ObservableList šalje obavijesti o promjenama, pa kontrole (TableView/ListView) mogu refreshati prikaz.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "Lista koja šalje notifikacije o promjenama", "isCorrect": true },
-        { "text": "Omogućava automatsko osvježavanje UI-a", "isCorrect": true },
-        { "text": "U JavaFX-u se ne koristi s kontrolama", "isCorrect": false },
-        { "text": "Zamjenjuje potrebu za MVC-om", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koji dio MVC-a je najčešće FXML datoteka?",
-      "explanation": "FXML definira izgled (View).",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": "View", "isCorrect": true },
-        { "text": "Model", "isCorrect": false },
-        { "text": "Controller", "isCorrect": false },
-        { "text": "Repository", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Kako se u JavaFX-u najčešće dodaje CSS datoteka na Scene? (Odaberite sve točne)",
-      "explanation": "Dodaje se putem scene.getStylesheets().add(url.toExternalForm()).",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": 'scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm())', "isCorrect": true },
-        { "text": "stage.getStylesheets().add(...)", "isCorrect": false },
-        { "text": 'scene.addCss("application.css")', "isCorrect": false },
-        { "text": "Resource treba pretvoriti u external form (String URL)", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: postavljanje sadržaja Tab-a na Button?",
-      "codeSnippet": 'import javafx.scene.control.*;\n\npublic class TabContent {\n public Tab make() {\n Tab t = new Tab("X");\n t.setContent(new Button("Click"));\n return t;\n }\n}',
-      "explanation": "Da, kompilira se. Tab content može biti bilo koji Node.",
-      "difficulty": "MEDIUM",
-      "options": [
-        { "text": 'Da, kompilira se', "isCorrect": true },
-        { "text": "Ne, Tab content mora biti Parent", "isCorrect": false },
-        { "text": "Ne, Button ne može biti u Tab-u", "isCorrect": false },
-        { "text": "Ne, Tab nema setContent()", "isCorrect": false }
-      ]
-    },
-
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": 'to se događa ako getClass().getResource(" / nepostoji.fxml") vrati null i to proslijediš FXMLLoader.load(null)? (Odaberite sve točne)',
-      "explanation": "Ako je URL null, dobit ćeš runtime grešku (najčešće NullPointerException) jer FXMLLoader ne može učitati null resource.",
+      "prompt": "Može li MenuItem biti direktno u MenuBar? (Odaberite sve točne)",
+      "explanation": "NE, MenuBar.getMenus() vraća ObservableList<Menu>! MenuItem se mora dodati u Menu, zatim Menu u MenuBar. Hijerarhija: MenuBar → Menu → MenuItem. Menu je container, MenuItem je akcija. MenuBar je samo top-level container.",
       "difficulty": "HARD",
       "options": [
-        { "text": "U runtime-u može baciti NullPointerException", "isCorrect": true },
-        { "text": "FXMLLoader automatski traži alternativni resource", "isCorrect": false },
-        { "text": "Problem je u krivoj putanji ili tome da resource nije u classpath-u", "isCorrect": true },
-        { "text": "Kompajler će to uhvatiti kao grešku", "isCorrect": false }
+        { "text": "NE, mora biti u Menu", "isCorrect": true },
+        { "text": "MenuBar prima samo Menu", "isCorrect": true },
+        { "text": "Hijerarhija: MenuBar→Menu→MenuItem", "isCorrect": true },
+        { "text": "DA, direktno se dodaje", "isCorrect": false },
+        { "text": "MenuItem je top-level", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": 'Što vrijedi za Controller klasu u FXML-u kada se koristi fx:controller? (Odaberite sve točne)',
-      "explanation": "FXMLLoader instancira controller refleksijom. Tipično treba no-arg konstruktor ili controller factory.",
+      "prompt": "Kada se ToggleButton automatski deselektira u ToggleGroup? (Odaberite sve točne)",
+      "explanation": "ToggleButton u ToggleGroup se deselektira kada se DRUGI button selektira! Klik na selektirani button ga NE deselektira (mutual exclusion). Za deselect mora se kliknuti drugi ili pozvati setSelected(false). Bez grupe: klik toggle-a state. clearSelection() na grupi deselektira sve.",
       "difficulty": "HARD",
       "options": [
-        { "text": "Controller se obično instancira refleksijom", "isCorrect": true },
-        { "text": "No-arg konstruktor je tipično potreban (ako nema controller factory)", "isCorrect": true },
-        { "text": "Controller mora biti interface", "isCorrect": false },
-        { "text": "Controller se nikad ne instancira automatski", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": 'Hoće li se kompilirati: poziv initialize() s pogrešnim signatureom?',
-      "codeSnippet": 'import javafx.fxml.FXML;\n\npublic class C {\n @FXML\n public void initialize(int x) {\n System.out.println(x);\n }\n}',
-      "explanation": 'Kompilira se, ali FXMLLoader neće prepoznati initialize(int) kao validan initialize handler (očekuje no-arg ili (URL, ResourceBundle)).',
-      "difficulty": "HARD",
-      "options": [
-        { "text": 'Da, kompilira se, ali FXMLLoader neće automatski pozvati initialize(int)', "isCorrect": true },
-        { "text": "Ne, ne kompilira se jer initialize mora biti bez parametara", "isCorrect": false },
-        { "text": "Da, i FXMLLoader će ga pozvati s 0", "isCorrect": false },
-        { "text": "Ne, @FXML se ne može koristiti na metodama", "isCorrect": false }
+        { "text": "Kad se drugi selektira", "isCorrect": true },
+        { "text": "Klik na selected NE deselektira", "isCorrect": true },
+        { "text": "Mutual exclusion behaviour", "isCorrect": true },
+        { "text": "Automatski nakon 2 sekunde", "isCorrect": false },
+        { "text": "Svaki klik deselektira", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": 'Što je točno za onAction="#metoda" u FXML-u? (Odaberite sve točne)',
-      "explanation": "FXMLLoader mapira handler na metodu u controlleru. Ako metoda ne postoji ili potpis nije kompatibilan, dobiješ LoadException u runtime-u.",
+      "prompt": "Što TabPane.getSelectionModel().getSelectedItem() vraća bez tab-ova? (Odaberite sve točne)",
+      "explanation": "Vraća NULL! Prazan TabPane nema selected tab-a. getSelectedIndex() vraća -1 (no selection). Dodavanje prvog tab-a ga automatski selektira. SelectionModel omogućava programsku kontrolu. Tab.setClosable(false) sprječava zatvaranje.",
       "difficulty": "HARD",
       "options": [
-        { "text": "Metoda mora postojati u controlleru", "isCorrect": true },
-        { "text": "Greška se često vidi kao LoadException pri učitavanju FXML-a", "isCorrect": true },
-        { "text": "Metoda mora obavezno vraćati boolean", "isCorrect": false },
-        { "text": "Handler se provjerava u compile time-u", "isCorrect": false }
+        { "text": "Vraća null", "isCorrect": true },
+        { "text": "getSelectedIndex() vraća -1", "isCorrect": true },
+        { "text": "Prvi tab automatski selected", "isCorrect": true },
+        { "text": "Baca IndexOutOfBoundsException", "isCorrect": false },
+        { "text": "Vraća prazan Tab", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje tvrdnje su točne za SplitPane s 3 itema? (Odaberite sve točne)",
-      "explanation": "SplitPane s 3 itema ima 2 dividera (indeksi 0 i 1) i pozicije su 0.0-1.0.",
+      "prompt": "Što Accordion.setExpandedPane(null) radi? (Odaberite sve točne)",
+      "explanation": "setExpandedPane(null) ZATVARA sve TitledPane-ove! Accordion dozvoljava null expanded pane. getExpandedPane() vraća null ako su svi zatvoreni. Korisnik može toggle expanded pane. TitledPane.setCollapsible(false) sprječava zatvaranje.",
       "difficulty": "HARD",
       "options": [
-        { "text": "Ima 2 dividera", "isCorrect": true },
-        { "text": "Divider indeksi su 0 i 1", "isCorrect": true },
-        { "text": "Pozicije dividera su u rasponu 0.0 do 1.0", "isCorrect": true },
-        { "text": "Pozicije dividera se postavljaju u pikselima", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: pokušaj dodavanja Node-a direktno u BorderPane preko getChildren()?",
-      "codeSnippet": 'import javafx.scene.layout.BorderPane;\nimport javafx.scene.control.Button;\n\npublic class B {\n public void t() {\n BorderPane p = new BorderPane();\n p.getChildren().add(new Button("X"));\n }\n}',
-      "explanation": "Neće se kompilirati: BorderPane ne izlaže public getChildren() (koristi setTop/setCenter...).",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "Ne, neće se kompilirati (nema public getChildren())", "isCorrect": true },
-        { "text": "Da, kompilira se i dodaje gumb u CENTER", "isCorrect": false },
-        { "text": "Da, kompilira se ali baca exception u runtime-u", "isCorrect": false },
-        { "text": "Ne, BorderPane ne može sadržavati kontrole", "isCorrect": false }
+        { "text": "Zatvara sve pane-ove", "isCorrect": true },
+        { "text": "null je validan", "isCorrect": true },
+        { "text": "getExpandedPane() vraća null", "isCorrect": true },
+        { "text": "Baca NullPointerException", "isCorrect": false },
+        { "text": "Ne može biti null", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je točno za TableView i njegove stupce? (Odaberite sve točne)",
-      "explanation": "TableView prikazuje redove iz items liste, a TableColumn definira kako se čita vrijednost iz objekta (cellValueFactory).",
+      "prompt": "Je li TreeView root vidljiv po defaultu? (Odaberite sve točne)",
+      "explanation": "DA, TreeView PO DEFAULTU prikazuje root! isShowRoot() vraća true. setShowRoot(false) skriva root - prikazuje samo children. Root je OBAVEZAN čak i kad je skriven! TreeItem.setExpanded(true) za expanding. getRoot() vraća null ako nije postavljen.",
       "difficulty": "HARD",
       "options": [
-        { "text": "TableView čita redove iz items (ObservableList)", "isCorrect": true },
-        { "text": "TableColumn koristi cellValueFactory za dohvat vrijednosti", "isCorrect": true },
-        { "text": "Stupci se automatski generiraju bez ikakvih postavki", "isCorrect": false },
-        { "text": "TableView može raditi i bez items (prikazat će prazno)", "isCorrect": true }
+        { "text": "DA, default prikazuje root", "isCorrect": true },
+        { "text": "isShowRoot() vraća true", "isCorrect": true },
+        { "text": "Root obavezan čak i skriven", "isCorrect": true },
+        { "text": "NE, default skriva root", "isCorrect": false },
+        { "text": "Root nije obavezan", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je razlika između setStyle(...) i CSS datoteke na Scene-u? (Odaberite sve točne)",
-      "explanation": "setStyle postavlja inline CSS na Node, dok CSS datoteka (stylesheet) djeluje kroz selektore na više čvorova.",
+      "prompt": "Što SplitPane.setDividerPosition() prima? (Odaberite sve točne)",
+      "explanation": "Prima (dividerIndex, position)! dividerIndex je 0-based int. position je double 0.0-1.0 (postotak). 3 itema = 2 dividera (indeksi 0 i 1). getDividerPositions() vraća double[]. setDividerPositions(double...) postavlja sve.",
       "difficulty": "HARD",
       "options": [
-        { "text": "setStyle postavlja inline stil na pojedini Node", "isCorrect": true },
-        { "text": "Stylesheet na Scene-u može stilizirati više elemenata selektorima", "isCorrect": true },
-        { "text": "Inline style uvijek koristi web CSS bez -fx- prefiksa", "isCorrect": false },
-        { "text": "Stylesheet se može dodati preko scene.getStylesheets()", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: upotreba getResource bez toExternalForm u stylesheets?",
-      "codeSnippet": 'import javafx.scene.Scene;\nimport javafx.scene.layout.BorderPane;\n\npublic class S {\n public Scene make() {\n Scene sc = new Scene(new BorderPane(), 200, 200);\n sc.getStylesheets().add(getClass().getResource("application.css").toString());\n return sc;\n }\n}',
-      "explanation": 'Kompilira se, ali je preporučeno koristiti toExternalForm(); toString() često radi jer je URL, no external form je standardan pristup.',
-      "difficulty": "HARD",
-      "options": [
-        { "text": 'Da, kompilira se (toExternalForm je preporučen)', "isCorrect": true },
-        { "text": "Ne, ne kompilira se jer add prima URL, ne String", "isCorrect": false },
-        { "text": "Ne, getStylesheets() ne postoji", "isCorrect": false },
-        { "text": "Da, ali uvijek baca exception u compile time-u", "isCorrect": false }
+        { "text": "dividerIndex (int)", "isCorrect": true },
+        { "text": "position (double 0.0-1.0)", "isCorrect": true },
+        { "text": "3 itema = 2 dividera", "isCorrect": true },
+        { "text": "position u pikselima", "isCorrect": false },
+        { "text": "Samo jedan divider", "isCorrect": false }
       ]
     },
     {
       "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je najčešći uzrok da @FXML polje ostane null nakon učitavanja FXML-a? (Odaberite sve točne)",
-      "explanation": "Najčešće: krivi fx:id (ne podudara se), fali @FXML anotacija na private polju, ili se učitava krivi FXML.",
+      "prompt": "Kada ScrollPane prikazuje scrollbar-ove po defaultu? (Odaberite sve točne)",
+      "explanation": "Default policy je AS_NEEDED! Prikazuje scrollbar samo kad je content veći od viewport-a. ALWAYS = uvijek prikazuje. NEVER = nikad ne prikazuje. setVbarPolicy/HbarPolicy kontroliraju vertical/horizontal. setFitToWidth/Height prilagođava content.",
       "difficulty": "HARD",
       "options": [
-        { "text": "fx:id u FXML-u ne odgovara nazivu polja", "isCorrect": true },
-        { "text": "Polje je private i nema @FXML", "isCorrect": true },
-        { "text": "FXMLLoader uvijek puni sva polja bez obzira na naziv", "isCorrect": false },
-        { "text": "Učitava se druga FXML datoteka nego što misliš", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što vrijedi za BorderPane pozicije? (Odaberite sve točne)",
-      "explanation": "BorderPane ima 5 pozicija i svaka pozicija može imati samo jedan Node; za više elemenata koristi se dodatni container (npr. HBox).",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "Postoji TOP/LEFT/CENTER/RIGHT/BOTTOM", "isCorrect": true },
-        { "text": "Svaka pozicija prima samo jedan Node", "isCorrect": true },
-        { "text": "Za više elemenata u TOP koristi se npr. HBox", "isCorrect": true },
-        { "text": "BorderPane može imati neograničeno djece u CENTER bez dodatnog layouta", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: poziv launch(args) iz obične metode koja nije static main?",
-      "codeSnippet": "import javafx.application.Application;\nimport javafx.stage.Stage;\n\npublic class A extends Application {\n @Override public void start(Stage s) { s.show(); }\n public void runApp(String[] args) { launch(args); }\n}",
-      "explanation": "Da, kompilira se, ali u praksi launch se tipično zove iz static main ili direktno preko JVM-a; poziv iz instance metode je legalan za kompilaciju.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "Da, kompilira se", "isCorrect": true },
-        { "text": "Ne, launch se smije zvati samo u main metodi", "isCorrect": false },
-        { "text": "Ne, launch je private metoda", "isCorrect": false },
-        { "text": "Da, ali neće pokrenuti JavaFX Application Thread nikad", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje tvrdnje su točne za 'MenuBar → Menu → MenuItem'? (Odaberite sve točne)",
-      "explanation": "MenuBar sadrži Menu, a Menu sadrži MenuItem (akcije). MenuItem se ne dodaje direktno u MenuBar.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "MenuBar sadrži Menu objekte", "isCorrect": true },
-        { "text": "Menu sadrži MenuItem objekte", "isCorrect": true },
-        { "text": "MenuItem se može direktno dodati u MenuBar.getMenus()", "isCorrect": false },
-        { "text": "Menu može sadržavati i pod-izbornik (Menu unutar Menu-a)", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je najtočniji opis razlike između ListView i TableView? (Odaberite sve točne)",
-      "explanation": "ListView je lista (jedna kolona prikaza), TableView prikazuje tablicu (više stupaca) s TableColumn definicijama.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "ListView prikazuje listu stavki (obično jedan prikazni stupac)", "isCorrect": true },
-        { "text": "TableView prikazuje redove i stupce (TableColumn)", "isCorrect": true },
-        { "text": "TableView ne može raditi s ObservableList", "isCorrect": false },
-        { "text": "ListView je obavezno hijerarhijski prikaz (stablo)", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: korištenje ChoiceBox bez generics tipa?",
-      "codeSnippet": 'import javafx.scene.control.ChoiceBox;\n\npublic class Ch {\n public void t() {\n ChoiceBox cb = new ChoiceBox();\n cb.getItems().add("A");\n }\n}',
-      "explanation": 'Da, kompilira se uz raw type upozorenja. Preporuka je koristiti ChoiceBox<String>.',
-      "difficulty": "HARD",
-      "options": [
-        { "text": 'Da, kompilira se (raw type warning)', "isCorrect": true },
-        { "text": "Ne, ChoiceBox mora imati generic tip da bi se kompiliralo", "isCorrect": false },
-        { "text": "Ne, getItems() ne postoji na ChoiceBox", "isCorrect": false },
-        { "text": 'Da, ali add("A") nije dopušten', "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje tvrdnje su točne za GridPane koordinate? (Odaberite sve točne)",
-      "explanation": "GridPane pozicionira node po (columnIndex, rowIndex). Elementi se mogu poravnati i constraintati (Hgap/Vgap, constraints).",
-      "difficulty": "HARD",
-      "options": [
-        { "text": 'Dodavanje ide kao add(node, col, row)', "isCorrect": true },
-        { "text": "Hgap/Vgap su razmaci između ćelija", "isCorrect": true },
-        { "text": "GridPane koristi apsolutne piksele umjesto redaka/stupaca", "isCorrect": false },
-        { "text": "ColumnConstraints/RowConstraints mogu utjecati na veličine", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što se događa ako u BorderPane-u više puta pozoveš setLeft(...) s različitim nodeovima? (Odaberite sve točne)",
-      "explanation": "Svaka pozicija ima samo jednog node-a; novi node zamjenjuje stari na toj poziciji.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "Novi node zamjenjuje prethodni (overwrite)", "isCorrect": true },
-        { "text": "Oba node-a ostaju prikazana", "isCorrect": false },
-        { "text": "Baca exception jer je pozicija zauzeta", "isCorrect": false },
-        { "text": "Za više elemenata treba koristiti container (npr. VBox) kao left content", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "CODE_WILL_COMPILE",
-      "prompt": "Hoće li se kompilirati: dodavanje više elemenata u TOP BorderPane-a preko HBox-a?",
-      "codeSnippet": 'import javafx.scene.layout.;\nimport javafx.scene.control.;\n\npublic class BP {\n public BorderPane make() {\n BorderPane bp = new BorderPane();\n HBox top = new HBox(5, new Button("A"), new Button("B"));\n bp.setTop(top);\n return bp;\n }\n}',
-      "explanation": 'Da, kompilira se. BorderPane TOP prima jedan Node, ali taj Node može biti HBox s više djece.',
-      "difficulty": "HARD",
-      "options": [
-        { "text": 'Da, kompilira se', "isCorrect": true },
-        { "text": 'Ne, BorderPane TOP ne može primiti HBox', "isCorrect": false },
-        { "text": "Ne, HBox ne može primiti Button", "isCorrect": false },
-        { "text": "Da, ali samo ako je TOP prazan", "isCorrect": false }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Koje su realne posljedice krivog -fx- prefiksa u JavaFX CSS-u? (Odaberite sve točne)",
-      "explanation": "Ako koristiš web CSS property bez -fx-, JavaFX ga najčešće ignorira pa stil ne djeluje.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": "Stil se može ignorirati i neće se primijeniti", "isCorrect": true },
-        { "text": "Aplikacija se neće kompilirati", "isCorrect": false },
-        { "text": "Može izgledati kao da CSS 'ne radi'", "isCorrect": true },
-        { "text": "Rješenje je koristiti odgovarajuća -fx-* svojstva", "isCorrect": true }
-      ]
-    },
-    {
-      "type": "MULTIPLE_CHOICE",
-      "prompt": "Što je točno za povezivanje TableColumn s podacima preko PropertyValueFactory? (Odaberite sve točne)",
-      "explanation": "PropertyValueFactory koristi naziv propertyja da pronađe getter (bean konvencija) ili property metodu; naziv treba odgovarati propertyju.",
-      "difficulty": "HARD",
-      "options": [
-        { "text": 'Prima naziv propertyja kao String (npr. "firstName")', "isCorrect": true },
-        { "text": 'Oslanja se na bean konvencije (getFirstName / firstNameProperty)', "isCorrect": true },
-        { "text": 'Automatski radi i ako je naziv potpuno drugačiji', "isCorrect": false },
-        { "text": 'Koristi se unutar setCellValueFactory(...)', "isCorrect": true }
+        { "text": "AS_NEEDED je default", "isCorrect": true },
+        { "text": "Samo kad je content veći", "isCorrect": true },
+        { "text": "ALWAYS/NEVER opcije", "isCorrect": true },
+        { "text": "Uvijek prikazuje", "isCorrect": false },
+        { "text": "Nikad ne prikazuje", "isCorrect": false }
       ]
     }
   ]

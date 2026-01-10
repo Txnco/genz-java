@@ -17,6 +17,11 @@ npm run db:seed        # Seed with admin/student users + lectures
 npm run db:studio      # Open Prisma Studio GUI
 ```
 
+# Windows (PowerShell)
+$env:SEED_MODE="RESET"; npx tsx prisma/seed.ts
+# Windows (Command Prompt)
+set SEED_MODE=RESET && npx tsx prisma/seed.ts
+
 **Always run `db:generate` after modifying `prisma/schema.prisma`** before starting dev server.
 
 ### Testing

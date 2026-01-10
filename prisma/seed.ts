@@ -502,7 +502,7 @@ async function main() {
   console.log('Seeding database...')
 
   // Create admin user
-  const adminPassword = await bcrypt.hash('admin123', 12)
+  const adminPassword = await bcrypt.hash('KWdrwc%WsqTDqX!i=,N{', 12)
   const admin = await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},
@@ -516,7 +516,7 @@ async function main() {
   console.log('Created admin user:', admin.email)
 
   // Create test student
-  const studentPassword = await bcrypt.hash('student123', 12)
+  const studentPassword = await bcrypt.hash('KWdrwc%WsqTDqX!i=,N{', 12)
   const student = await prisma.user.upsert({
     where: { email: 'student@example.com' },
     update: {},

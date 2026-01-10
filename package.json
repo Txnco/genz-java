@@ -13,7 +13,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "build": "prisma generate && next build"
+    "build": "prisma generate && next build",
+    "import-questions": "npx tsx importer/import-to-db.ts"
   },
   "keywords": [
     "java",

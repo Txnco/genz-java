@@ -289,6 +289,18 @@ function formatQuestionType(type: QuestionType): string {
     CODE_WILL_COMPILE: 'Analiza koda',
     CODE_WILL_CRASH: 'Analiza koda',
     SHORT_TEXT: 'Kratki odgovor',
+    // New TVZ question types
+    CODE_RUNTIME_BEHAVIOR: 'Ponašanje koda',
+    CODE_OUTPUT: 'Izlaz koda',
+    FIND_THE_ERROR: 'Pronađi grešku',
+    WHAT_IS_MISSING: 'Što nedostaje',
+    WHAT_MUST_BE_FIXED: 'Što treba popraviti',
+    WHICH_STATEMENTS_COMPILE: 'Koje naredbe se izvršavaju',
+    WHICH_EXCEPTIONS_OCCUR: 'Koje iznimke nastaju',
+    WHICH_METHOD_IS_TERMINAL: 'Koja metoda je terminalna',
+    WHICH_TYPE_IS_RETURNED: 'Koji tip se vraća',
+    ORDER_OF_EXECUTION: 'Redoslijed izvršavanja',
+    EDGE_CASE_BEHAVIOR: 'Granični slučaj',
   }
   return typeMap[type] || type
 }

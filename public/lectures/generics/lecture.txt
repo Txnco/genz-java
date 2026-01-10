@@ -1,0 +1,1744 @@
+Generičko programiranje u Javi
+Type-Safe kod s Generics 🎯
+
+🔒 Type Safety • 🔄 Reusability • ⚡ Performance
+
+
+1️⃣ Uvod u Generics
+
+Problem bez Generics-a
+Zašto ih trebamo?
+
+2️⃣ Generičke metode
+
+Sintaksa <T>
+Type parameters
+
+3️⃣ Generičke klase
+
+Kreiranje generičkih klasa
+Multiple type parameters
+
+4️⃣ Bounded Types
+
+Upper bounds (extends)
+Lower bounds (super)
+
+5️⃣ Wildcards
+
+? wildcard
+PECS princip
+
+6️⃣ Best Practices
+
+Raw types - ne!
+Type erasure
+
+2
+
+😰 Problem: Bez Generics-a (pre-Java 5)
+
+Scenario: Lista igrača u gaming lobby-ju
+
+❌ Prije Java 5 - Sve je Object
+// Lista može sadržavati bilo što!
+List players = new ArrayList();
+
+// Dodajemo igrace
+players.add(new Player("xXDragonSlayerXx"));
+players.add(new Player("NoobMaster69"));
+
+// Netko slučajno doda String umjesto Player objekta!
+players.add("Ovo nije Player!");  // 😱 Kompajler to dozvoli!
+
+// Izvlačenje podataka - OPASNO!
+for (int i = 0; i < players.size(); i++) {
+Player p = (Player) players.get(i);  // ⚠️ Casting obavezan
+System.out.println(p.getUsername());
+}
+
+// 💥 RUNTIME ERROR: ClassCastException!
+// Exception in thread "main" java.lang.ClassCastException:
+// java.lang.String cannot be cast to Player
+
+⚠️ Problemi bez Generics-a
+
+❌ Greške u runtime-u - ne u compile-time!
+❌ Potreban casting - repetitivan i opasan kod
+❌ Nema type safety - možeš staviti bilo što u listu
+❌ Teže čitljiv kod - nije jasno što lista sadržava
+
+3
+
+✨ Rješenje: Generics!
+
+❌ BEZ Generics
+
+// Nije type-safe
+List players = new ArrayList();
+players.add(new Player("Ana"));
+players.add("Greška");  // OK 😱
+
+// Casting potreban
+Player p = (Player) players.get(0);
+
+// Runtime greška!
+Player p2 = (Player) players.get(1);
+// 💥 ClassCastException!
+
+✅ SA Generics
+
+// Type-safe!
+List<Player> players = new ArrayList<>();
+players.add(new Player("Ana"));
+players.add("Greška");  // ❌ COMPILE ERROR!
+
+// Bez castinga!
+Player p = players.get(0);
+
+// Sigurno - nema runtime greški! ✅
+Player p2 = players.get(1);
+
+🎯 Što su Generics?
+
+Generics omogućavaju da definiraš klase i metode s tipovima kao parametrima.
+Kompajler onda može provjeriti tipove u compile-time, ne u runtime!
+
+🎁 Prednosti Generics-a:
+
+✅ Type safety u compile-time - greške se hvataju odmah
+✅ Elimininacija castinga - čitljiviji kod
+✅ Reusabilnost koda - jedna klasa/metoda za sve tipove
+✅ Bolja dokumentacija - jasno se vidi što metoda prima
+
+4
+
+🔧 Generičke metode
+
+Sintaksa
+
+public <T> void methodName(T param) {
+// T može biti bilo koji tip!
+}
+
+<T> se naziva type parameter i označava da metoda koristi generički tip.
+
+Primjer: Ispis array-a - Generic način
+// Jedna metoda za sve tipove! 🎉
+public static <T> void printArray(T[] array) {
+for (T element : array) {
+System.out.print(element + " ");
+}
+System.out.println();
+}
+
+// Korištenje - radi za sve tipove!
+Integer[] numbers = {1, 2, 3, 4, 5};
+printArray(numbers);  // Output: 1 2 3 4 5
+
+String[] names = {"Ana", "Marko", "Ivana"};
+printArray(names);  // Output: Ana Marko Ivana
+
+Double[] prices = {19.99, 29.99, 39.99};
+printArray(prices);  // Output: 19.99 29.99 39.99
+
+❌ Bez Generics - Duplicate kod
+
+// Morali bi napisati 3 metode!
+public static void printIntArray(Integer[] arr) {
+for (Integer n : arr) {
+System.out.print(n + " ");
+}
+}
+
+public static void printStringArray(String[] arr) {
+for (String s : arr) {
+System.out.print(s + " ");
+}
+}
+
+public static void printDoubleArray(Double[] arr) {
+for (Double d : arr) {
+System.out.print(d + " ");
+}
+}
+// 😫 Copy-paste, teško za održavanje!
+
+✅ S Generics - DRY princip
+
+// Samo jedna metoda! 🎉
+public static <T> void printArray(T[] arr) {
+for (T element : arr) {
+System.out.print(element + " ");
+}
+}
+
+// Radi za SVE tipove!
+// Integer, String, Double,
+// Player, User, Post...
+// bilo što!
+
+5
+
+🔤 Konvencije za Type Parameters
+
+Po konvenciji se koriste velika slova za type parameters:
+
+T - Type
+Opći tip - najčešće korišteno
+
+public class Box<T> {
+private T item;
+}
+
+E - Element
+Element u kolekciji
+
+public interface List<E> {
+void add(E element);
+}
+
+K, V - Key, Value
+Za Map strukture
+
+public interface Map<K, V> {
+V get(K key);
+}
+
+N - Number
+Za numeričke tipove
+
+public class Calculator<N> {
+N sum(N a, N b);
+}
+
+Instagram primjer - Multiple type parameters
+// Metoda koja prima DVA generička tipa
+public static <K, V> Map<K, V> createMap(K key, V value) {
+Map<K, V> map = new HashMap<>();
+map.put(key, value);
+return map;
+}
+
+// Korištenje:
+Map<String, Integer> likes = createMap("post_123", 1500);
+Map<String, User> followers = createMap("@ana", new User("Ana"));
+
+💡 Dobra praksa
+Uvijek koristi konvencionalna imena (T, E, K, V)
+za type parameters - to će razumjeti svaki Java developer!
+
+6
+
+📦 Generičke klase
+
+Klasa može imati type parameter koji se koristi kroz cijelu klasu.
+
+Primjer: Box<T> - Generic kontejner
+// Generička klasa koja može držati bilo koji tip
+public class Box<T> {
+private T content;
+
+public Box(T content) {
+this.content = content;
+}
+
+public T getContent() {
+return content;
+}
+
+public void setContent(T content) {
+this.content = content;
+}
+}
+
+// Korištenje:
+Box<String> stringBox = new Box<>("Hello Generics!");
+String text = stringBox.getContent();  // Bez castinga!
+
+Box<Integer> numberBox = new Box<>(42);
+Integer num = numberBox.getContent();  // Type-safe!
+
+Box<User> userBox = new Box<>(new User("Ana"));
+User user = userBox.getContent();  // Odlično!
+
+Gaming primjer - Inventory sistem
+// Generic inventory za bilo koji tip itema
+public class Inventory<T> {
+private List<T> items;
+private int maxSize;
+
+public Inventory(int maxSize) {
+this.items = new ArrayList<>();
+this.maxSize = maxSize;
+}
+
+public boolean addItem(T item) {
+if (items.size() < maxSize) {
+items.add(item);
+return true;
+}
+return false; // Inventory full!
+}
+
+public T getItem(int index) {
+return items.get(index);
+}
+
+public int getSize() {
+return items.size();
+}
+}
+
+// Korištenje - različiti inventoryi za različite tipove:
+Inventory<Weapon> weapons = new Inventory<>(10);
+weapons.addItem(new Weapon("Sword", 50));
+weapons.addItem(new Weapon("Bow", 30));
+
+Inventory<Potion> potions = new Inventory<>(20);
+potions.addItem(new Potion("Health", 25));
+potions.addItem(new Potion("Mana", 15));
+
+// Type-safe - ne možeš staviti Weapon u potions inventory!
+// potions.addItem(new Weapon(...)); // ❌ COMPILE ERROR!
+
+7
+
+🥞 Real-world primjer: Generic Stack
+
+Stack<T> - LIFO struktura podataka
+// Generic Stack implementacija
+public class Stack<T> {
+private List<T> elements;
+private int maxSize;
+
+public Stack(int maxSize) {
+this.elements = new ArrayList<>();
+this.maxSize = maxSize;
+}
+
+// Push element na vrh stacka
+public void push(T element) {
+if (elements.size() >= maxSize) {
+throw new RuntimeException("Stack overflow! 💥");
+}
+elements.add(element);
+}
+
+// Pop - ukloni i vrati element s vrha
+public T pop() {
+if (isEmpty()) {
+throw new RuntimeException("Stack je prazan!");
+}
+return elements.remove(elements.size() - 1);
+}
+
+// Peek - pogledaj vrh bez uklanjanja
+public T peek() {
+if (isEmpty()) {
+throw new RuntimeException("Stack je prazan!");
+}
+return elements.get(elements.size() - 1);
+}
+
+public boolean isEmpty() {
+return elements.isEmpty();
+}
+
+public int size() {
+return elements.size();
+}
+}
+
+Korištenje - Browser History primjer
+// Stack za browser back button funkcionalnost
+Stack<String> browserHistory = new Stack<>(50);
+
+// Korisnik browsea po stranicama
+browserHistory.push("google.com");
+browserHistory.push("youtube.com");
+browserHistory.push("instagram.com");
+browserHistory.push("tiktok.com");
+
+System.out.println("Trenutna stranica: " + browserHistory.peek());
+// Output: Trenutna stranica: tiktok.com
+
+// Klikni "Back" button
+String previous = browserHistory.pop();
+System.out.println("Vraćam se s: " + previous);
+// Output: Vraćam se s: tiktok.com
+
+System.out.println("Sada sam na: " + browserHistory.peek());
+// Output: Sada sam na: instagram.com
+
+🎯 Zašto je ovo odlično?
+Jedna Stack<T> klasa radi za SVE tipove:
+Stack<String>, Stack<Integer>, Stack<User>, Stack<Post>...
+Bez Generics-a bi morali pisati zasebnu klasu za svaki tip! 😫
+
+8
+
+🔒 Bounded Type Parameters
+
+Ponekad želiš ograničiti koje tipove generic može prihvatiti.
+Koristi extends keyword za upper bound!
+
+Sintaksa - extends keyword
+// T mora biti Number ili nešto što nasljeđuje Number
+public <T extends Number> void someMethod(T number) {
+// Sada možemo pozvati metode iz Number klase!
+double value = number.doubleValue();
+}
+
+❌ Bez bounds - preopćenito
+
+// T može biti BILO ŠTO
+public static <T> double sum(List<T> list) {
+double total = 0;
+for (T item : list) {
+// ❌ ERROR: Ne možemo
+// koristiti doubleValue()
+// jer T nije Number!
+total += item.doubleValue();
+}
+return total;
+}
+
+✅ S bounds - specifično
+
+// T mora biti Number ili podklasa
+public static <T extends Number>
+double sum(List<T> list) {
+double total = 0;
+for (T item : list) {
+// ✅ OK! T extends Number
+// pa ima doubleValue()
+total += item.doubleValue();
+}
+return total;
+}
+
+E-commerce primjer - Calculator
+// Bounded generic klasa za kalkulacije
+public class Calculator<T extends Number> {
+
+public double add(T a, T b) {
+return a.doubleValue() + b.doubleValue();
+}
+
+public double subtract(T a, T b) {
+return a.doubleValue() - b.doubleValue();
+}
+
+public double multiply(T a, T b) {
+return a.doubleValue() * b.doubleValue();
+}
+}
+
+// Korištenje:
+Calculator<Integer> intCalc = new Calculator<>();
+double result1 = intCalc.add(5, 10);  // 15.0
+
+Calculator<Double> doubleCalc = new Calculator<>();
+double result2 = doubleCalc.multiply(2.5, 4.0);  // 10.0
+
+// ❌ NE radi - String nije Number!
+// Calculator<String> stringCalc = new Calculator<>(); // COMPILE ERROR!
+
+9
+
+🔗 Multiple Bounds
+
+Tip može imati više ograničenja odjednom!
+
+Sintaksa - & operator
+// T mora biti i Number I Comparable
+public <T extends Number & Comparable<T>> T max(T a, T b) {
+return a.compareTo(b) > 0 ? a : b;
+}
+
+Gaming Leaderboard primjer
+// Interface za rangiranje igrača
+interface Rankable {
+int getRank();
+}
+
+// Klasa mora biti Comparable I implementirati Rankable
+public class Leaderboard<T extends Comparable<T> & Rankable> {
+private List<T> players;
+
+public Leaderboard() {
+this.players = new ArrayList<>();
+}
+
+public void addPlayer(T player) {
+players.add(player);
+// Možemo sortirati jer je Comparable
+Collections.sort(players);
+}
+
+public T getTopPlayer() {
+return players.isEmpty() ? null : players.get(0);
+}
+
+public void displayRankings() {
+for (T player : players) {
+// Možemo koristiti getRank() jer implementira Rankable
+System.out.println("Rank " + player.getRank() + ": " + player);
+}
+}
+}
+
+// Player klasa koja zadovoljava obje uvjete
+class Player implements Comparable<Player>, Rankable {
+private String username;
+private int score;
+private int rank;
+
+@Override
+public int compareTo(Player other) {
+return Integer.compare(other.score, this.score); // Više = bolje
+}
+
+@Override
+public int getRank() {
+return rank;
+}
+}
+
+⚠️ Važno pravilo
+Ako imaš multiple bounds:
+
+✅ Klasa mora biti prva (ako postoji)
+✅ Interface-i dolaze nakon
+Primjer: <T extends Number & Comparable<T> & Serializable>
+
+10
+
+🃏 Wildcards - Zamjenski znakovi
+
+Wildcard ? označava "nepoznati tip".
+Koristi se u situacijama gdje ne znaš ili ne brineš o konkretnom tipu.
+
+Problem: Previše specifična metoda
+// Ova metoda radi SAMO za List<Integer>
+public static void printList(List<Integer> list) {
+for (Integer i : list) {
+System.out.println(i);
+}
+}
+
+// Problem:
+List<Integer> ints = List.of(1, 2, 3);
+printList(ints);  // ✅ OK
+
+List<String> strings = List.of("a", "b", "c");
+printList(strings);  // ❌ ERROR - ne prima String!
+
+List<Double> doubles = List.of(1.5, 2.5);
+printList(doubles);  // ❌ ERROR - ne prima Double!
+
+Rješenje: Unbounded wildcard (?)
+// ? = bilo koji tip! Univerzalna metoda!
+public static void printList(List<?> list) {
+for (Object element : list) {
+System.out.println(element);
+}
+}
+
+// Sada radi za SVE tipove! 🎉
+List<Integer> ints = List.of(1, 2, 3);
+printList(ints);  // ✅ OK
+
+List<String> strings = List.of("a", "b", "c");
+printList(strings);  // ✅ OK
+
+List<Double> doubles = List.of(1.5, 2.5);
+printList(doubles);  // ✅ OK
+
+List<User> users = getUsers();
+printList(users);  // ✅ OK
+
+🤔 Kada koristiti wildcard?
+
+✅ Kada metoda samo čita elemente
+✅ Kada ne ovisi o konkretnom tipu
+✅ Kada želiš maksimalnu fleksibilnost
+
+11
+
+⬆️ Upper Bounded Wildcards
+
+<? extends Type> = "bilo koji tip koji JE ili NASLJEĐUJE Type"
+
+Spotify primjer - suma duljina pjesama
+// Želimo sumirati duljine pjesama različitih tipova
+public static double sumDurations(List<? extends Number> durations) {
+double total = 0;
+for (Number duration : durations) {
+total += duration.doubleValue();
+}
+return total;
+}
+
+// Radi za SVE što nasljeđuje Number!
+List<Integer> intDurations = List.of(180, 240, 195);  // sekunde
+double total1 = sumDurations(intDurations);  // ✅ OK
+
+List<Double> doubleDurations = List.of(3.5, 4.2, 3.8);  // minute
+double total2 = sumDurations(doubleDurations);  // ✅ OK
+
+List<Long> longDurations = List.of(180000L, 240000L);  // milisekunde
+double total3 = sumDurations(longDurations);  // ✅ OK
+
+// ❌ NE radi - String nije Number!
+// List<String> strings = List.of("3:00", "4:00");
+// sumDurations(strings); // COMPILE ERROR!
+
+Gaming primjer - hijerarhija karaktera
+// Hijerarhija klasa
+class Character {
+protected String name;
+protected int health;
+}
+
+class Warrior extends Character {
+private int armor;
+}
+
+class Mage extends Character {
+private int mana;
+}
+
+// Metoda koja prima bilo koji Character ili podklasu
+public static void healParty(List<? extends Character> party) {
+for (Character member : party) {
+member.health = 100;  // Full heal!
+System.out.println("Healed " + member.name);
+}
+}
+
+// Korištenje:
+List<Warrior> warriors = getWarriors();
+healParty(warriors);  // ✅ Warrior extends Character
+
+List<Mage> mages = getMages();
+healParty(mages);  // ✅ Mage extends Character
+
+List<Character> mixed = getMixedParty();
+healParty(mixed);  // ✅ Character sam po sebi
+
+💡 Kada koristiti <? extends T>?
+Koristi kada želiš ČITATI podatke iz kolekcije,
+ali ne i pisati. Think: "Producer extends" 📤
+
+12
+
+⬇️ Lower Bounded Wildcards
+
+<? super Type> = "bilo koji tip koji JE ili NADKLASA od Type"
+
+Primjer: Dodavanje elemenata u listu
+// Možemo PISATI Integer u listu Number ili Object
+public static void addNumbers(List<? super Integer> list) {
+list.add(1);
+list.add(2);
+list.add(3);
+}
+
+// Korištenje:
+List<Integer> integers = new ArrayList<>();
+addNumbers(integers);  // ✅ OK - Integer
+
+List<Number> numbers = new ArrayList<>();
+addNumbers(numbers);  // ✅ OK - Number je super od Integer
+
+List<Object> objects = new ArrayList<>();
+addNumbers(objects);  // ✅ OK - Object je super od Integer
+
+// ❌ NE radi - Double nije super od Integer!
+// List<Double> doubles = new ArrayList<>();
+// addNumbers(doubles); // COMPILE ERROR!
+
+Discord primjer - slanje notifikacija
+// Hijerarhija notifikacija
+class Notification {
+protected String message;
+}
+
+class DirectMessage extends Notification {
+private String sender;
+}
+
+class MentionNotification extends Notification {
+private String channel;
+}
+
+// Možemo PISATI DirectMessage u listu koja prihvaća Notification ili super
+public static void sendDirectMessages(
+List<? super DirectMessage> inbox,
+String sender
+) {
+inbox.add(new DirectMessage(sender, "Hey! 👋"));
+inbox.add(new DirectMessage(sender, "What's up?"));
+}
+
+// Korištenje:
+List<DirectMessage> dmList = new ArrayList<>();
+sendDirectMessages(dmList, "@john");  // ✅ OK
+
+List<Notification> allNotifs = new ArrayList<>();
+sendDirectMessages(allNotifs, "@jane");  // ✅ OK - može sve notifikacije
+
+List<Object> everything = new ArrayList<>();
+sendDirectMessages(everything, "@bob");  // ✅ OK - Object sve prihvaća
+
+💡 Kada koristiti <? super T>?
+Koristi kada želiš PISATI podatke u kolekciju.
+Think: "Consumer super" 📥
+
+13
+
+🎯 PECS Princip
+
+Producer
+Extends,
+Consumer
+Super
+
+Zlatno pravilo za wildcards! ✨
+
+📤 Producer Extends
+Kada čitaš/dobavljaš iz kolekcije:
+
+// Čitanje iz liste
+public static void processNumbers(
+List<? extends Number> numbers
+) {
+for (Number n : numbers) {
+System.out.println(n.doubleValue());
+}
+// ✅ Čitanje - OK!
+// ❌ Pisanje - NE!
+// numbers.add(5); // ERROR
+}
+
+📥 Consumer Super
+Kada pišeš/dodaješ u kolekciju:
+
+// Pisanje u listu
+public static void addIntegers(
+List<? super Integer> list
+) {
+list.add(1);
+list.add(2);
+list.add(3);
+// ✅ Pisanje - OK!
+// ⚠️ Čitanje - samo Object
+Object obj = list.get(0);
+}
+
+Real-world primjer: Collections.copy()
+// Stvarna deklaracija iz Java Collections API
+public static <T> void copy(
+List<? super T> dest,     // Consumer (pišemo u dest)
+List<? extends T> src    // Producer (čitamo iz src)
+) {
+for (T item : src) {        // Čitanje iz src
+dest.add(item);         // Pisanje u dest
+}
+}
+
+// Primjer korištenja:
+List<Integer> source = List.of(1, 2, 3);
+List<Number> destination = new ArrayList<>();
+
+Collections.copy(destination, source);
+// ✅ Radi jer:
+// - destination je List<? super Integer> (Number je super od Integer)
+// - source je List<? extends Integer> (Integer extends Integer)
+
+💡 Kako zapamtiti PECS?
+
+📤 Producer (izvor) → čitaš podatke → extends
+📥 Consumer (odredište) → pišeš podatke → super
+🎯 Ako SAMO čitaš i pišeš → ne koristi wildcards, koristi <T>
+
+14
+
+🔄 Type Erasure - Brisanje tipova
+
+Java Generics koriste "type erasure" - kompajler briše informaciju o
+tipovima u runtime-u zbog backward kompatibilnosti s Java verzijama prije 5.
+
+📝 Source kod (što pišeš)
+
+// Tvoj kod s Generics
+List<String> strings = new ArrayList<>();
+strings.add("Java");
+strings.add("Generics");
+
+String first = strings.get(0);
+
+// Generic metoda
+public <T> void process(T item) {
+System.out.println(item);
+}
+
+⚙️ Bytecode (što vidi JVM)
+
+// Nakon type erasure
+List strings = new ArrayList();
+strings.add("Java");
+strings.add("Generics");
+
+String first = (String) strings.get(0);  // Casting!
+
+// T se zamjenjuje s Object
+public void process(Object item) {
+System.out.println(item);
+}
+
+Type Erasure s bounded types
+// Source kod
+public class Calculator<T extends Number> {
+private T value;
+
+public double getValue() {
+return value.doubleValue();
+}
+}
+
+// Nakon type erasure - T se zamjenjuje s Number (ne s Object!)
+public class Calculator {
+private Number value;  // T → Number
+
+public double getValue() {
+return value.doubleValue();
+}
+}
+
+⚠️ Posljedice Type Erasure
+
+❌ Ne možeš napraviti new T() - tip ne postoji u runtime-u!
+❌ Ne možeš napraviti new T[] - array ne može biti generički
+❌ Ne možeš koristiti instanceof T
+❌ Statički članovi ne mogu koristiti type parameters
+
+Što NE radi zbog Type Erasure
+public class Box<T> {
+// ❌ ERROR - ne možeš instancirati T
+// T item = new T();
+
+// ❌ ERROR - ne možeš napraviti array od T
+// T[] array = new T[10];
+
+// ❌ ERROR - instanceof ne radi s T
+// if (obj instanceof T) { ... }
+
+// ❌ ERROR - statički članovi ne mogu koristiti T
+// private static T staticField;
+}
+
+15
+
+⚠️ Raw Types - Nemoj koristiti!
+
+Raw type = korištenje generičke klase bez type parametara.
+Postoji samo zbog backward kompatibilnosti s pre-Java 5 kodom.
+
+❌ RAW TYPE - Opasno!
+
+// Bez <> - raw type!
+List users = new ArrayList();
+
+// Može primiti SVE - nema type safety!
+users.add(new User("Ana"));
+users.add("Ovo nije User!");  // 😱 OK u compile-time
+users.add(42);  // 😱 OK u compile-time
+
+// Potreban casting - opasno!
+User u = (User) users.get(0);  // ✅ OK
+User u2 = (User) users.get(1);  // 💥 ClassCastException!
+
+// ⚠️ Compiler warning:
+// "List is a raw type. References to
+// generic type List<E> should be parameterized"
+
+✅ GENERICS - Sigurno!
+
+// S <> - type-safe!
+List<User> users = new ArrayList<>();
+
+// Samo User objekti!
+users.add(new User("Ana"));  // ✅ OK
+
+// Compile-time errors - odlično!
+// users.add("String"); // ❌ COMPILE ERROR
+// users.add(42); // ❌ COMPILE ERROR
+
+// Bez castinga - sigurno!
+User u = users.get(0);  // ✅ Uvijek User
+User u2 = users.get(1);  // ✅ Uvijek User
+
+// 🎉 Nema warnings!
+
+TikTok primjer - Raw type problem
+// ❌ Loše - Raw type
+class VideoQueue {
+private List videos = new ArrayList();  // Raw type!
+
+public void addVideo(Object video) {
+videos.add(video);
+}
+
+public Object nextVideo() {
+return videos.remove(0);
+}
+}
+
+VideoQueue queue = new VideoQueue();
+queue.addVideo(new Video("funny_cat.mp4"));
+queue.addVideo("Not a video!");  // 😱 Prihvaća String!
+
+Video v = (Video) queue.nextVideo();  // OK
+Video v2 = (Video) queue.nextVideo();  // 💥 RUNTIME ERROR!
+
+// ✅ Dobro - Generics
+class VideoQueue<T> {
+private List<T> videos = new ArrayList<>();
+
+public void addVideo(T video) {
+videos.add(video);
+}
+
+public T nextVideo() {
+return videos.remove(0);
+}
+}
+
+VideoQueue<Video> queue = new VideoQueue<>();
+queue.addVideo(new Video("funny_cat.mp4"));
+// queue.addVideo("Not a video!"); // ❌ COMPILE ERROR!
+
+Video v = queue.nextVideo();  // ✅ Type-safe, bez castinga!
+
+🚫 Pravilo: NIKAD nemoj koristiti raw types!
+Raw types postoje samo zbog starih verzija Jave (pre-1.5).
+Uvijek koristi Generics za type safety!
+
+16
+
+✨ Best Practices za Generics
+
+1️⃣ Eliminiraj raw types
+
+// ❌ Loše
+List list = new ArrayList();
+
+// ✅ Dobro
+List<String> list = new ArrayList<>();
+
+2️⃣ Koristi diamond operator
+
+// ❌ Redundantno
+List<String> l = new ArrayList<String>();
+
+// ✅ Kraće (Java 7+)
+List<String> l = new ArrayList<>();
+
+3️⃣ Preferiraj liste nad arrayima
+
+// ❌ Array - ne type-safe
+Object[] arr = new String[10];
+arr[0] = 1;  // Runtime error!
+
+// ✅ Lista - type-safe
+List<String> list = new ArrayList<>();
+// list.add(1); // Compile error!
+
+4️⃣ Koristi PECS za wildcards
+
+// Producer - extends
+void read(List<? extends T> src);
+
+// Consumer - super
+void write(List<? super T> dest);
+
+5️⃣ Bounded types kad je potrebno
+
+// Ograniči na Number
+public <T extends Number>
+double sum(List<T> list) {
+return list.stream()
+.mapToDouble(Number::doubleValue)
+.sum();
+}
+
+6️⃣ Ne koristi instanceof s Generics
+
+// ❌ Ne radi - Type erasure
+// if (obj instanceof List<String>)
+
+// ✅ Radi - samo raw type
+if (obj instanceof List) {
+List<?> list = (List<?>) obj;
+}
+
+💡 Golden Rules
+
+✅ Uvijek koristi Generics umjesto raw types
+✅ Koristi wildcards za fleksibilnost
+✅ PECS princip za wildcards
+✅ Bounded types za ograničenja
+❌ Ne pokušavaj "prevariti" type system
+
+17
+
+🎯 Praktični projekt: Generic Cache
+
+Zadatak: Cache sistem za web aplikaciju
+
+Kreiraj generički cache koji može spremati bilo koji tip podataka s TTL (Time To Live).
+
+CacheEntry - wrapper za podatke
+class CacheEntry<T> {
+private final T value;
+private final long expiryTime;
+
+public CacheEntry(T value, long ttlMillis) {
+this.value = value;
+this.expiryTime = System.currentTimeMillis() + ttlMillis;
+}
+
+public boolean isExpired() {
+return System.currentTimeMillis() > expiryTime;
+}
+
+public T getValue() {
+return value;
+}
+}
+
+GenericCache - glavna klasa
+public class GenericCache<K, V> {
+private final Map<K, CacheEntry<V>> cache;
+private final long defaultTtl;
+
+public GenericCache(long defaultTtlMillis) {
+this.cache = new ConcurrentHashMap<>();
+this.defaultTtl = defaultTtlMillis;
+}
+
+// Dodaj u cache
+public void put(K key, V value) {
+cache.put(key, new CacheEntry<>(value, defaultTtl));
+}
+
+// Dodaj s custom TTL
+public void put(K key, V value, long ttlMillis) {
+cache.put(key, new CacheEntry<>(value, ttlMillis));
+}
+
+// Dohvati iz cache-a
+public Optional<V> get(K key) {
+CacheEntry<V> entry = cache.get(key);
+
+if (entry == null) {
+return Optional.empty();
+}
+
+if (entry.isExpired()) {
+cache.remove(key);  // Očisti expired entry
+return Optional.empty();
+}
+
+return Optional.of(entry.getValue());
+}
+
+// Očisti sve expired entries
+public void cleanup() {
+cache.entrySet()
+.removeIf(entry -> entry.getValue().isExpired());
+}
+
+public int size() {
+return cache.size();
+}
+
+public void clear() {
+cache.clear();
+}
+}
+
+Korištenje - Instagram user cache
+// Cache za User objekte - 5 minuta TTL
+GenericCache<String, User> userCache =
+new GenericCache<>(5 * 60 * 1000);
+
+// Spremi korisnika
+User ana = new User("@ana", "Ana Horvat");
+userCache.put("@ana", ana);
+
+// Dohvati iz cache-a
+Optional<User> cached = userCache.get("@ana");
+cached.ifPresent(user ->
+System.out.println("Loaded from cache: " + user.getName())
+);
+
+// Cache za post statistike - 1 minuta TTL
+GenericCache<String, PostStats> statsCache =
+new GenericCache<>(60 * 1000);
+
+statsCache.put("post_123", new PostStats(1500, 250));
+
+// Cache za session tokene - 30 minuta TTL
+GenericCache<String, SessionToken> sessionCache =
+new GenericCache<>(30 * 60 * 1000);
+
+18
+
+🆕 Generics u Java 25+
+
+Budućnost Generics-a
+
+Project Valhalla i Project Amber donose poboljšanja u Generics!
+
+1. Primitive Type Specialization (budućnost)
+// Trenutno - mora boxing
+List<Integer> numbers = new ArrayList<>();
+numbers.add(5);  // Boxing: int → Integer (overhead!)
+
+// Budućnost - direktno primitive
+List<int> numbers = new ArrayList<>();  // Možda uskoro!
+numbers.add(5);  // Bez boxinga, brže!
+
+2. Inline Types (Project Valhalla)
+// Inline types - value types bez wrappera
+inline class Point<T extends Number> {
+private final T x;
+private final T y;
+
+// Brže, manje memorije, bez heap allocation!
+}
+
+3. Better type inference
+// Trenutno - ponekad treba eksplicitno
+List<String> list = Collections.<String>emptyList();
+
+// Java 25+ - još bolji inference
+var list = List.of("a", "b", "c");  // List<String> inferred
+var map = Map.of("key", 1, "key2", 2);  // Map<String, Integer>
+
+🚀 Što možemo očekivati?
+
+⚡ Primitive Generics - bez boxing overheada
+📦 Inline Types - vrijednosti bez heap allocation
+🎯 Bolji type inference - manje verboze koda
+🔧 Reified Generics - pristup tipovima u runtime-u
+
+💡 Stay Updated!
+Prati:
+
+Project Valhalla: Value types i specialized generics
+Project Amber: Pattern matching s generics
+JEPs: Java Enhancement Proposals na openjdk.org
+
+19
+
+🎓 Zaključak
+
+📝 Što smo naučili?
+
+Generičke metode i klase
+Type parameters (T, E, K, V)
+Bounded types (extends, super)
+Wildcards (?, extends, super)
+PECS princip
+Type Erasure
+
+💪 Key Takeaways
+
+🔒 Type safety u compile-time
+📝 Čitljiviji kod bez castinga
+♻️ Reusability - jedna klasa za sve
+🚫 Nikad raw types!
+🎯 PECS za wildcards
+
+🎉 Generics = Type Safety + Reusability
+
+Jedna generička klasa bolja je od stotinu specifičnih! 💡
+
+❌ Bez Generics
+
+Runtime greške
+Puno castinga
+Duplicate kod
+Teže za održavanje
+
+✅ S Generics
+
+Compile-time greške
+Bez castinga
+DRY princip
+Lako za održavanje
+
+📚 Dodatni resursi
+
+Oracle Java Tutorials: Generics Tutorial
+Effective Java (Joshua Bloch): Poglavlja 26-31
+Java Language Specification: Chapter 4 & 8
+
+⚡ Generičko programiranje u Javi
+Generičko programiranje omogućava pisanje fleksibilnog i sigurnog koda koji radi s različitim tipovima podataka uz zadržavanje sigurnosti tipova u vrijeme kompilacije.
+
+📚 Sadržaj prezentacije:
+
+1️⃣ Uvod u Generics
+Osnovni koncepti i prednosti
+
+2️⃣ Generičke metode
+Metode s generičkim parametrima
+
+3️⃣ Parametrizirane klase
+Kreiranje vlastitih generičkih klasa
+
+4️⃣ Zamjenski simboli
+Wildcards i bounded types
+
+5️⃣ Moderne značajke
+Java 17+ novosti
+
+6️⃣ Best Practices
+Dobre prakse i savjeti
+
+📖 Što su Generics?
+
+Generičko programiranje omogućava definiranje klasa, sučelja i metoda s parametriziranim tipovima podataka.
+
+💡 Zašto koristiti Generics?
+
+Sigurnost tipova u vrijeme kompilacije - greške se otkrivaju prije izvođenja programa
+Eliminacija castinga - više nije potrebno eksplicitno pretvaranje tipova
+Ponovno iskoristivost koda - jedna implementacija radi s više tipova
+Čitljiviji kod - jasno se vidi s kojim tipovima radimo
+
+💡 Zanimljivost: Generics su uvedeni u Javi 5.0 (2004.), ali njihov razvoj je trajao 5+ godina! Originalni prijedlog je bio puno kompleksniji.
+
+🔄 Prije i poslije Generics
+
+❌ Bez Generics (stari način):
+
+List lista = new ArrayList();
+lista.add("Tekst");
+lista.add(123); // Kompajler dopušta!
+
+String str = (String) lista.get(0); // Potreban casting
+String num = (String) lista.get(1); // ClassCastException! 💥
+
+✅ Sa Generics (moderni način):
+
+List<String> lista = new ArrayList<>();
+lista.add("Tekst");
+lista.add(123); // Greška pri kompilaciji! ✓
+
+String str = lista.get(0); // Nema potrebe za casting!
+
+🎯 Ključna prednost: Greške se hvataju u vrijeme kompilacije, a ne izvođenja!
+
+🔧 Generičke metode
+
+Generičke metode su metode koje deklariraju vlastite parametre tipa. Mogu biti dio negeneričkih klasa!
+
+📝 Sintaksa:
+
+public static <T> T metodaNaziv(T parametar) {
+// Tip parametar T se deklarira prije povratnog tipa
+return parametar;
+}
+
+⚠️ Važno: Parametar tipa <T> se deklarira prije povratnog tipa metode!
+
+📊 Primjer: Pronalaženje maksimuma
+
+Klase koje implementiraju sučelje Comparable mogu međusobno uspoređivati svoje objekte pomoću metode compareTo.
+
+🎯 Bounded Type Parameter:
+
+public static <T extends Comparable<T>> T maximum(T x, T y, T z) {
+T max = x;
+
+if (y.compareTo(max) > 0) {
+max = y;
+}
+
+if (z.compareTo(max) > 0) {
+max = z;
+}
+
+return max;
+}
+
+💡 Objašnjenje: <T extends Comparable<T>> znači da tip T mora implementirati Comparable sučelje. Ovo se zove bounded type parameter.
+
+🚀 Korištenje generičke metode
+
+public static void main(String[] args) {
+// Rad s Integer tipom
+System.out.printf("Maximum of %d, %d and %d is %d%n%n",
+3, 4, 5, maximum(3, 4, 5));
+
+// Rad s Double tipom
+System.out.printf("Maximum of %.1f, %.1f and %.1f is %.1f%n%n",
+6.6, 8.8, 7.7, maximum(6.6, 8.8, 7.7));
+
+// Rad s String tipom
+System.out.printf("Maximum of %s, %s and %s is %s%n",
+"pear", "apple", "orange",
+maximum("pear", "apple", "orange"));
+}
+
+📤 Izlaz programa:
+
+Maximum of 3, 4 and 5 is 5
+
+Maximum of 6.6, 8.8 and 7.7 is 8.8
+
+Maximum of pear, apple and orange is pear
+
+🆕 Java 17+: Poboljšano zaključivanje tipova
+
+Moderne verzije Jave imaju poboljšan mehanizam zaključivanja tipova (type inference).
+
+🎯 Primjer s var ključnom riječju:
+
+// Java 10+ - lokalna varijabla s var
+var lista = new ArrayList<String>();
+
+// Java kompajler automatski zaključuje tip
+var rezultat = maximum(10, 20, 30); // Integer
+var tekstMax = maximum("a", "b", "c"); // String
+
+// Diamond operator (<>) automatski zaključuje tip
+List<Integer> brojevi = new ArrayList<>(); // <> umjesto <Integer>
+
+💡 Savjet: Koristite var kada je tip očigledan iz konteksta. Kod postaje kraći ali i dalje type-safe!
+
+🏗️ Parametrizirane klase
+
+Parametrizirana klasa je klasa koja ima jedan ili više parametara tipa.
+
+📝 Osnovni primjer:
+
+public class Kutija<T> {
+private T sadrzaj;
+
+public void postavi(T sadrzaj) {
+this.sadrzaj = sadrzaj;
+}
+
+public T dohvati() {
+return sadrzaj;
+}
+}
+
+🚀 Korištenje:
+
+Kutija<String> kutijaZaTekst = new Kutija<>();
+kutijaZaTekst.postavi("Java Generics");
+
+Kutija<Integer> kutijaZaBroj = new Kutija<>();
+kutijaZaBroj.postavi(42);
+
+📚 Primjer: Generički Stack
+
+🏗️ Konstruktori i varijable:
+
+public class Stack<T> {
+private List<T> elements;
+
+public Stack() {
+this(10);
+}
+
+public Stack(int capacity) {
+int initCapacity = capacity > 0 ? capacity : 10;
+elements = new ArrayList<T>(initCapacity);
+}
+}
+
+🎯 Dizajn: Stack koristi ArrayList interno za pohranu elemenata. Generički tip T omogućava da Stack radi s bilo kojim tipom podataka.
+
+⚙️ Stack metode
+
+public void push(T pushValue) {
+elements.add(pushValue);
+}
+
+public T pop() {
+if (elements.isEmpty()) {
+throw new EmptyStackException("Stack is empty, cannot pop");
+}
+return elements.remove(elements.size() - 1);
+}
+
+public boolean isEmpty() {
+return elements.isEmpty();
+}
+
+public int size() {
+return elements.size();
+}
+}
+
+🧪 Testiranje Stack klase
+
+public static void main(String[] args) {
+double[] doubleElements = {1.1, 2.2, 3.3, 4.4, 5.5};
+
+Stack<Double> doubleStack = new Stack<>(5);
+
+testPushDouble(doubleStack, doubleElements);
+testPopDouble(doubleStack);
+}
+
+private static void testPushDouble(Stack<Double> stack, double[] values) {
+System.out.printf("%nPushing elements onto doubleStack%n");
+for (double value : values) {
+System.out.printf("%.1f ", value);
+stack.push(value);
+}
+}
+
+📤 Pop operacija
+
+private static void testPopDouble(Stack<Double> stack) {
+try {
+System.out.printf("%nPopping elements from doubleStack%n");
+double popValue;
+
+while (true) {
+popValue = stack.pop();
+System.out.printf("%.1f ", popValue);
+}
+} catch (EmptyStackException emptyStackException) {
+System.err.println();
+emptyStackException.printStackTrace();
+}
+}
+
+⚠️ Napomena: Beskonačna petlja se prekida kada stack postane prazan i baci se EmptyStackException.
+
+🃏 Zamjenski simboli (Wildcards)
+
+Wildcards omogućavaju kreiranje fleksibilnijih generičkih metoda.
+
+🎯 Tri vrste wildcards:
+
+Tip
+Sintaksa
+Značenje
+
+Unbounded
+List<?>
+Lista bilo kojeg tipa
+
+Upper bounded
+List<? extends Number>
+Lista Number ili njegovih podtipova
+
+Lower bounded
+List<? super Integer>
+Lista Integer ili njegovih nadtipova
+
+🎓 PECS pravilo:
+Producer Extends, Consumer Super
+Ako čitaš iz kolekcije → extends
+Ako pišeš u kolekciju → super
+
+⬆️ Upper Bounded Wildcards
+
+🎯 Primjer: Zbrajanje brojeva
+
+public static double sum(List<? extends Number> list) {
+double total = 0;
+
+for (Number element : list) {
+total += element.doubleValue();
+}
+
+return total;
+}
+
+💡 Objašnjenje: ? extends Number znači da metoda prihvaća listu bilo kojeg tipa koji je Number ili nasljeđuje Number (Integer, Double, Float, itd.).
+
+🚀 Primjer korištenja
+
+public static void main(String[] args) {
+// Lista Integer brojeva
+Integer[] integers = {1, 2, 3, 4, 5};
+List<Integer> integerList = Arrays.asList(integers);
+System.out.printf("integerList: %s%n", integerList);
+System.out.printf("Total: %.0f%n%n", sum(integerList));
+
+// Lista Double brojeva
+Double[] doubles = {1.1, 3.3, 5.5};
+List<Double> doubleList = Arrays.asList(doubles);
+System.out.printf("doubleList: %s%n", doubleList);
+System.out.printf("Total: %.1f%n%n", sum(doubleList));
+
+// Mješovita lista Number objekata
+Number[] numbers = {1, 2.4, 3, 4.1};
+List<Number> numberList = Arrays.asList(numbers);
+System.out.printf("numberList: %s%n", numberList);
+System.out.printf("Total: %.1f%n", sum(numberList));
+}
+
+🆕 Java 17+: Generički Records
+
+Records (uvedeni u Java 16) također mogu biti generički!
+
+📝 Primjer: Par vrijednosti
+
+// Jednostavna definicija generičkog record-a
+public record Par<T, U>(T prvi, U drugi) {
+// Automatski generirani konstruktor, getteri, toString, equals, hashCode
+}
+
+🚀 Korištenje:
+
+Par<String, Integer> student = new Par<>("Ana", 20);
+System.out.println(student.prvi());   // Ana
+System.out.println(student.drugi());  // 20
+
+Par<Double, Double> koordinate = new Par<>(45.8, 15.9);
+System.out.println(koordinate); // Par[prvi=45.8, drugi=15.9]
+
+🎯 Prednosti: Records nude kompaktnu sintaksu za immutable data klase. Idealni zaDTO objekte!
+
+🆕 Java 21+: Pattern Matching za Generics
+
+🎯 Pattern Matching for switch (Preview)
+
+public static String obradi(Object obj) {
+return switch (obj) {
+case Integer i when i > 0 ->
+"Pozitivan broj: " + i;
+case Integer i when i < 0 ->
+"Negativan broj: " + i;
+case String s when s.length() > 0 ->
+"Tekst: " + s;
+case List<?> list ->
+"Lista s " + list.size() + " elemenata";
+default -> "Nepoznat tip";
+};
+}
+
+💡 Novost: Pattern matching omogućava elegantnije rukovanje različitim tipovima bez eksplicitnog castinga!
+
+🆕 Java 21: Sequenced Collections
+
+Java 21 uvodi nova sučelja za kolekcije s definiranim redoslijedom.
+
+📋 Nova sučelja:
+
+interface SequencedCollection<E> extends Collection<E> {
+SequencedCollection<E> reversed();
+void addFirst(E e);
+void addLast(E e);
+E getFirst();
+E getLast();
+E removeFirst();
+E removeLast();
+}
+
+🚀 Primjer:
+
+List<String> lista = new ArrayList<>();
+lista.addFirst("prvi");
+lista.addLast("zadnji");
+
+String prvi = lista.getFirst();  // "prvi"
+String zadnji = lista.getLast(); // "zadnji"
+
+var obrnuto = lista.reversed();   // Obrnuti pogled
+
+✨ Dobre prakse (Best Practices)
+
+✅ Što činiti:
+
+✓ Koristite deskriptivna imena za parametre tipa (npr. T za Type, E za Element, K za Key, V za Value)
+✓ Preferirajte bounded type parameters kada je moguće (<T extends Number>)
+✓ Koristite wildcards za fleksibilnost u metodama
+✓ Favorizirajte kompoziciju nad nasljeđivanjem generičkih klasa
+✓ Koristite diamond operator <> za kraći kod
+
+❌ Što izbjegavati:
+
+✗ Ne koristite raw types (List umjesto List<String>)
+✗ Izbjegavajte unchecked castove
+✗ Ne kreirajte generičke nizove (new T[] nije moguće)
+✗ Ne koristite primitive tipove kao parametre (List<int> ne radi, koristite List<Integer>)
+
+🔄 Type Erasure - Brisanje tipova
+
+Type erasure je proces kojim Java kompajler uklanja sve informacije o generičkim tipovima tijekom kompilacije.
+
+📝 Primjer transformacije:
+
+Izvorni kod
+Nakon type erasure
+
+List<String> lista
+List lista
+
+<T extends Number>
+Number
+
+<T>
+Object
+
+⚠️ Posljedice Type Erasure:
+
+Ne možete kreirati instance generičkog tipa: new T() ❌
+Ne možete koristiti instanceof s parametriziranim tipovima
+Ne možete kreirati nizove generičkih tipova
+
+🎯 Multiple Type Bounds
+
+Parametar tipa može imati više ograničenja (bounds).
+
+📝 Sintaksa:
+
+public class MultipleGranice<T extends Number & Comparable<T>> {
+private T vrijednost;
+
+public MultipleGranice(T vrijednost) {
+this.vrijednost = vrijednost;
+}
+
+public boolean jeVeceOd(T drugo) {
+// Možemo koristiti metode i iz Number i iz Comparable
+return vrijednost.compareTo(drugo) > 0
+&& vrijednost.doubleValue() > 0;
+}
+}
+
+💡 Pravilo: Klasa (ako postoji) mora biti prva u listi bounds, zatim sučelja. Koristite & za razdvajanje.
+
+💾 Praktični primjer: Generički Cache
+
+public class Cache<K, V> {
+private final Map<K, V> cache = new HashMap<>();
+private final int maxSize;
+
+public Cache(int maxSize) {
+this.maxSize = maxSize;
+}
+
+public void put(K key, V value) {
+if (cache.size() >= maxSize) {
+// Ukloni najstariji element
+var firstKey = cache.keySet().iterator().next();
+cache.remove(firstKey);
+}
+cache.put(key, value);
+}
+
+public Optional<V> get(K key) {
+return Optional.ofNullable(cache.get(key));
+}
+}
+
+🚀 Korištenje:
+
+Cache<String, Integer> rezultati = new Cache<>(100);
+rezultati.put("marko", 95);
+rezultati.get("marko").ifPresent(System.out::println);
+
+📦 Varargs i Generics
+
+Možete kombinirati generičke tipove s varargs parametrima.
+
+// Metoda koja prihvaća proizvoljan broj elemenata
+public static <T> List<T> listaOd(T... elementi) {
+return new ArrayList<>(Arrays.asList(elementi));
+}
+
+// Korištenje:
+var brojevi = listaOd(1, 2, 3, 4, 5);
+var imena = listaOd("Ana", "Marko", "Ivana");
+
+⚠️ Heap Pollution: Varargs s generičkim tipovima mogu uzrokovati "heap pollution" upozorenja. Koristite @SafeVarargs anotaciju ako ste sigurni da je metoda sigurna.
+
+// SafeVarargs anotacija
+@SafeVarargs
+public static final <T> List<T> sigurnaListaOd(T... elementi) {
+return Arrays.asList(elementi);
+}
+
+🆕 Java 25: Unnamed Patterns & Variables
+
+Java 25 donosi nove sintaksne mogućnosti za rad s pattern matchingom.
+
+📝 Primjer s unnamed patterns:
+
+// Korištenje underscore (_) za zanemarivanje vrijednosti
+public static <T, U> T uzmiPrvi(Par<T, U> par) {
+return switch (par) {
+case Par(var prvi, _) -> prvi; // _ zanemaruje drugi element
+};
+}
+
+// Također možemo koristiti _ u lambda izrazima
+lista.forEach(_ -> System.out.println("Element"));
+
+💡 Korisno: Underscore _ jasno pokazuje da određenu vrijednost namjerno zanemarujemo.
+
+🏋️ Praktične vježbe
+
+📝 Zadaci za vježbu:
+
+Zadatak 1: Generička metoda za zamjenu
+Napišite generičku metodu swap() koja zamjenjuje dva elementa u polju na zadanim pozicijama.
+
+Zadatak 2: Prioritetni red
+Implementirajte generičku klasu PriorityQueue<T extends Comparable<T>> koja održava elemente sortirane.
+
+Zadatak 3: Filtriranje kolekcije
+Kreirajte generičku metodu filter() koja prima List<T> i Predicate<T>, vraća novu listu filtriranih elemenata.
+
+Zadatak 4: Generički Pair builder
+Implementirajte klasu za kreiranje parova vrijednosti s metodama za transformaciju obje vrijednosti.
+
+📝 Pitanja za ponavljanje
+
+🎯 Provjerite svoje znanje:
+
+Pitanje 1: Je li moguće kreirati niz generičkog tipa? Zašto da/ne?
+
+Pitanje 2: Koja je razlika između <? extends T> i <? super T>?
+
+Pitanje 3: Što je type erasure i koje su njegove posljedice?
+
+Pitanje 4: Može li generička klasa implementirati više bounded type parametara?
+
+Pitanje 5: Zašto ne možemo koristiti primitive tipove kao generičke parametre?
+
+💡 Savjet: Raspravite odgovore u grupi ili s profesorom. Razumijevanje ovih koncepata je ključno za naprednije teme!
+
+📚 Dodatni resursi za učenje
+
+🌐 Online resursi:
+
+Oracle Java Tutorials - Službena dokumentacija o generičkom programiranju
+Effective Java (Joshua Bloch) - Poglavlja 26-31 o Generics
+Java Language Specification - Detaljna tehnička specifikacija
+Baeldung - Praktični tutoriali i primjeri
+
+🎓 Preporučeni članci:
+
+Java Generics FAQs (Angelika Langer)
+Generics in Java - Complete Tutorial
+Understanding Wildcards in Java
+Java 21+ New Features Guide

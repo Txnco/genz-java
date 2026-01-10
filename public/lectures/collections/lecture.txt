@@ -1,0 +1,895 @@
+
+🎓 Zbirke podataka u Javi
+
+Comparator, Sortiranje i moderne tehnike
+
+📋 Sadržaj vježbi
+
+Klasični pristupi
+
+Comparator sučelje
+Implementacija Comparatora
+TreeSet sa sortiranjem
+Enumeracije u praksi
+
+Moderni pristupi
+
+Lambda izrazi za usporedbu
+Method references
+Comparator.comparing()
+Sortiranje po više kriterija
+Stream API operacije
+
+⚖️ Sučelje Comparator
+
+Comparator omogućava definiranje specifičnih kriterija sortiranja za objekte.
+
+Ključne karakteristike:
+
+Funkcionalno sučelje – ima samo jednu apstraktnu metodu (compare)
+Idealno za lambda izraze
+Omogućava višestruke kriterije sortiranja za istu klasu
+Koristi se s Collections.sort(), Stream.sorted(), TreeSet
+
+@FunctionalInterface
+public interface Comparator<T> {
+int compare(T o1, T o2);
+// Vraća: negativan (o1 < o2), 0 (jednaki), pozitivan (o1 > o2)
+}
+
+👨‍🎓 Student klasa - Primjer
+
+public class Student {
+private String prezime;
+private String ime;
+private String jmbag;
+private double prosjek;
+ 
+// Konstruktor
+public Student(String prezime, String ime,
+String jmbag, double prosjek) {
+this.prezime = prezime;
+this.ime = ime;
+this.jmbag = jmbag;
+this.prosjek = prosjek;
+}
+ 
+// Getteri i setteri...
+ 
+@Override
+public String toString() {
+return prezime + " " + ime + "(" + prosjek + ")";
+}
+}
+
+Klasična implementacija Comparatora
+
+❌ Stari način (verbose)
+
+public class ProsjekSorter
+implements Comparator<Student> {
+ 
+@Override
+public int compare(Student st1,
+Student st2) {
+if(st1.getProsjek() >
+st2.getProsjek()) {
+return 1;
+}
+else if (st1.getProsjek() <
+st2.getProsjek()) {
+return -1;
+}
+else {
+return 0;
+}
+}
+}
+
+✅ Moderni način (Java 8+) BEST PRACTICE
+
+// Lambda izraz
+Comparator<Student> poProsjeku =
+(s1, s2) -> Double.compare(
+s1.getProsjek(),
+s2.getProsjek()
+);
+ 
+// Još bolje - Comparator.comparing()
+Comparator<Student> poProsjeku =
+Comparator.comparingDouble(
+Student::getProsjek
+);
+
+Primjer sortiranja liste
+
+// Kreiranje studenata
+Student prvi = new Student("Perić", "Pero", "0240293832", 4.11);
+Student drugi = new Student("Ivić", "Ivo", "0240212322", 3.82);
+Student treci = new Student("Markić", "Marko", "0240297890", 4.78);
+Student cetvrti = new Student("Horvat", "Ivan", "0240294345", 3.05);
+ 
+// Kreiranje liste
+List<Student> listaStudenata = new ArrayList<>();
+listaStudenata.add(prvi);
+listaStudenata.add(drugi);
+listaStudenata.add(treci);
+listaStudenata.add(cetvrti);
+ 
+// Sortiranje - moderni način
+listaStudenata.sort(Comparator.comparingDouble(Student::getProsjek));
+ 
+System.out.println(listaStudenata);
+// [Horvat Ivan(3.05), Ivić Ivo(3.82), Perić Pero(4.11), Markić Marko(4.78)]
+
+TreeSet s Comparatorom
+
+TreeSet automatski sortira elemente prema Comparatoru ili natural ordering.
+
+// TreeSet s custom comparatorom
+SortedSet<Student> setStudenata = new TreeSet<>(
+Comparator.comparingDouble(Student::getProsjek)
+);
+ 
+setStudenata.add(prvi);
+setStudenata.add(drugi);
+setStudenata.add(treci);
+setStudenata.add(cetvrti);
+ 
+System.out.println("Najbolji: " + setStudenata.last());
+System.out.println("Najgori: " + setStudenata.first());
+ 
+// Ispis:
+// Najbolji: Markić Marko(4.78)
+// Najgori: Horvat Ivan(3.05)
+
+Java 21 - SequencedSet s TreeSet JAVA 21
+
+Od Java 21, TreeSet implementira SequencedSet za bolji pristup prvom/zadnjem!
+
+// Java 21 - SequencedSet API
+SequencedSet<Student> setStudenata = new TreeSet<>(
+Comparator.comparingDouble(Student::getProsjek)
+);
+ 
+setStudenata.add(prvi);
+setStudenata.add(drugi);
+setStudenata.add(treci);
+setStudenata.add(cetvrti);
+ 
+// Nove metode iz Java 21!
+Student najbolji = setStudenata.getLast();  // Direktno!
+Student najgori = setStudenata.getFirst(); // Direktno!
+ 
+// Obrnuti redoslijed
+SequencedSet<Student> obrnuto = setStudenata.reversed();
+
+Sortiranje po više kriterija
+Problem: Studenti s istim prosjekom
+
+Student prvi = new Student("Perić", "Pero", "0240293832", 4.11);
+Student drugi = new Student("Ivić", "Ivo", "0240212322", 4.11);
+Student treci = new Student("Markić", "Marko", "0240297890", 4.11);
+Student cetvrti = new Student("Horvat", "Ivan", "0240294345", 4.11);
+ 
+// Svi imaju isti prosjek - trebamo sortirat i po prezimenu!
+
+⚠️ Trebamo sortirati prvo po prosjeku, a onda po prezimenu!
+
+Višekriterijsko sortiranje - Moderni pristup
+
+List<Student> listaStudenata = new ArrayList<>();
+listaStudenata.add(prvi);
+listaStudenata.add(drugi);
+listaStudenata.add(treci);
+listaStudenata.add(cetvrti);
+ 
+// Java 8+ način - jednostavno!
+Comparator<Student> poProsjekuIPrezimenu =
+Comparator.comparingDouble(Student::getProsjek)
+.thenComparing(Student::getPrezime);
+ 
+listaStudenata.stream()
+.sorted(poProsjekuIPrezimenu)
+.forEach(System.out::println);
+ 
+// Ispis: Horvat Ivan(4.11), Ivić Ivo(4.11),
+//        Markić Marko(4.11), Perić Pero(4.11)
+
+🛠️ Comparator - Korisne metode (Java 8+)
+
+Kreiranje Comparatora:
+
+comparing()
+comparingInt()
+comparingDouble()
+comparingLong()
+naturalOrder()
+reverseOrder()
+
+Kombiniranje:
+
+thenComparing()
+thenComparingInt()
+thenComparingDouble()
+reversed()
+nullsFirst()
+nullsLast()
+
+// Kompleksni primjer
+Comparator<Student> kompleksni =
+Comparator.comparingDouble(Student::getProsjek)
+.reversed()  // Silazno po prosjeku
+.thenComparing(Student::getPrezime)  // Pa uzlazno po prezimenu
+.thenComparing(Student::getIme);      // Pa po imenu
+
+🏛️ Enumeracije - Primjer sa Županijama
+
+public enum Zupanija {
+ 
+ZAGREBACKA("1", "Zagrebačka", 309696, 3078.0),
+PRIMORSKO_GORANSKA("051", "Primorsko-goranska",
+305505, 3590.0),
+SPLITSKO_DALMATINSKA("021", "Splitsko-dalmatinska",
+463676, 4524.0),
+GRAD_ZAGREB("01", "Grad Zagreb", 779145, 641.0);
+ 
+private final String pozivniBroj;
+private final String naziv;
+private final int brojStanovnika;
+private final double povrsina;
+ 
+Zupanija(String pozivniBroj, String naziv,
+int brojStanovnika, double povrsina) {
+this.pozivniBroj = pozivniBroj;
+this.naziv = naziv;
+this.brojStanovnika = brojStanovnika;
+this.povrsina = povrsina;
+}
+// Getteri...
+}
+
+Comparator za gustoću naseljenosti
+
+❌ Klasični način
+
+public class GustocaComparator
+implements Comparator<Zupanija> {
+ 
+@Override
+public int compare(Zupanija z1,
+Zupanija z2) {
+double gustoca1 =
+z1.getBrojStanovnika() /
+z1.getPovrsina();
+double gustoca2 =
+z2.getBrojStanovnika() /
+z2.getPovrsina();
+ 
+return Double.compare(
+gustoca2, gustoca1);
+}
+}
+
+✅ Moderni način (Java 8+)
+
+// Lambda + metoda za gustoću
+Comparator<Zupanija> poGustoci =
+Comparator.comparingDouble(
+z -> z.getBrojStanovnika() /
+z.getPovrsina()
+).reversed();
+ 
+// Ili s helper metodom
+Comparator<Zupanija> poGustoci2 =
+Comparator.comparingDouble(
+Zupanija::gustocaNaseljenosti
+).reversed();
+
+🌊 Stream operacije s enumeracijama
+
+// Top 5 županija po gustoći naseljenosti
+List<Zupanija> top5 = Arrays.stream(Zupanija.values())
+.sorted(Comparator.comparingDouble(
+z -> z.getBrojStanovnika() / z.getPovrsina()
+).reversed())
+.limit(5)
+.toList();  // Java 17+
+ 
+top5.forEach(System.out::println);
+ 
+// Prosječna gustoća svih županija
+double prosjekGustoca = Arrays.stream(Zupanija.values())
+.mapToDouble(z -> z.getBrojStanovnika() / z.getPovrsina())
+.average()
+.orElse(0.0);
+ 
+System.out.println("Prosječna gustoća: " + prosjekGustoca);
+
+Java 24 - Stream Gatherers JAVA 24
+Grupiranje županija po regijama
+
+// Grupiranje županija u grupe od po 5 (regije)
+List<List<Zupanija>> regije = Arrays.stream(Zupanija.values())
+.sorted(Comparator.comparing(Zupanija::getNaziv))
+.gather(Gatherers.windowFixed(5))
+.toList();
+ 
+// Ispiši regije
+int regionIndex = 1;
+for (List<Zupanija> regija : regije) {
+System.out.println("Regija " + regionIndex++ + ":");
+regija.forEach(z -> System.out.println("  - " +
+z.getNaziv()));
+}
+
+💡 Gatherers omogućavaju custom intermediate operacije koje prije nisu bile moguće!
+
+📊 Statističke analize sa Stream API
+
+// DoubleSummaryStatistics - sveobuhvatna statistika
+DoubleSummaryStatistics stats =
+Arrays.stream(Zupanija.values())
+.mapToDouble(z -> z.getBrojStanovnika() / z.getPovrsina())
+.summaryStatistics();
+ 
+System.out.println("Broj županija: " + stats.getCount());
+System.out.println("Minimalna gustoća: " + stats.getMin());
+System.out.println("Maksimalna gustoća: " + stats.getMax());
+System.out.println("Prosječna gustoća: " + stats.getAverage());
+System.out.println("Suma: " + stats.getSum());
+ 
+// Županije iznad prosjeka
+double prosjek = stats.getAverage();
+List<Zupanija> iznadProsjeka = Arrays.stream(Zupanija.values())
+.filter(z -> (z.getBrojStanovnika() / z.getPovrsina()) > prosjek)
+.toList();
+
+Grupiranje s Collectors.groupingBy()
+
+// Grupiraj studente po prosjeku (cijeli broj)
+Map<Integer, List<Student>> studentiPoProsjeku =
+listaStudenata.stream()
+.collect(Collectors.groupingBy(
+s -> (int) s.getProsjek()
+));
+ 
+// Ispiši grupe
+studentiPoProsjeku.forEach((prosjek, studenti) -> {
+System.out.println("Prosjek " + prosjek + ":");
+studenti.forEach(s -> System.out.println("  " + s));
+});
+ 
+// Broj studenata po prosjeku
+Map<Integer, Long> brojStudenata =
+listaStudenata.stream()
+.collect(Collectors.groupingBy(
+s -> (int) s.getProsjek(),
+Collectors.counting()
+));
+
+Particioniranje s Collectors.partitioningBy()
+
+// Particioniraj studente - odlikaši vs ostali
+Map<Boolean, List<Student>> particionirano =
+listaStudenata.stream()
+.collect(Collectors.partitioningBy(
+s -> s.getProsjek() >= 4.5
+));
+ 
+System.out.println("Odlikaši:");
+particionirano.get(true).forEach(System.out::println);
+ 
+System.out.println("\nOstali:");
+particionirano.get(false).forEach(System.out::println);
+ 
+// Broj studenata u svakoj grupi
+Map<Boolean, Long> brojevi =
+listaStudenata.stream()
+.collect(Collectors.partitioningBy(
+s -> s.getProsjek() >= 4.5,
+Collectors.counting()
+));
+
+💡 Best Practices
+
+✅ Radi ovo:
+
+Koristi Comparator.comparing()
+Koristi method references
+Koristi thenComparing() za više kriterija
+Koristi Stream API
+Koristi lambda izraze
+Koristi toList() (Java 17+)
+
+❌ Izbjegavaj:
+
+Vlastite Comparator klase kad nije potrebno
+Ručno implementiranje compare()
+Collections.sort() - koristi List.sort()
+if-else u compare metodi
+Zbunjujuću logiku sortiranja
+
+📚 Sažetak
+
+Ključne tehnike:
+
+Comparator - funkcionalno sučelje za custom sortiranje
+Lambda izrazi - kraći i čitljiviji kod
+Method references - još kraći kod
+Comparator.comparing() - standardni način kreiranja Comparatora
+thenComparing() - višekriterijsko sortiranje
+Stream API - funkcionalna obrada kolekcija
+Collectors - groupingBy, partitioningBy
+SequencedSet (Java 21) - bolji pristup sortiranim setovima
+Gatherers (Java 24) - custom intermediate operacije
+
+🚀 Moderne Java funkcionalnosti
+
+Java 8: Lambda, Stream API, Method references, Comparator.comparing()
+Java 9: Factory metode (List.of, Set.of)
+Java 10: var keyword
+Java 17 LTS: Stream.toList()
+Java 21 LTS: Sequenced Collections
+Java 24: Stream Gatherers
+Java 25 LTS: Compact Headers, Performance improvements
+
+Uvijek koristite najnovije verzije Java LTS-a!
+Trenutno: Java 21 LTS ili Java 25 LTS
+
+
+Osnovni koncepti
+
+Uvod u zbirke podataka
+Collection sučelje
+Liste, Setovi, Mape
+Enumeracije
+
+Moderne funkcionalnosti
+
+Stream API (Java 8+)
+Immutable kolekcije (Java 9+)
+Stream.toList() (Java 17)
+Sequenced Collections (Java 21)
+Stream Gatherers (Java 24) 🎯
+Performance (Java 25 LTS) ⚡
+
+🗂️ Što su zbirke podataka?
+
+Zbirka (Collection) je objektna struktura podataka koja može sadržavati reference drugih objekata.
+
+Glavna sučelja u Java Collections Framework:
+
+Collection – osnovno sučelje za sve zbirke
+List – dopušta duplikate, čuva redoslijed
+Set – ne dopušta duplikate
+Map – pohranjuje parove "ključ-vrijednost"
+
+⚠️ Važno: Zbirke ne mogu sadržavati primitivne tipove! Koristi se autoboxing (npr. int → Integer)
+
+📝 Liste (List interface)
+Karakteristike:
+
+Poredana zbirka koja čuva redoslijed elemenata
+Može sadržavati duplikate
+Pristup elementima putem indeksa
+
+Najčešće implementacije:
+
+ArrayList
+✅ Brzo dohvaćanje po indeksu
+❌ Sporije umetanje/brisanje
+💡 Najbolji za čitanje
+
+LinkedList
+✅ Brzo umetanje/brisanje
+❌ Sporije dohvaćanje
+💡 Najbolji za česte izmjene
+
+ArrayList - Primjer sa strukturom blokova
+
+// Diamond operator (<>) - od Java 7
+List<String> godisnjaDoba = new ArrayList<>();
+ 
+// Dodavanje elemenata
+godisnjaDoba.add("Proljeće");
+godisnjaDoba.add("Ljeto");
+godisnjaDoba.add("Jesen");
+godisnjaDoba.add("Zima");
+ 
+// For-each petlja (od Java 5)
+for (String doba : godisnjaDoba) {
+System.out.println(doba);
+}
+ 
+// Dohvaćanje elementa po indeksu
+String prvo = godisnjaDoba.get(0); // "Proljeće"
+
+Ugniježđeni blokovi - Jasna struktura
+
+List<Integer> brojevi = Arrays.asList(1, 2, 3, 4, 5);
+ 
+for (Integer broj : brojevi) {
+ 
+if (broj % 2 == 0) {
+System.out.println("Paran: " + broj);
+}
+else {
+System.out.println("Neparan: " + broj);
+}
+}
+ 
+// Vertikalne linije pokazuju hijerarhiju blokova!
+
+🎯 Setovi (Set interface)
+Karakteristike:
+
+Bez duplikata – svaki element može biti samo jednom
+Ne čuva nužno redoslijed umetanja
+Brzo provjera postoji li element
+
+Set<String> jedinstvenaImena = new HashSet<>();
+ 
+jedinstvenaImena.add("Ana");
+jedinstvenaImena.add("Marko");
+jedinstvenaImena.add("Ana"); // Neće se dodati!
+ 
+System.out.println(jedinstvenaImena.size()); // 2
+
+🗺️ Mape (Map interface)
+
+Map<String, Integer> brojStudenata = new HashMap<>();
+ 
+// Dodavanje parova
+brojStudenata.put("FER", 1500);
+brojStudenata.put("PMF", 1200);
+brojStudenata.put("TVZ", 800);
+ 
+// Dohvaćanje vrijednosti
+Integer ferStudenti = brojStudenata.get("FER");
+ 
+// Iteracija kroz sve parove
+for (String fakultet : brojStudenata.keySet()) {
+System.out.println(fakultet + ": " +
+brojStudenata.get(fakultet));
+}
+
+🛠️ Collections utility klasa
+Sadrži statičke metode za rad sa zbirkama:
+
+Algoritmi:
+
+sort() – sortiranje
+shuffle() – miješanje
+reverse() – obrat
+binarySearch() – pretraživanje
+
+Utility metode:
+
+min(), max()
+frequency() – brojanje
+copy() – kopiranje
+fill() – popunjavanje
+
+List<Integer> brojevi = Arrays.asList(5, 2, 8, 1, 9);
+ 
+Collections.sort(brojevi);    // [1, 2, 5, 8, 9]
+Collections.reverse(brojevi); // [9, 8, 5, 2, 1]
+ 
+Integer max = Collections.max(brojevi); // 9
+
+🏷️ Enumeracije (Enum)
+
+Jednostavna enum:
+
+public enum GodisnjeDoba {
+PROLJECE,
+LJETO,
+JESEN,
+ZIMA
+}
+
+Enum s poljima:
+
+public enum Status {
+USPJEH(1, "OK"),
+GRESKA(2, "Fail");
+ 
+private final int kod;
+private final String opis;
+ 
+Status(int kod, String opis) {
+this.kod = kod;
+this.opis = opis;
+}
+}
+
+🌊 Stream API (Java 8)
+Što su tokovi (Streams)?
+
+Omogućavaju funkcionalno programiranje u Javi
+Deklarativna obrada podataka (kažemo "što" ne "kako")
+Podržavaju paralelno procesiranje
+Lenivo evaluiranje (lazy evaluation)
+
+List<Integer> brojevi = Arrays.asList(1, 2, 3, 4, 5);
+ 
+// Tradicionalni pristup
+int suma = 0;
+for (Integer broj : brojevi) {
+if (broj % 2 == 0) {
+suma += broj;
+}
+}
+ 
+// Stream API pristup
+int suma = brojevi.stream()
+.filter(b -> b % 2 == 0)
+.mapToInt(Integer::intValue)
+.sum();
+
+Stream operacije
+
+⚙️ Međuoperacije
+
+filter() – filtriranje
+map() – transformacija
+distinct() – ukloni duplikate
+sorted() – sortiranje
+limit() – ograniči broj
+
+🎯 Završne operacije
+
+forEach() – obradi sve
+collect() – skupi rezultate
+count() – broji elemente
+reduce() – reduciraj
+findFirst() – prvi element
+
+Stream API - Primjer sa strukturom
+
+class Student {
+String ime;
+int ocjena;
+// konstruktor, getteri...
+}
+ 
+List<Student> studenti = Arrays.asList(
+new Student("Ana", 5),
+new Student("Marko", 3),
+new Student("Ivana", 4)
+);
+ 
+// Pronađi imena studenata s ocjenom 5
+List<String> odlikasi = studenti.stream()
+.filter(s -> s.getOcjena() == 5)
+.map(Student::getIme)
+.sorted()
+.collect(Collectors.toList());
+
+Java 9 - Factory metode JAVA 9
+Jednostavno kreiranje immutable kolekcija:
+
+// Prije Java 9 - komplicirano 😓
+List<String> lista = new ArrayList<>();
+lista.add("A");
+lista.add("B");
+lista = Collections.unmodifiableList(lista);
+ 
+// Java 9 - jednostavno! 🎉
+List<String> lista = List.of("A", "B", "C");
+Set<Integer> set = Set.of(1, 2, 3);
+Map<String, Integer> mapa = Map.of(
+"Ana", 25,
+"Marko", 30
+);
+ 
+// Pokušaj izmjene baca iznimku!
+lista.add("D"); // UnsupportedOperationException
+
+Java 17 - Stream.toList() JAVA 17
+Kraći i čitljiviji kod!
+
+List<String> imena = List.of("Ana", "Marko", "Ivana");
+ 
+// Prije Java 17 - verbose
+List<String> velkaSlova1 = imena.stream()
+.map(String::toUpperCase)
+.collect(Collectors.toList());
+ 
+// Java 17 - jednostavnije! 🎯
+List<String> velkaSlova2 = imena.stream()
+.map(String::toUpperCase)
+.toList();
+
+Java 21 - Sequenced Collections JAVA 21 LTS
+Najveća novost u Collections Frameworku!
+
+Problem: Dosad nije bilo konzistentnog načina za pristup prvom/zadnjem elementu
+
+// Lista sada ima konzistentan API
+List<String> lista = new ArrayList<>();
+ 
+lista.addFirst("Prvi");      // Dodaj na početak
+lista.addLast("Zadnji");    // Dodaj na kraj
+ 
+String prvi = lista.getFirst();
+String zadnji = lista.getLast();
+ 
+// Obrnuti redoslijed - nova mogućnost!
+List<String> obrnuto = lista.reversed();
+
+Java 24 - Stream Gatherers JAVA 24
+Custom intermediate operations za Stream!
+
+Problem: Stream API nema sve potrebne međuoperacije (npr. batching, windowing)
+
+Novi ugrađeni Gatherers:
+
+windowFixed(n) – podijeli u grupe fiksne veličine
+windowSliding(n) – klizni prozor
+fold() – složena redukcija
+scan() – akumulacija s međurezultatima
+mapConcurrent() – konkurentna obrada
+
+Stream Gatherers - Primjer
+
+// Podjela u grupe od po 3 elementa
+List<Integer> brojevi = List.of(1, 2, 3, 4, 5, 6, 7);
+ 
+List<List<Integer>> grupe = brojevi.stream()
+.gather(Gatherers.windowFixed(3))
+.toList();
+// [[1, 2, 3], [4, 5, 6], [7]]
+ 
+// Klizni prozor veličine 2
+List<List<Integer>> prozori = brojevi.stream()
+.gather(Gatherers.windowSliding(2))
+.toList();
+// [[1,2], [2,3], [3,4], [4,5], [5,6], [6,7]]
+ 
+// Konkurentna transformacija (max 3 paralelna)
+List<String> rezultati = brojevi.stream()
+.gather(Gatherers.mapConcurrent(3,
+n -> "Obrađeno: " + n))
+.toList();
+
+Java 25 - Performance & Memory JAVA 25 LTS
+🚀 Compact Object Headers (JEP 519)
+
+Smanjenje memorijskog footprinta za 50%!
+Header objekta: 128 bitova → 64 bita
+
+✅ Automatski aktivno u Java 25 (ne treba nikakva konfiguracija)
+✅ Posebno učinkovito za aplikacije s puno malih objekata
+✅ Smanjuje broj GC ciklusa
+💡 Idealno za microservices i cloud deploymente
+
+// Primjer: Lista od milijun malih objekata
+List<Point> tocke = new ArrayList<>();
+for (int i = 0; i < 1_000_000; i++) {
+tocke.add(new Point(i, i));
+}
+// Java 24: ~48 MB memorije
+// Java 25: ~32 MB memorije ⚡
+
+Java 25 - Generational Shenandoah JAVA 25 LTS
+⚡ Poboljšani Garbage Collector (JEP 521)
+
+Low-latency GC s generacijskim pristupom
+Dijeli heap na young i old generaciju
+Bolje performanse za aplikacije s puno kratkoživećih objekata
+Manji pause times (<10ms)
+
+// Pokretanje s Generational Shenandoah
+java -XX:+UseShenandoahGC \
+-XX:ShenandoahGCMode=generational \
+MojaAplikacija
+ 
+// Više ne treba -XX:+UnlockExperimentalVMOptions!
+
+💡 Kada koristiti: Latency-sensitive aplikacije (web serveri, real-time sustavi)
+
+Java 25 - Flexible Constructor Bodies JAVA 25
+Omogućava kod PRIJE super() poziva!
+
+class Rectangle extends Shape {
+final int width;
+final int height;
+ 
+public Rectangle(int width, int height) {
+// Java 25: Validacija PRIJE super()! 🎉
+if (width <= 0 || height <= 0) {
+throw new IllegalArgumentException(
+"Dimenzije moraju biti pozitivne");
+}
+ 
+// Računanje prije super()
+int area = width * height;
+ 
+super(area); // Sada je moguće!
+ 
+this.width = width;
+this.height = height;
+}
+}
+
+Java 25 - Module Import Declarations JAVA 25
+Import cijelog modula odjednom!
+
+// Prije Java 25 - mnogobrojna importanja
+import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.function.Function;
+ 
+// Java 25 - import cijelog modula 🎯
+import module java.base;
+// Sve klase iz java.base modula su dostupne!
+
+💡 Koristi se za manje projekte, prototipove ili skripte
+
+💡 Best Practices
+
+✅ Radi ovo:
+
+Koristi sučelja kao tipove
+Koristi diamond operator
+Koristi Stream API
+Koristi immutable kolekcije
+Koristi var (Java 10+)
+Koristi Gatherers (Java 24+)
+
+❌ Izbjegavaj:
+
+Konkretne implementacije kao tipove
+Ponavljanje tipova
+Ručno pisanje petlji
+Mijenjanje tijekom iteracije
+Null vrijednosti u zbirkama
+
+📚 Sažetak - Evolution of Java Collections
+
+Java 5: Generics, For-each, Enums
+Java 7: Diamond operator (<>)
+Java 8: 🌊 Stream API, Lambda izrazi
+Java 9: 🏭 Factory metode (List.of, Set.of, Map.of)
+Java 10: 🎯 Var keyword
+Java 17 LTS: ✨ Stream.toList()
+Java 21 LTS: 📊 Sequenced Collections
+Java 24: 🎨 Stream Gatherers
+Java 25 LTS: ⚡ Compact Headers, Generational Shenandoah, Flexible Constructors
+
+Java 25 je najnoviji LTS release!
+Sljedeći LTS: Java 29 (2027)
+
+Napredak kroz verzije - Primjer
+
+// Java 8 - verbose
+List<String> rezultat = brojevi.stream()
+.filter(n -> n % 2 == 0)
+.map(String::valueOf)
+.collect(Collectors.toList());
+ 
+// Java 17 - jednostavnije
+List<String> rezultat = brojevi.stream()
+.filter(n -> n % 2 == 0)
+.map(String::valueOf)
+.toList();
+ 
+// Java 24 - s grupiranjem
+List<List<Integer>> grupe = brojevi.stream()
+.filter(n -> n % 2 == 0)
+.gather(Gatherers.windowFixed(3))
+.toList();
+
+🔗 Korisni resursi
+
+Dokumentacija:
+
+Java 25 Documentation
+JEP 431: Sequenced Collections
+JEP 485: Stream Gatherers
+Oracle Dev.java

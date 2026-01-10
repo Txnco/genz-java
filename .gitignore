@@ -39,3 +39,17 @@ next-env.d.ts
 .idea
 .vscode/*
 !.vscode/extensions.json
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Question Generator
+importer/output/
+importer/.env

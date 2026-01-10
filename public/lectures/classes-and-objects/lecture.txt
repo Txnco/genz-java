@@ -1,0 +1,653 @@
+Klase i objekti u Javi
+Osnove
+Uvod u klase i objekte
+Primjer klase Account
+Konvencije nazivanja
+Kreiranje objekata
+Import deklaracije
+
+🔥 Napredno
+
+Primitivni vs referentni tipovi
+Konstruktori
+Date and Time API
+Reference i memorija
+Uspoređivanje objekata
+
+🏗️ Što su klase i objekti?
+
+🍪 Analogija s kolačićima:
+Klasa = Kalup za kolačiće (blueprint, recept)
+Objekt = Pojedini kolačić napravljen tim kalupom
+Jedan kalup → Bezbroj kolačića! 🎉
+
+Klase definiraju vlastite tipove podataka
+Atributi (varijable) = karakteristike entiteta
+Metode (funkcije) = ponašanje entiteta
+Mogu se višestruko koristiti nasljeđivanjem
+
+💳 Primjer: Klasa Account
+
+package account;
+
+public class Account {
+private String name;  // atribut (varijabla instance)
+// Getter metoda - dohvaća vrijednost
+public String getName() {
+return name;
+}
+
+// Setter metoda - postavlja vrijednost
+public void setName(String name) {
+this.name = name;  // 'this' razlikuje parametar od varijable
+}
+}
+
+💡 Tip: U IntelliJ-u koristi Alt+Insert za automatsko generiranje getter/setter metoda!
+
+🔒 Public vs Private
+
+🔓 public
+
+Pristupačno svugdje
+(unutar i izvan klase)
+
+🔒 private
+
+Pristupačno samo
+unutar klase
+
+🛡️ Enkapsulacija: Sakrivanje podataka i kontrola pristupa kroz metode!
+Ovo je jedan od temeljnih principa OOP-a (Object-Oriented Programming)
+
+📝 Konvencija nazivanja (Naming Convention)
+
+🐫
+
+Klase: PascalCase → velika početno slovo
+Objekti i varijable: camelCase → malo početno slovo
+Metode: camelCase → malo početno slovo
+Svaka klasa mora biti u istoimenu .java datoteku
+❌ Izbjegavati hrvatske znakove (č, ć, š, ž, đ)
+
+// ✅ Dobro
+class PrvaLaboratorijskaVjezba
+int brojacStudenata;
+void izracunajProsjek()
+
+// ❌ Loše
+class prvaLaboratorijskaVjezba
+int BrojacStudenata
+
+🎨 Kreiranje objekta
+
+import java.util.Scanner;
+
+public class AccountTest {
+public static void main(String[] args) {
+// Kreiranje Scanner objekta za unos
+Scanner unos = new Scanner(System.in);
+
+// Kreiranje Account objekta pomoću konstruktora
+Account mojRacun = new Account();
+
+System.out.println("Unesite naziv računa: ");
+String brojRacuna = unos.nextLine();
+
+mojRacun.setName(brojRacuna);  // Postavljanje naziva
+
+unos.close();
+}
+}
+
+🔑 new = ključna riječ za kreiranje novog objekta (poziva konstruktor)
+
+📦 Import deklaracije
+
+// 1. Deklaracija paketa
+package account;
+
+// 2. Import deklaracije (klase iz drugih paketa)
+import java.util.Scanner;
+import java.time.LocalDateTime;
+
+// 3. Deklaracija klase
+public class AccountTest { ... }
+
+⌨️ Shortcut: Ctrl+Space = Auto-complete
+⌨️ Shortcut: Alt+Enter = Automatski dodaj import
+
+// Alternativa bez importa (rijetko korišteno)
+java.util.Scanner unos = new java.util.Scanner(System.in);
+
+⚡ Primitivni vs Referentni tipovi
+
+Primitivni tipovi
+
+int, long, short, byte
+float, double
+boolean
+char
+
+📊 Defaultna vrijednost:
+0 ili false
+
+Referentni tipovi
+
+String
+Account
+Scanner
+Sve klase...
+
+📊 Defaultna vrijednost:
+null
+
+⚠️ NullPointerException: Događa se kad pokušaš koristiti metodu ili varijablu objekta koji je null!
+
+🏗️ Konstruktori
+
+🏭 Konstruktor = Tvornica za objekte!
+Specijalna metoda koja "sastavlja" objekt i inicijalizira njegove vrijednosti
+
+public class Account {
+private String name;
+
+// Konstruktor - isto ime kao klasa, nema return type!
+public Account(String name) {
+this.name = name;
+}
+}
+
+// Korištenje:
+Account racun = new Account("Tekući račun");
+
+💡 Ako ne napišeš konstruktor, Java automatski kreira defaultni konstruktor (bez parametara)
+
+🎯 IntelliJ: Code → Generate... → Constructor
+
+📅 Date and Time API (Java 8+)
+
+🎉 Java 8 donosi novi Date/Time API inspiriran JodaTime bibliotekom!
+Stari Date i Calendar su zastarjeli i konfuzni
+
+Glavne klase:
+
+LocalDate - samo datum (godina, mjesec, dan)
+LocalTime - samo vrijeme (sati, minute, sekunde)
+LocalDateTime - datum + vrijeme
+Instant - timestamp (nanosekunde od 01.01.1970.)
+
+⏰ Primjer: LocalDateTime
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+LocalDateTime trenutno = LocalDateTime.now();
+System.out.println("Trenutni datum: " + trenutno);
+
+// Dodavanje vremena
+LocalDateTime zaKvaTjedna = trenutno.plusWeeks(2);
+System.out.println("Nakon dva tjedna: " + zaKvaTjedna);
+
+// Formatiranje
+String formatiran = trenutno.format(
+DateTimeFormatter.ofPattern("dd.MM.yyyy.")
+);
+System.out.println("Formatirani: " + formatiran);
+
+// Output:
+Trenutni datum: 2025-10-10T12:37:29.035
+Nakon dva tjedna: 2025-10-24T12:37:29.035
+Formatirani: 10.10.2025.
+
+🔗 Objekti i reference (1)
+
+Nakon deklaracije:
+
+firstDate
+
+⊥
+null
+
+secondDate
+
+⊥
+null
+
+💡 Varijable referentnih tipova ne sadrže objekt, već adresu (referencu) gdje se objekt nalazi u memoriji!
+
+🔗 Objekti i reference (2)
+
+Nakon kreiranja objekta:
+
+firstDate
+
+→
+
+day: 0
+month: null
+year: 0
+
+secondDate
+
+⊥
+null
+
+🧠 Objekt je rezervirao prostor u memoriji! Primitivni tipovi dobivaju 0, referentni null
+
+🔗 Objekti i reference (3)
+
+Nakon postavljanja vrijednosti:
+
+firstDate
+
+→
+
+day: 1
+month: "Listopad"
+year: 2025
+
+secondDate
+
+⊥
+null
+
+🔗 Objekti i reference (4)
+
+secondDate = firstDate;  // Kopiranje reference!
+
+Obje varijable pokazuju na isti objekt!
+
+firstDate
+
+secondDate
+
+→
+→
+
+day: 1
+month: "Listopad"
+year: 2025
+
+⚠️ Promjena preko jedne varijable mijenja objekt za obje! Dijele memorijsku lokaciju!
+
+⚖️ Uspoređivanje objekata
+
+Dva načina usporedbe:
+
+== (usporedba referenci)
+
+if (firstDate == secondDate) {
+// Jesu li isti objekti?
+// (ista memorijska lokacija)
+}
+
+⚠️ Često se koristi pogrešno!
+
+.equals() (usporedba vrijednosti)
+
+boolean areDatesEqual(Date f, Date s) {
+return f.day == s.day &&
+f.month.equals(s.month) &&
+f.year == s.year;
+}
+
+✅ Pravilan način!
+
+💡 Za String UVIJEK koristi .equals(), ne ==!
+
+☕ Klase i objekti u Javi
+
+„Hello World" primjer
+Metode za formatiranje ispisa
+Klasa java.util.Scanner
+Članke varijable i metode
+Metoda main
+
+Komandna linija (javac, java)
+Operatori u Javi
+Korištenje polja
+Unos podataka i objekti
+Switch-case konstrukt
+
+👋 „Hello World" primjer
+
+Ključne točke:
+
+Svaka klasa treba biti smještena u određeni paket
+Naziv klase mora započeti velikim slovom i biti napisan CamelCase principom
+Metoda main omogućava „pokretanje" klase
+Za ispis koristimo System.out.println
+
+package helloworld;
+
+public class HelloWorld {
+
+public static void main(String args[]) {
+System.out.println("Dobrodošli u IntelliJ i programiranje u Javi!");
+}
+
+}
+
+🎨 Metode za formatiranje ispisa
+
+Tri glavne metode za ispis:
+
+System.out.println() - ispisuje tekst i pomiče kursor u novi redak
+
+System.out.print() - ispisuje tekst bez pomaka kursora
+
+System.out.printf() - formatiran ispis (kao u C-u)
+
+System.out.printf("%s%n%s%n",
+"Dobrodošli",
+"Ovo je programski jezik Java");
+
+// Ispis:
+// Dobrodošli
+// Ovo je programski jezik Java
+
+🔗 Spajanje stringova
+
+💡 Savjet: Stringove spajamo operatorom +
+
+String ime = "Ana";
+String prezime = "Anić";
+int godine = 20;
+
+// Automatsko spajanje stringova i brojeva
+System.out.println("Student: " + ime + " " + prezime);
+System.out.println("Broj godina: " + godine);
+
+// Rezultat:
+// Student: Ana Anić
+// Broj godina: 20
+
+Kod svih objekata se implicitno poziva metoda toString() koja pretvara objekt u String oblik
+
+⌨️ Klasa java.util.Scanner
+
+Omogućava učitavanje različitih tipova podataka iz konzole
+
+Tekstualni podaci
+
+nextLine()
+cijela linija do entera
+
+next()
+samo prva riječ
+
+Brojčani podaci
+
+nextInt()
+cijeli broj
+
+nextDouble()
+realni broj
+
+nextBigDecimal()
+višestruka preciznost
+
+⚠️ Važno: Neispravan unos → InputMismatchException
+
+Scanner - Praktični primjer
+import java.util.Scanner;
+
+public class UnosPodataka {
+
+public static void main(String[] args) {
+Scanner scanner = new Scanner(System.in);
+
+System.out.print("Unesite svoje ime: ");
+String ime = scanner.nextLine();
+
+System.out.print("Unesite broj godina: ");
+int godine = scanner.nextInt();
+
+System.out.print("Unesite prosjek ocjena: ");
+double prosjek = scanner.nextDouble();
+
+System.out.println("\n--- Podaci ---");
+System.out.println("Ime: " + ime);
+System.out.println("Godine: " + godine);
+System.out.println("Prosjek: " + prosjek);
+
+scanner.close();
+}
+}
+
+🔑 Korištenje članskih varijabli i metoda
+
+Članke elemente pristupamo operatorom . (točka)
+
+Statičke metode i varijable
+Pozivaju se izravno iz klase (bez kreiranja objekta)
+System.out.println("Poruka");
+Math.sqrt(25);
+Integer.parseInt("123");
+
+Nestatičke metode
+Prvo treba kreirati objekt, pa onda pozvati metodu
+Account mojRacun = new Account();
+mojRacun.setName("Ana Anić");
+mojRacun.deposit(1000.0);
+
+🚀 Metoda public static void main
+
+Ulazna točka Java aplikacije
+
+JVM automatski poziva ovu metodu pri pokretanju
+Mora biti static kako bi JVM mogao pristupiti
+Prima polje String argumenata: String[] args
+
+public class Program {
+
+public static void main(String[] args) {
+// Ispis argumenata komandne linije
+if (args.length > 0) {
+System.out.println("Primljeni argumenti:");
+for (int i = 0; i < args.length; i++) {
+System.out.println((i + 1) + ". " + args[i]);
+}
+} else {
+System.out.println("Nema argumenata!");
+}
+}
+}
+
+💻 Naredbe komandne linije
+
+javac
+🔨Kompajlira .java datoteku u bytecode (.class)
+javac HelloWorld.java
+
+java
+▶️Izvršava .class datoteku
+java HelloWorld
+
+💡 Napomena: Naredbe moraju biti u PATH varijabli u Environment Variables postavkama
+
+# Primjer s argumentima
+javac Program.java
+java Program arg1 arg2 arg3
+
+➕➖✖️➗ Operatori u Javi
+
+Operatori su vrlo slični onima u C-u za primitivne tipove
+Java NE omogućava overloadanje operatora!
+
+Primitivni tipovi - očekivano ponašanje:
+int a = 10;
+int b = 5;
+int zbroj = a + b;        // 15
+int razlika = a - b;      // 5
+int umnozak = a * b;      // 50
+int kolicnik = a / b;     // 2
+
+Operatori s referentnim tipovima
+
+✅ Radi - wrapper klase
+Integer prviBroj = 5;
+Integer drugiBroj = 10;
+
+Integer treciBroj =
+prviBroj + drugiBroj;
+
+System.out.println(
+"Rezultat: " + treciBroj
+);
+// Ispis: Rezultat: 15
+Automatska konverzija u primitivni tip
+
+❌ Ne radi - BigDecimal
+BigDecimal prvi =
+new BigDecimal("10.23");
+BigDecimal drugi =
+new BigDecimal("25.75");
+
+BigDecimal treci =
+prvi.add(drugi);
+
+System.out.println(
+"Rezultat: " + treci
+);
+// Ispis: Rezultat: 35.98
+Moramo koristiti metode!
+
+📦 Korištenje polja u Javi
+
+Osnovna sintaksa:
+// Deklaracija i inicijalizacija
+int[] brojevi = new int[5];
+String[] imena = {"Ana", "Marko", "Petra"};
+
+// Pristup elementima (indeksiranje počinje od 0)
+brojevi[0] = 10;
+System.out.println(imena[1]);  // Ispis: Marko
+
+// Duljina polja
+System.out.println("Duljina: " + brojevi.length);
+
+Primjer s poljima
+import java.util.Scanner;
+
+public class UnosKlijenata {
+
+private static final int BROJ_KLIJENATA = 2;
+
+public static void main(String[] args) {
+Scanner scanner = new Scanner(System.in);
+
+System.out.println("=== UNOS PODATAKA ===\n");
+
+// Kreiranje polja objekata
+Klijent[] klijenti = new Klijent[BROJ_KLIJENATA];
+
+// Unos podataka za svakog klijenta
+for (int i = 0; i < BROJ_KLIJENATA; i++) {
+System.out.println("UNESITE " + (i + 1) +
+". KLIJENTA:");
+klijenti[i] = unesiKlijenta(scanner);
+System.out.println();
+}
+}
+}
+
+🏗️ Kreiranje objekata - primjer metode
+private static Klijent unesiKlijenta(Scanner scanner) {
+System.out.print("Unesite OIB: ");
+String oib = scanner.nextLine();
+
+System.out.print("Unesite prezime: ");
+String prezime = scanner.nextLine();
+
+System.out.print("Unesite ime: ");
+String ime = scanner.nextLine();
+
+System.out.print("Broj telefona: ");
+String brojTelefona = scanner.nextLine();
+
+System.out.print("E-mail adresa: ");
+String eMailAdresa = scanner.nextLine();
+
+System.out.print("Datum rođenja (dd.MM.yyyy.): ");
+String datumString = scanner.nextLine();
+
+DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+LocalDate datum = LocalDate.parse(datumString, fmt);
+
+return new Klijent(oib, prezime, ime,
+brojTelefona, eMailAdresa, datum);
+}
+
+🔀 Novi switch-case konstrukt (Java 13+)
+
+Switch expression - može vratiti vrijednost!
+
+String vrijednost = "2";
+
+// Switch kao izraz - vraća vrijednost
+String poruka = switch(vrijednost) {
+case "1" -> "Odabrana je prva opcija!";
+case "2" -> "Odabrana je druga opcija!";
+case "3" -> "Odabrana je treća opcija!";
+default -> "Odabrana je podrazumijevana opcija";
+};
+
+System.out.println(poruka);
+// Ispis: Odabrana je druga opcija!
+
+✨ Nova sintaksa: Koristimo -> umjesto : i nema potrebe za break!
+
+Switch-case s yield
+
+Za složenije slučajeve koristimo yield ključnu riječ
+
+String godisnjeDoba = "Jesen";
+
+String translated = switch (godisnjeDoba) {
+case "Proljece":
+yield "Spring";
+case "Ljeto":
+yield "Summer";
+case "Jesen":
+yield "Fall";
+case "Zima":
+yield "Winter";
+default:
+yield "Unknown";
+};
+
+System.out.println("Prevedeno godišnje doba: " + translated);
+// Ispis: Prevedeno godišnje doba: Fall
+
+Usporedba: Stari vs. Novi switch
+
+Stari način (Java 12 i ranije)
+String rezultat;
+switch(dan) {
+case "PON":
+case "UTO":
+rezultat = "Radni dan";
+break;
+case "SUB":
+case "NED":
+rezultat = "Vikend";
+break;
+default:
+rezultat = "Nepoznat";
+break;
+}
+
+Novi način (Java 13+)
+String rezultat = switch(dan) {
+case "PON", "UTO", "SRI",
+"ČET", "PET" ->
+"Radni dan";
+case "SUB", "NED" ->
+"Vikend";
+default ->
+"Nepoznat";
+};
+
+🎯Prednosti novog načina: Kraći kod, bez break, može kombinirati case-ove s ,

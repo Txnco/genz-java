@@ -26,6 +26,18 @@ export function evaluateAnswer(
       return evaluateSingleChoice(options, selectedOptionIds)
 
     case 'MULTIPLE_CHOICE':
+    // New TVZ question types - all treated as multiple choice
+    case 'CODE_RUNTIME_BEHAVIOR':
+    case 'CODE_OUTPUT':
+    case 'FIND_THE_ERROR':
+    case 'WHAT_IS_MISSING':
+    case 'WHAT_MUST_BE_FIXED':
+    case 'WHICH_STATEMENTS_COMPILE':
+    case 'WHICH_EXCEPTIONS_OCCUR':
+    case 'WHICH_METHOD_IS_TERMINAL':
+    case 'WHICH_TYPE_IS_RETURNED':
+    case 'ORDER_OF_EXECUTION':
+    case 'EDGE_CASE_BEHAVIOR':
       return evaluateMultipleChoice(options, selectedOptionIds)
 
     case 'FILL_IN_BLANK':

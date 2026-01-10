@@ -1,0 +1,719 @@
+
+☕ Java 25 Edition
+
+Exception Handling kao profesionalci
+
+Osnove
+
+Uvod u iznimke
+Try-catch-finally
+Multi-catch blok
+Try-with-resources
+
+Napredne teme
+
+Hijerarhija iznimaka
+Checked vs Unchecked
+Bacanje iznimaka
+Vlastite iznimke
+
+Ova prezentacija je interaktivna - koristite strelice ili klikove za navigaciju!
+
+🎯 Što su to iznimke?
+
+Iznimka (Exception) je objekt koji predstavlja problem nastao tijekom izvođenja programa.
+
+🛡️ Omogućavaju razvoj robusnih aplikacija
+♻️ Program može nastaviti rad i nakon greške
+🎭 Predstavljene klasama koje nasljeđuju Throwable
+🎣 Mogu se hvatati (catch) i bacati (throw)
+
+Exception handling nije samo za greške - koristi se i za kontrolu toka programa!
+
+❌ Problem: Bez obrade iznimki
+
+public class BezObradeIznimke {
+private static int podijeli(int djeljenik, int djelitelj) {
+return djeljenik / djelitelj;  // ⚠️ Što ako je djelitelj 0?
+}
+
+public static void main(String[] args) {
+Scanner unos = new Scanner(System.in);
+System.out.print("Unesite dva broja: ");
+
+int prvi = unos.nextInt();
+int drugi = unos.nextInt();
+int rezultat = podijeli(prvi, drugi);
+
+System.out.println("Rezultat: " + rezultat);
+unos.close();
+}
+}
+
+Output (ako korisnik unese 5 i 0):
+Exception in thread "main" java.lang.ArithmeticException: / by zero
+
+🔍 Razumijevanje Stack Trace
+
+Exception in thread "main" java.lang.ArithmeticException: / by zero
+at BezObradeIznimke.podijeli(BezObradeIznimke.java:8)
+at BezObradeIznimke.main(BezObradeIznimke.java:18)
+
+Dio
+Opis
+
+java.lang.ArithmeticException
+Naziv iznimke
+
+/ by zero
+Opisna poruka
+
+at BezObradeIznimke.podijeli(...)
+Lokacija gdje se dogodila iznimka
+
+(BezObradeIznimke.java:8)
+Datoteka i broj linije
+
+✅ Rješenje: Try-Catch blok
+
+boolean nastaviPetlju;
+do {
+nastaviPetlju = false;
+try {
+// Rizičan kod koji može baciti iznimku
+System.out.print("Unesite dva broja: ");
+int prvi = unos.nextInt();
+int drugi = unos.nextInt();
+int rezultat = podijeli(prvi, drugi);
+System.out.println("Rezultat: " + rezultat);
+
+} catch (InputMismatchException ex) {
+// Obrada pogrešnog unosa
+System.out.println("❌ Morate unijeti brojčane vrijednosti!");
+unos.nextLine();  // Očisti buffer
+nastaviPetlju = true;
+
+} catch (ArithmeticException ex) {
+// Obrada dijeljenja s nulom
+System.out.println("❌ Ne možete dijeliti s nulom!");
+unos.nextLine();
+nastaviPetlju = true;
+}
+} while (nastaviPetlju);
+
+🔬 Anatomija Try-Catch bloka
+
+TRY blok
+Sadrži kod koji može baciti iznimku. Izvodi se sve dok ne dođe do iznimke.
+
+CATCH blok
+Sadrži kod koji se izvodi samo ako se dogodi određena iznimka.
+
+Možete imati više catch blokova za različite tipove iznimaka!
+
+⚡ Try se izvodi linearno do iznimke
+🎯 Catch "hvata" samo svoj tip iznimke
+🔄 Nakon catch-a program normalno nastavlja
+
+🎭 Multi-Catch blok Java 7+
+Kada više iznimaka treba obrađivati na isti način:
+
+❌ Stari način
+
+catch (IOException ex) {
+logger.log(ex);
+showError();
+}
+catch (SQLException ex) {
+logger.log(ex);
+showError();
+}
+
+✅ Novi način
+
+catch (IOException | SQLException ex) {
+logger.log(ex);
+showError();
+}
+
+Prednosti:
+
+Manje dupliciranog koda
+Čitljiviji i koncizniji kod
+Lakše održavanje
+
+🎬 Finally Blok - Uvijek se izvršava!
+
+FileReader reader = null;
+try {
+reader = new FileReader("data.txt");
+// Rad s datotekom...
+
+} catch (IOException ex) {
+System.err.println("Greška čitanja: " + ex.getMessage());
+
+} finally {
+// Ovo se UVIJEK izvršava - iznimka ili ne!
+if (reader != null) {
+try {
+reader.close();
+System.out.println("✅ Datoteka zatvorena");
+} catch (IOException e) {
+e.printStackTrace();
+}
+}
+}
+
+Finally se izvršava: Nakon try bloka, nakon catch bloka, čak i ako postoji return u try/catch!
+
+🚰 Try-with-Resources Java 7+
+Automatsko zatvaranje resursa - elegantnije i sigurnije!
+
+❌ Stari način (verbozno)
+
+BufferedReader br = null;
+try {
+br = new BufferedReader(
+new FileReader("file.txt")
+);
+return br.readLine();
+} finally {
+if (br != null) {
+br.close();
+}
+}
+
+✅ Novi način (clean)
+
+try (BufferedReader br =
+new BufferedReader(
+new FileReader("file.txt")
+)) {
+return br.readLine();
+}
+// Automatski zatvoreno! 🎉
+
+Radi s bilo kojom klasom koja implementira AutoCloseable interface!
+
+🌳 Hijerarhija iznimaka
+
+java.lang.Throwable - Korijen svega
+
+Exception - Iznimke koje treba obrađivati
+
+RuntimeException - Neoznačene iznimke
+
+ArithmeticException
+NullPointerException
+IndexOutOfBoundsException
+
+IOException - Označene iznimke
+
+FileNotFoundException
+EOFException
+
+Error - Ozbiljne greške (NE OBRAĐIVATI!)
+
+OutOfMemoryError
+StackOverflowError
+
+🏷️ Označene vs Neoznačene iznimke
+
+✅ Checked (Označene)
+
+Nasljeđuju Exception
+MORAJU se obrađivati
+Kompajler ih provjerava
+Za predvidive probleme
+
+IOException
+SQLException
+ClassNotFoundException
+
+⚠️ Unchecked (Neoznačene)
+
+Nasljeđuju RuntimeException
+Ne moraju se obrađivati
+Kompajler ih ne provjerava
+Za programske greške
+
+NullPointerException
+ArithmeticException
+ArrayIndexOutOfBoundsException
+
+Pravilo: Ako možete spriječiti u kodu - unchecked. Ako ovisi o vanjskim faktorima - checked.
+
+🎾 Bacanje iznimaka - throw
+
+public class Korisnik {
+private String email;
+
+public void setEmail(String email) {
+// Validacija emaila
+if (email == null || email.isEmpty()) {
+throw new IllegalArgumentException(
+"Email ne može biti prazan! 📧"
+);
+}
+
+if (!email.contains("@")) {
+throw new IllegalArgumentException(
+"Email mora sadržavati @"
+);
+}
+
+this.email = email;
+}
+}
+
+throw - baca novu iznimku (stvara objekt i prekida tok izvođenja)
+
+📢 Deklaracija iznimaka - throws
+Za checked iznimke morate ili: (1) uhvatiti ih ili (2) deklarirati da ih metoda baca
+
+public class FileManager {
+
+// Metoda deklarira da baca IOException
+public String readFile(String path)
+throws IOException {
+
+BufferedReader reader = new BufferedReader(
+new FileReader(path)  // Baca IOException
+);
+
+return reader.readLine();  // Također baca IOException
+}
+
+public void processFile() {
+try {
+String content = readFile("data.txt");
+System.out.println(content);
+} catch (IOException e) {
+System.err.println("❌ Greška: " + e.getMessage());
+}
+}
+}
+
+throws = "ova metoda može baciti ove iznimke, pa ih ti obradi"
+
+🎨 Kreiranje vlastitih iznimaka
+
+// Checked iznimka (nasljeđuje Exception)
+public class InvalidEmailException extends Exception {
+
+public InvalidEmailException() {
+super("Email adresa nije valjana");
+}
+
+public InvalidEmailException(String message) {
+super(message);
+}
+
+public InvalidEmailException(String message, Throwable cause) {
+super(message, cause);
+}
+
+public InvalidEmailException(Throwable cause) {
+super(cause);
+}
+}
+
+Best Practice: Implementirajte sva 4 konstruktora za fleksibilnost!
+
+🎯 Korištenje vlastite iznimke
+
+public class EmailValidator {
+
+public static void validateEmail(String email)
+throws InvalidEmailException {
+
+if (email == null || email.isEmpty()) {
+throw new InvalidEmailException(
+"Email ne smije biti prazan"
+);
+}
+
+if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+throw new InvalidEmailException(
+"Email format nije valjan: " + email
+);
+}
+}
+
+public static void main(String[] args) {
+try {
+validateEmail("korisnik@primjer.com");
+System.out.println("✅ Email je valjan!");
+
+} catch (InvalidEmailException e) {
+System.err.println("❌ " + e.getMessage());
+}
+}
+}
+
+⭐ Best Practices
+
+✅ RADI:
+
+Hvati specifične iznimke, ne Exception
+Daj korisne poruke o greškama
+Koristi try-with-resources za resurse
+Logiraj iznimke za debugging
+Kreiraj vlastite iznimke za domensku logiku
+
+❌ NEMOJ:
+
+Prazan catch blok (catch(Exception e) {})
+Hvatati Error klasu
+Koristiti iznimke za kontrolu toka
+Ignorirati checked iznimke
+Bacati generičke iznimke bez poruke
+
+🆕 Pattern Matching Java 21+
+Moderne mogućnosti za obradu iznimaka:
+
+public String handleException(Exception ex) {
+return switch (ex) {
+case FileNotFoundException fnf
+when fnf.getMessage().contains("config") ->
+"⚙️ Konfiguracijska datoteka nije pronađena";
+
+case FileNotFoundException fnf ->
+"📄 Datoteka nije pronađena: " + fnf.getMessage();
+
+case IOException io ->
+"💾 I/O greška: " + io.getMessage();
+
+case SQLException sql ->
+"🗃️ Greška baze podataka: " + sql.getMessage();
+
+default ->
+"❌ Nepoznata greška: " + ex.getMessage();
+};
+}
+
+Pattern matching omogućava elegantniju obradu različitih tipova iznimaka!
+
+⛓️ Chained Exceptions
+Povezivanje iznimaka za bolju dijagnostiku:
+
+public class DataService {
+
+public User getUser(int id) throws DataAccessException {
+try {
+// Spajanje na bazu i dohvaćanje korisnika
+Connection conn = getConnection();
+return fetchUserFromDB(conn, id);
+
+} catch (SQLException e) {
+// Omotaj SQL iznimku u domensku iznimku
+throw new DataAccessException(
+"Ne mogu dohvatiti korisnika #" + id,
+e  // ← Originalna iznimka kao uzrok
+);
+}
+}
+}
+
+Prednosti:
+
+Zadržava potpunu informaciju o greški
+Omogućava apstrakciju (skriva SQL detalje)
+Olakšava debugging (cijeli lanac je vidljiv)
+
+💼 Praktični primjer - API poziv
+
+public class UserAPI {
+
+public User createUser(String email, String password) {
+try {
+// Validacija
+EmailValidator.validateEmail(email);
+PasswordValidator.validatePassword(password);
+
+// Provjera postoji li već korisnik
+if (userRepository.existsByEmail(email)) {
+throw new UserAlreadyExistsException(email);
+}
+
+// Kreiranje korisnika
+User user = new User(email, password);
+return userRepository.save(user);
+
+} catch (InvalidEmailException | InvalidPasswordException e) {
+// Validacijske greške
+logger.warn("Validacija neuspješna: {}", e.getMessage());
+throw new ValidationException(e.getMessage(), e);
+
+} catch (UserAlreadyExistsException e) {
+// Poslovni problem
+logger.info("Pokušaj duple registracije: {}", email);
+throw e;
+
+} catch (DataAccessException e) {
+// Tehnički problem
+logger.error("DB greška pri kreiranju korisnika", e);
+throw new ServiceException("Nije moguće kreirati korisnika", e);
+}
+}
+}
+
+🎯 Zaključak
+
+Što smo naučili:
+
+✅ Try-catch-finally za obradu iznimaka
+🎭 Multi-catch i try-with-resources
+🌳 Hijerarhiju iznimaka (Exception vs Error)
+🏷️ Razliku između checked i unchecked
+🎾 Kako bacati i deklarirati iznimke
+🎨 Kreiranje vlastitih iznimaka
+🆕 Moderne Java 21+ feature-e
+
+Exception handling je umjetnost! Vježbom ćete razviti intuiciju kada i kako koristiti iznimke.
+Stack Trace - kako čitati stazu greške
+Logging s LogBackom - profesionalno zapisivanje
+Maven - upravljanje ovisnostima
+Praktični primjer - igra pogađanja brojeva
+Quiz - pitanja s Java certifikata
+
+💡 Pro tip: Iznimke nisu greške - one su način komunikacije!
+
+🔍 Stack Trace - Tvoj najbolji prijatelj
+Stack trace je kao mapa koja te vodi do problema! 🗺️
+
+try {
+int rezultat = 10 / 0; // Ups! 💥
+} catch (ArithmeticException ex) {
+ex.printStackTrace(); // Ispiši trag
+String poruka = ex.getMessage(); // "/ by zero"
+}
+
+Output:
+java.lang.ArithmeticException: / by zero
+
+📝 Logging - Zašto ne samo println?
+
+❌ System.out.println
+
+Nestaje nakon restarta
+Nema razine važnosti
+Teško za analizu
+Ne radi u produkciji
+
+✅ LogBack
+
+Trajno spremanje
+5 razina (ERROR, WARN...)
+Lako za pretraživanje
+Profesionalni standard
+
+⚙️ LogBack Konfiguracija
+Jedna XML datoteka = svemoćno logiranje! ✨
+
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+<file>logs/app.log</file>
+<encoder>
+<pattern>%date %level [%thread] %msg%n</pattern>
+</encoder>
+</appender>
+
+<root level="debug">
+<appender-ref ref="FILE" />
+</root>
+</configuration>
+
+📊 Razine Logiranja
+
+🔴 ERROR - Nešto je puklo! Kritična greška
+
+🟠 WARN - Oprez! Potencijalni problem
+
+🔵 INFO - Bitne informacije o radu aplikacije
+
+🟢 DEBUG - Detalji za debugging
+
+⚪ TRACE - Sve, baš sve!
+
+💻 LogBack u Akciji
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MojaKlasa {
+private static final Logger logger =
+LoggerFactory.getLogger(MojaKlasa.class);
+
+public void radNesto() {
+try {
+// Tvoj kod
+logger.info("Započeo rad! 🚀");
+} catch (Exception ex) {
+logger.error("Došlo je do greške!", ex);
+}
+}
+}
+
+🔧 Apache Maven
+Zaboravi ručno dodavanje JAR datoteka! 🎯
+
+Prije Mavena 😢
+
+Ručno preuzimanje JARova
+Konflikti verzija
+Kaos u projektu
+Problemi pri dijeljenju
+
+S Mavenom 😎
+
+Automatsko preuzimanje
+Rješavanje ovisnosti
+Čist projekt
+Jednostavno dijeljenje
+
+📦 pom.xml - Srce Maven projekta
+
+<project>
+<groupId>hr.java.vjezbe</groupId>
+<artifactId>iznimke-app</artifactId>
+<version>1.0-SNAPSHOT</version>
+
+<dependencies>
+<dependency>
+<groupId>ch.qos.logback</groupId>
+<artifactId>logback-classic</artifactId>
+<version>1.5.20</version>
+</dependency>
+</dependencies>
+</project>
+
+🌐 Maven Central Repository
+Tvoja biblioteka na dohvat ruke: mvnrepository.com
+
+Kako dodati ovisnost? 3 koraka:
+
+Posjeti mvnrepository.com
+Pretraži biblioteku (npr. "logback")
+Kopiraj XML i zalijepi u pom.xml
+
+🎓 IntelliJ automatski preuzima ovisnosti nakon spremanja pom.xml!
+
+🎮 Praktični Primjer: Igra Pogađanja
+Napravi vlastite iznimke za igru! 🎲
+
+public class PremaliBrojException extends Exception {
+public PremaliBrojException(String poruka) {
+super(poruka);
+}
+}
+
+public class PrevelikiBrojException extends Exception {
+public PrevelikiBrojException(String poruka) {
+super(poruka);
+}
+}
+
+🎯 Glavna Logika
+
+public static void provjera(int broj)
+throws PremaliBrojException, PrevelikiBrojException {
+
+if (broj < generiraniBroj) {
+throw new PremaliBrojException(
+"🔽 Premali broj! Pokušaj veći!"
+);
+}
+else if (broj > generiraniBroj) {
+throw new PrevelikiBrojException(
+"🔼 Preveliki broj! Pokušaj manji!"
+);
+}
+// Ako smo ovdje - pogodak! 🎉
+}
+
+🎪 Rukovanje Iznimkama
+
+do {
+System.out.println("Unesite broj:");
+uneseniBroj = scanner.nextInt();
+logger.info("Unesen: " + uneseniBroj);
+
+try {
+provjera(uneseniBroj);
+pogodio = true; // Pogodak! 🎯
+
+} catch (PremaliBrojException ex) {
+logger.warn(ex.getMessage(), ex);
+System.out.println(ex.getMessage());
+
+} catch (PrevelikiBrojException ex) {
+logger.warn(ex.getMessage(), ex);
+System.out.println(ex.getMessage());
+}
+} while(!pogodio);
+
+🆕 Što je novo u Java 25?
+
+🎨 Poboljšani Pattern Matching
+
+try {
+// kod
+} catch (Exception ex) when (ex.getMessage().contains("timeout")) {
+// Specifično rukovanje timeout greškama
+}
+
+💡 Conditional catch blokovi - filtriranje iznimaka direktno u catch!
+
+✨ Best Practices
+
+✅ Radi
+
+Specifične iznimke
+Jasne poruke
+Logiraj sve važno
+Zatvori resurse
+
+❌ Ne radi
+
+catch (Exception e)
+Prazni catch blokovi
+Ignoriraj iznimke
+Pretjerano bacanje
+
+🧠 Vrijeme za Quiz!
+
+Testirajmo znanje s pravim pitanjima
+s Java certifikata! 🎓
+
+💪 Priprema za Oracle Certified Professional!
+
+❓ Pitanje 1
+Koja klasa ima najmanje podklasa?
+A) Exception ima manje podklasa od RuntimeException i Error
+B) RuntimeException ima manje podklasa od Exception i Error
+C) Error ima manje podklasa od Exception i RuntimeException ✓
+
+Objašnjenje: Error klasa predstavlja ozbiljne sistemske greške i ima relativno mali broj specifičnih podklasa (OutOfMemoryError, StackOverflowError...).
+
+❓ Pitanje 2
+
+String typeOfDog = "Mini Australian Shepherd";
+typeOfDog = null;
+System.out.println(typeOfDog.length());
+
+Što će se dogoditi?
+A) NullPointerException ✓
+B) RuntimeException
+C) Greška pri kompajliranju
+
+❓ Pitanje 3
+Koje su nove značajke Java 7 za rukovanje iznimkama?
+A) multi-catch ✓
+B) boomerang
+C) try-with-resources ✓
+D) try-with-riches
+
+Java 7: Multi-catch omogućava hvatanje više iznimaka u jednom bloku!
+catch (IOException | SQLException ex)

@@ -1,0 +1,534 @@
+Vrste komentara u Javi
+Što je Javadoc dokumentacija?
+Primjeri Javadoc dokumentacije
+Javadoc i nasljeđivanje
+Prva rečenica - zlatno pravilo
+Javadoc oznake (@tags)
+Stil pisanja i best practices
+Generiranje dokumentacije
+
+💬 Vrste komentara u Javi
+
+1. Jednolinijski komentar
+// Ovo je jednolinijski komentar
+int brojStudenata = 42; // inline komentar
+
+2. Višelinijski komentar
+/*
+* Ovo je višelinijski komentar
+* Može se protezati kroz više redaka
+* Koristi se za duža objašnjenja
+*/
+
+3. Javadoc komentar ⭐
+/**
+* Ovo je Javadoc komentar
+* Služi za generiranje dokumentacije
+* Koristi posebne @oznake
+*/
+public class Student {
+// klasa...
+}
+
+💡 Pro tip: Javadoc komentari pišu se SAMO za public i protected članove!
+
+📚 Što je Javadoc dokumentacija?
+
+Javadoc je sustav za generiranje HTML dokumentacije iz posebno formatiranih komentara u Java kodu.
+
+🎯 Zašto je važan?
+
+📖 Razumljivost: Pomaže drugim programerima (i vama nakon 6 mjeseci) da razumiju vaš kod
+🤝 Timski rad: Olakšava kolaboraciju na projektima
+⚡ IDE podrška: Moderna razvojna okruženja (IntelliJ, Eclipse, VS Code) automatski prikazuju Javadoc
+🏢 Profesionalnost: Standard u industriji - obavezan u većini kompanija
+
+⚠️ Upozorenje: Kod bez dokumentacije = tehnički dug = glavobolja za cijeli tim!
+
+🎓 Primjer: Dokumentirana klasa
+/**
+* Predstavlja studenta na sveučilištu.
+*
+* Ova klasa omogućava upravljanje osnovnim podacima o studentu
+* uključujući ime, prezime, JMBAG i prosjek ocjena.
+*
+* @author Vaše Ime
+* @version 2.0
+* @since Java 25
+*/
+public class Student {
+
+private String ime;
+private String prezime;
+private String jmbag;
+private double prosjek;
+
+/**
+* Konstruira novog studenta sa zadanim podacima.
+*
+* @param ime ime studenta (ne smije biti null)
+* @param prezime prezime studenta (ne smije biti null)
+* @param jmbag jedinstveni matični broj (format: 10 znamenki)
+* @throws IllegalArgumentException ako je parametar null ili JMBAG neispravan
+*/
+public Student(String ime, String prezime, String jmbag) {
+this.ime = ime;
+this.prezime = prezime;
+this.jmbag = jmbag;
+}
+}
+
+⚙️ Primjer: Dokumentirana metoda
+/**
+* Izračunava konačnu ocjenu studenta na temelju prosjeka.
+*
+* Konačna ocjena se određuje prema sljedećem:
+* <ul>
+*   <li>1.5 - 2.5: Dovoljan (2)</li>
+*   <li>2.5 - 3.5: Dobar (3)</li>
+*   <li>3.5 - 4.5: Vrlo dobar (4)</li>
+*   <li>4.5 - 5.0: Izvrstan (5)</li>
+* </ul>
+*
+* @param prosjek prosjek ocjena studenta (1.0 - 5.0)
+* @return konačna ocjena kao cijeli broj (2-5)
+* @throws IllegalArgumentException ako je prosjek izvan raspona
+* @see #getProsjek()
+* @since 2.0
+*/
+public int izracunajKonacnuOcjenu(double prosjek) {
+
+if (prosjek < 1.5 || prosjek > 5.0) {
+throw new IllegalArgumentException("Neispravan prosjek");
+}
+
+return (int) Math.round(prosjek);
+}
+
+🎨 Kako to izgleda u dokumentaciji?
+
+izracunajKonacnuOcjenu
+
+public int izracunajKonacnuOcjenu(double prosjek)
+
+Izračunava konačnu ocjenu studenta na temelju prosjeka.
+
+Konačna ocjena se određuje prema sljedećem:
+
+1.5 - 2.5: Dovoljan (2)
+2.5 - 3.5: Dobar (3)
+3.5 - 4.5: Vrlo dobar (4)
+4.5 - 5.0: Izvrstan (5)
+
+Parameters:
+prosjek - prosjek ocjena studenta (1.0 - 5.0)
+Returns:
+konačna ocjena kao cijeli broj (2-5)
+Throws:
+IllegalArgumentException - ako je prosjek izvan raspona
+
+🔗 Javadoc i nasljeđivanje
+Java automatski nasljeđuje Javadoc dokumentaciju! 🎉
+
+Automatsko nasljeđivanje u slučajevima:
+
+@Override u podklasi: Automatski se dodaje oznaka "Overrides"
+Implementacija sučelja: Automatski se dodaje oznaka "Specified by"
+Nasljeđivanje sučelja: Dokumentacija se prenosi s nadsučelja
+
+// U sučelju
+public interface Osoba {
+
+/**
+* Vraća puno ime osobe.
+*
+* @return ime i prezime odvojeni razmakom
+*/
+String getPunoIme();
+}
+
+// U klasi - NE TREBA ponovno pisati Javadoc!
+public class Student implements Osoba {
+
+private String ime;
+private String prezime;
+
+@Override
+public String getPunoIme() {
+return ime + " " + prezime;
+}
+
+// Javadoc se automatski naslijeđuje! ✨
+}
+
+✨ Zlatno pravilo: Prva rečenica
+
+⚡ Najvažnije pravilo Javadoc dokumentacije!
+Prva rečenica MORA biti sažetak koji se može čitati samostalno.
+
+✅ DOBRO
+/**
+* Izračunava prosjek ocjena.
+*
+* Metoda uzima u obzir samo
+* pozitivne ocjene i zaokružuje
+* rezultat na dvije decimale.
+*/
+✓ Prva rečenica je jasna i samostalna
+✓ Počinje glagolom
+✓ Detalji su odvojeni
+
+❌ LOŠE
+/**
+* Ova metoda se koristi kada
+* trebamo izračunati prosjek.
+* Izračunava prosjek ocjena.
+*/
+✗ Prva rečenica je nejasna
+✗ Ne počinje glagolom
+✗ Previše riječi bez smisla
+
+💡 Pravilo: Prva rečenica završava s prvom točkom. Javadoc alat je koristi za pregled!
+
+🏷️ Javadoc oznake (@tags)
+
+Oznaka
+Gdje se koristi
+Svrha
+Obvezna?
+
+@author
+Klase, sučelja
+Autor koda
+✅ Da
+
+@version
+Klase, sučelja
+Verzija
+✅ Da
+
+@param
+Metode, konstruktori
+Opis parametra
+✅ Za svaki parametar
+
+@return
+Metode
+Opis povratne vrijednosti
+✅ Ako nije void
+
+@throws
+Metode, konstruktori
+Opis iznimke
+✅ Za svaku iznimku
+
+@see
+Bilo gdje
+Referenca na drugi element
+Preporučeno
+
+@since
+Bilo gdje
+Od koje verzije postoji
+Preporučeno
+
+@deprecated
+Bilo gdje
+Zastarjelo, ne koristiti
+Kada je zastarjelo
+
+🔧 Praktični primjeri oznaka
+/**
+* Sprema podatke studenta u bazu podataka.
+*
+* Metoda provjerava valjanost podataka prije spremanja
+* i automatski generira ID ako ne postoji.
+*
+* @param student objekt studenta za spremanje (ne smije biti null)
+* @return true ako je spremanje uspješno, false inače
+* @throws DatabaseException ako dođe do greške pri povezivanju
+* @throws ValidationException ako podaci nisu valjani
+* @see #loadStudent(int)
+* @see Student
+* @since 2.0
+* @deprecated Koristite {@link #saveStudentAsync(Student)}
+*             za bolju performansu u Java 25
+*/
+@Deprecated(since = "2.0", forRemoval = true)
+public boolean saveStudent(Student student)
+throws DatabaseException, ValidationException {
+
+// Validacija
+if (student == null) {
+throw new ValidationException("Student ne smije biti null");
+}
+
+// Spremanje...
+return true;
+}
+
+/**
+* Asinkrono sprema podatke studenta.
+*
+* @param student objekt studenta
+* @return CompletableFuture sa rezultatom spremanja
+* @since 2.0
+*/
+public CompletableFuture<Boolean> saveStudentAsync(Student student) {
+return CompletableFuture.supplyAsync(() -> {
+// Asinkrono spremanje...
+return true;
+});
+}
+
+✍️ Stil pisanja Javadoc dokumentacije
+
+📝 Pravila pisanja
+
+Piši u trećem licu ("dohvaća", ne "dohvaćam")
+Opisi metoda počinju glagolom
+Koristi <code> za kod
+Koristi <p> za paragrafe
+Koristi HTML oznake za formatiranje
+
+💡 HTML u Javadoc: Možeš koristiti osnovne HTML tagove poput <ul>, <ol>, <li>, <b>, <i>, <code>, <pre>
+
+✅ Primjer dobrog stila
+/**
+* Dohvaća listu aktivnih studenata.
+* <p>
+* Metoda filtrira studente prema
+* sljedećim kriterijima:
+* <ul>
+*   <li>Status: aktivan</li>
+*   <li>Prosjek: > 2.0</li>
+* </ul>
+* <p>
+* Rezultati su sortirani po
+* prezimenu.
+*
+* @return nemodificibilna lista
+*         {@code Student} objekata
+* @since 2.0
+*/
+
+❌ Što ne raditi: Ne pišite "metoda()" sa zagradama, već samo "metoda". Javadoc automatski prepoznaje metode!
+
+🚀 Moderne Javadoc značajke u Java 25
+
+1. {@snippet} tag (od Java 18+)
+/**
+* Primjer korištenja:
+* {@snippet :
+*   Student student = new Student("Marko", "Marić", "0036512345");
+*   student.setProsjek(4.5);
+*   database.save(student);
+* }
+*/
+
+2. {@link} i {@linkplain}
+/**
+* Koristi {@link Student} klasu za manipulaciju studentima.
+* Vidi također {@linkplain DatabaseManager#connect()}.
+*/
+
+3. {@value} za konstante
+/**
+* Maksimalni broj studenata: {@value MAX_STUDENTS}
+*/
+public static final int MAX_STUDENTS = 1000;
+
+🎯 Pro tip: Moderne IDE-ove automatski prikazuju Javadoc dok tipkate - iskoristite to!
+
+⚙️ Generiranje Javadoc dokumentacije
+
+1️⃣ Putem naredbenog retka
+# Osnovna naredba
+javadoc -d docs -sourcepath src -subpackages hr.fer.oop
+
+# Sa dodatnim opcijama
+javadoc -d docs \
+-sourcepath src \
+-subpackages hr.fer.oop \
+-author \
+-version \
+-private \
+-link https://docs.oracle.com/en/java/javase/25/docs/api/
+
+2️⃣ Putem Maven-a
+mvn javadoc:javadoc
+
+3️⃣ Putem Gradle-a
+./gradlew javadoc
+
+4️⃣ IntelliJ IDEA
+Tools → Generate JavaDoc...
+
+🏆 Best Practices - Pravila profića
+
+✅ UVIJEK
+
+Dokumentiraj sve public metode
+Dokumentiraj sve parametre
+Objasni što metoda radi, NE kako
+Koristi primjere koda
+Navedi edge case-eve
+Navedi sve moguće iznimke
+Ažuriraj dokumentaciju kad mijenjašaš kod!
+
+❌ NIKAD
+
+Ne pišite očite stvari
+Ne kopirajte kod u dokumentaciju
+Ne ostavljaj zastarjelu dokumentaciju
+Ne dokumentiraj private metode (osim ako su kompleksne)
+Ne pišite romane - budi koncizan
+
+💎 Zlatna pravila
+1. Dokumentacija koja laže je gora od nedostatka dokumentacije
+2. Ako trebaš dokumentirati "zašto" metoda postoji - možda je problem u dizajnu
+3. Dobar kod se sam dokumentira, ali Javadoc je i dalje neophodan!
+
+⚠️ Česti problemi i kako ih riješiti
+
+❌ Problem 1: Neažurirana dokumentacija
+/**
+* @param ime ime studenta
+* @param prezime prezime studenta
+*/
+public Student(String ime, String prezime, String jmbag) {
+// Zaboravio si dodati @param za jmbag! ⚠️
+this.ime = ime;
+this.prezime = prezime;
+this.jmbag = jmbag;
+}
+Rješenje: Koristi IDE upozorenja i provjere prije commit-a!
+
+❌ Problem 2: Nejasne @param oznake
+/**
+* @param x broj  // LOŠE - što je x?
+*/
+Rješenje: Uvijek koristi opisna imena i detaljne opise!
+/**
+* @param brojStudenata ukupan broj studenata (min: 1, max: 50)
+* // DOBRO! ✓
+*/
+
+🎯 Stvarni primjer: Kompletan projekt
+package hr.fer.oop.studenti;
+
+import java.util.*;
+
+/**
+* Menadžer za upravljanje studentima na fakultetu.
+* <p>
+* Ova klasa pruža funkcionalnosti za:
+* <ul>
+*   <li>Dodavanje i brisanje studenata</li>
+*   <li>Pretraživanje studenata po različitim kriterijima</li>
+*   <li>Generiranje izvještaja</li>
+* </ul>
+* <p>
+* Primjer korištenja:
+* {@snippet :
+*   StudentManager manager = new StudentManager();
+*   Student s = new Student("Ana", "Anić", "0036512345");
+*   manager.addStudent(s);
+* }
+*
+* @author Vaše Ime
+* @version 3.0
+* @since Java 25
+* @see Student
+*/
+public class StudentManager {
+
+private Map<String, Student> studenti = new HashMap<>();
+
+/**
+* Dodaje novog studenta u sustav.
+* <p>
+* Ako student sa istim JMBAG-om već postoji,
+* baca se iznimka.
+*
+* @param student student za dodavanje (ne smije biti null)
+* @throws IllegalArgumentException ako je student null
+* @throws DuplicateStudentException ako student već postoji
+* @since 1.0
+*/
+public void addStudent(Student student) {
+
+if (student == null) {
+throw new IllegalArgumentException("Student ne smije biti null");
+}
+
+if (studenti.containsKey(student.getJmbag())) {
+throw new DuplicateStudentException(
+"Student sa JMBAG-om već postoji"
+);
+}
+
+studenti.put(student.getJmbag(), student);
+}
+
+/**
+* Dohvaća studenta po JMBAG-u.
+*
+* @param jmbag jedinstveni matični broj studenta
+* @return Student objekt ili null ako ne postoji
+* @since 1.0
+*/
+public Student getStudent(String jmbag) {
+return studenti.get(jmbag);
+}
+}
+
+🛠️ Korisni alati i resursi
+
+🔧 Alati
+
+CheckStyle: Provjera Javadoc standarda
+SpotBugs: Detektira nedostajuću dokumentaciju
+SonarQube: Analiza kvalitete dokumentacije
+JApiCmp: Usporedba API verzija
+
+📚 Resursi
+
+Oracle Javadoc Guide
+Google Java Style Guide
+Effective Java (Joshua Bloch)
+
+💡 IDE plugin-ovi
+
+IntelliJ: Automatska Javadoc generacija (Alt+Enter)
+Eclipse: Generate Javadoc (Source menu)
+VS Code: Java Doc Generator extension
+
+🎓 Zadaća: Provjerite Javadoc dokumentaciju Java API-ja na:
+
+docs.oracle.com/en/java/javase/25/docs/api/
+
+🎓 Zaključak
+
+✅ Javadoc je OBAVEZAN dio profesionalnog razvoja
+📝 Piši dokumentaciju dok pišeš kod, ne naknadno
+🎯 Fokusiraj se na ŠTO metoda radi, ne KAKO
+🔄 Ažuriraj dokumentaciju s kodom
+👥 Piši za buduće programere (uključujući sebe)
+🏆 Kvalitetna dokumentacija = profesionalnost
+
+"Kod se piše jednom, čita tisuću puta."
+- Programerska mudrost
+
+❓ Pitanja?
+
+Slobodno pitajte! 🎯
+
+Hvala na pažnji! 🙏
+
+Sretno s dokumentiranjem vašeg koda! 🚀
+
+1 / 20
+
+← Prethodni
+Sljedeći →

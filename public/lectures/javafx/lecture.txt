@@ -1,0 +1,966 @@
+AUDITORNE VJEŽBE
+JavaFX
+📋 Sadržaj vježbi
+
+1Scene Builder
+2CSS u JavaFX-u
+3HBox primjer
+4VBox primjer
+5FlowPane primjer
+6BorderPane primjer
+7GridPane primjer
+8Dijalozi
+9Izbornici (Menu)
+10ToolBar
+11Tab komponente
+12TableView
+13Accordion
+14TreeView & SplitPane
+
+🎨 JavaFX Scene Builder
+
+🖱️ Drag & Drop
+Vizualno postavljanje elemenata bez pisanja koda
+
+🔗 IDE Integracija
+Radi s IntelliJ IDEA, Eclipse, NetBeans
+
+📄 FXML Generiranje
+Automatski generira FXML kod pri svakoj promjeni
+
+👁️ Live Preview
+Pregled dizajna u stvarnom vremenu
+
+💡 Download: Scene Builder se instalira zasebno od IntelliJ-a → gluonhq.com/products/scene-builder
+
+🖥️ Scene Builder - Sučelje
+
+Library Panel (lijevo) - svi JavaFX elementi
+Content Area (sredina) - prostor za dizajn
+Hierarchy (lijevo dolje) - stablo elemenata
+Inspector (desno) - Properties, Layout, Code
+
+Scene Builder
+
+Library
+├ Containers
+├ Controls
+└ Shapes
+
+Content Area
+
+Inspector
+Properties
+Layout
+Code
+
+📱 Scene Builder sučelje
+
+💅 CSS u JavaFX-u
+
+application.css
+
+.root {
+-fx-font-size: 16pt;
+-fx-font-family: "Courier New";
+-fx-base: rgb(132, 145, 47);
+-fx-background: rgb(225, 228, 203);
+}
+
+.button {
+-fx-background-color: #3498db;
+-fx-text-fill: white;
+}
+
+⚠️ CSS svojstva imaju -fx- prefiks!
+
+CSS Demo
+
+Styled Window
+Click Me
+
+📱 CSS stiliziran prozor
+
+↔️ HBox - Horizontalni raspored
+
+HBoxExample.java
+
+HBox hbox = new HBox(5);
+hbox.setPadding(new Insets(1));
+
+Rectangle r1 = new Rectangle(10, 10);
+Rectangle r2 = new Rectangle(20, 20);
+Rectangle r3 = new Rectangle(5, 20);
+Rectangle r4 = new Rectangle(20, 5);
+
+HBox.setMargin(r1, new Insets(2,2,2,2));
+hbox.getChildren().addAll(r1, r2, r3, r4);
+
+root.getChildren().add(hbox);
+
+HBox Example
+
+📱 Pravokutnici horizontalno
+
+↕️ VBox - Vertikalni raspored
+
+VBoxExample.java
+
+VBox vbox = new VBox(5);
+vbox.setPadding(new Insets(1));
+
+Rectangle r1 = new Rectangle(10, 10);
+Rectangle r2 = new Rectangle(20, 20);
+Rectangle r3 = new Rectangle(5, 20);
+Rectangle r4 = new Rectangle(20, 5);
+
+VBox.setMargin(r1, new Insets(2,2,2,2));
+vbox.getChildren().addAll(r1, r2, r3, r4);
+
+root.getChildren().add(vbox);
+
+VBox Example
+
+📱 Pravokutnici vertikalno
+
+🌊 FlowPane - Tok elemenata
+
+FlowPaneExample.java
+
+FlowPane flowPane = new FlowPane();
+
+Button b1 = new Button("Prvi");
+Button b2 = new Button("Drugi");
+// ... b3 do b10
+
+flowPane.setAlignment(Pos.TOP_RIGHT);
+flowPane.getChildren().addAll(
+b1, b2, b3, b4, b5,
+b6, b7, b8, b9, b10
+);
+
+root.getChildren().add(flowPane);
+
+FlowPane Example
+
+Prvi
+Drugi
+Treći
+Četvrti
+Peti
+Šesti
+Sedmi
+Osmi
+
+📱 Gumbi "teku" u retke
+
+🗺️ BorderPane - 5 područja
+
+BorderPaneExample.java
+
+BorderPane borderPane = new BorderPane();
+
+Button b1 = new Button("GORNJI");
+Button b2 = new Button("LIJEVI");
+Button b3 = new Button("SREDIŠNJI");
+Button b4 = new Button("DESNI");
+Button b5 = new Button("DONJI");
+
+borderPane.setTop(b1);
+borderPane.setLeft(b2);
+borderPane.setCenter(b3);
+borderPane.setRight(b4);
+borderPane.setBottom(b5);
+
+BorderPane Example
+
+GORNJI
+LIJEVI
+SREDIŠNJI
+DESNI
+DONJI
+
+📱 TOP, LEFT, CENTER, RIGHT, BOTTOM
+
+📊 GridPane - Forma
+
+GridPaneForm.java
+
+GridPane gridpane = new GridPane();
+gridpane.setHgap(5);
+gridpane.setVgap(5);
+
+Label fNameLbl = new Label("First Name");
+TextField fNameFld = new TextField();
+Label lNameLbl = new Label("Last Name");
+TextField lNameFld = new TextField();
+Button saveButt = new Button("Save");
+
+gridpane.add(fNameLbl, 0, 0);
+gridpane.add(fNameFld, 1, 0);
+gridpane.add(lNameLbl, 0, 1);
+gridpane.add(lNameFld, 1, 1);
+gridpane.add(saveButt, 1, 2);
+
+GridPane Form
+
+Contacts
+
+First Name
+
+Last Name
+
+Save
+
+📱 Forma u GridPane-u
+
+📊 GridPane - Napredne postavke
+
+// Definiranje širine stupaca
+ColumnConstraints column1 = new ColumnConstraints(100);
+ColumnConstraints column2 = new ColumnConstraints(50, 150, 300);
+column2.setHgrow(Priority.ALWAYS);  // automatsko širenje
+gridpane.getColumnConstraints().addAll(column1, column2);
+
+// Poravnanje elemenata
+GridPane.setHalignment(fNameLbl, HPos.RIGHT);
+GridPane.setHalignment(saveButt, HPos.RIGHT);
+
+💡 Priority.ALWAYS - stupac će uvijek zauzeti maksimalan prostor kad se prozor proširi
+
+💬 Alert Dijalozi
+
+// Information Dialog
+Alert alert = new Alert(AlertType.INFORMATION);
+alert.setTitle("Information Dialog");
+alert.setHeaderText("Look, an Information Dialog");
+alert.setContentText("I have a great message!");
+alert.showAndWait();
+
+// Confirmation Dialog
+Alert confirm = new Alert(AlertType.CONFIRMATION);
+Optional<ButtonType> result = confirm.showAndWait();
+if (result.get() == ButtonType.OK) {
+// korisnik potvrdio
+}
+
+ℹ️
+Information Dialog
+
+I have a great message for you!
+
+OK
+
+📱 Information Alert
+
+📑 Izbornici (Menu)
+
+MenuItem itemNew = new MenuItem("New...");
+itemNew.setAccelerator(
+KeyCombination.keyCombination("Ctrl+N")
+);
+MenuItem itemSave = new MenuItem("Save");
+
+Menu menuFile = new Menu("File");
+menuFile.getItems().addAll(itemNew, itemSave);
+
+Menu menuEdit = new Menu("Edit");
+menuEdit.getItems().addAll(
+new MenuItem("Cut"),
+new MenuItem("Copy"),
+new MenuItem("Paste")
+);
+
+MenuBar menuBar = new MenuBar();
+menuBar.getMenus().addAll(menuFile, menuEdit);
+
+Menu Example
+
+File
+Edit
+View
+Help
+
+📄 New... Ctrl+N
+💾 Save
+
+📱 MenuBar s otvorenim File
+
+🔧 ToolBar komponenta
+
+Button newButton = new Button();
+newButton.setGraphic(new ImageView(...));
+newButton.setTooltip(new Tooltip("New"));
+
+ToggleButton boldButton = new ToggleButton("B");
+ToggleButton italicButton = new ToggleButton("I");
+
+ToggleGroup alignGroup = new ToggleGroup();
+ToggleButton leftBtn = new ToggleButton("L");
+ToggleButton centerBtn = new ToggleButton("C");
+leftBtn.setToggleGroup(alignGroup);
+centerBtn.setToggleGroup(alignGroup);
+
+ToolBar toolBar = new ToolBar(
+newButton,
+new Separator(Orientation.VERTICAL),
+boldButton, italicButton,
+new Separator(Orientation.VERTICAL),
+leftBtn, centerBtn
+);
+
+ToolBar Example
+
+📄
+✏️
+🗑️
+
+B
+I
+
+⬅
+⬌
+➡
+
+📱 ToolBar s gumbima i separatorima
+
+📁 Tab komponente
+
+Tab tableTab = new Tab("TableView");
+tableTab.setContent(createTableNode());
+tableTab.setClosable(false);
+
+Tab accordionTab = new Tab("Accordion");
+accordionTab.setContent(createAccordionNode());
+
+Tab webViewTab = new Tab("WebView");
+webViewTab.setOnSelectionChanged(e -> {
+if (webViewTab.isSelected()) {
+webView.getEngine().load(url);
+}
+});
+
+TabPane tabPane = new TabPane();
+tabPane.getTabs().addAll(
+tableTab, accordionTab, webViewTab
+);
+
+TabPane Example
+
+TableView
+Accordion
+WebView
+
+Tab content here...
+
+📱 TabPane s 3 taba
+
+📊 TableView komponenta
+
+TableView<Person> table = new TableView<>();
+
+TableColumn<Person, String> firstNameCol =
+new TableColumn<>("First Name");
+firstNameCol.setCellValueFactory(
+new PropertyValueFactory<>("firstName")
+);
+
+TableColumn<Person, String> lastNameCol =
+new TableColumn<>("Last Name");
+lastNameCol.setCellValueFactory(
+new PropertyValueFactory<>("lastName")
+);
+
+table.getColumns().addAll(
+firstNameCol, lastNameCol, phoneCol
+);
+table.setItems(observableList);
+
+TableView Example
+
+First Name
+Last Name
+Phone
+
+Ivan
+Horvat
+091-123-4567
+
+Ana
+Kovač
+092-234-5678
+
+Marko
+Novak
+098-345-6789
+
+📱 TableView s podacima
+
+🗂️ TitledPane & Accordion
+
+TitledPane paneA = new TitledPane(
+"TitledPane A",
+new TextArea("Content A")
+);
+
+TitledPane paneB = new TitledPane(
+"TitledPane B",
+new TextArea("Content B")
+);
+
+TitledPane paneC = new TitledPane(
+"TitledPane C",
+new TextArea("Content C")
+);
+
+Accordion accordion = new Accordion();
+accordion.getPanes().addAll(paneA, paneB, paneC);
+accordion.setExpandedPane(paneA);
+
+Accordion Example
+
+▼ TitledPane A
+TitledPane A content...
+
+▶ TitledPane B
+
+▶ TitledPane C
+
+📱 Accordion - samo jedan otvoren
+
+🌳 TreeView & SplitPane
+
+TreeItem<String> animalTree = new TreeItem<>("Animal");
+animalTree.getChildren().addAll(
+new TreeItem<>("Lion"),
+new TreeItem<>("Tiger")
+);
+
+TreeItem<String> root = new TreeItem<>("Root");
+root.getChildren().add(animalTree);
+
+TreeView<String> treeView = new TreeView<>(root);
+treeView.setShowRoot(false);
+
+ListView<String> listView = new ListView<>();
+
+SplitPane splitPane = new SplitPane();
+splitPane.getItems().addAll(treeView, listView);
+
+SplitPane Example
+
+▼ Animal
+🦁 Lion
+🐯 Tiger
+🐻 Bear
+▶ Mineral
+
+Lion 1
+Lion 2
+Lion 3
+
+📱 TreeView + ListView u SplitPane
+
+🎛️ Razne kontrole
+
+🔘ButtonOsnovni gumb
+☑️CheckBoxDa/Ne odabir
+🔵RadioButtonJedan od više
+🔗HyperlinkKlikabilni link
+📋ChoiceBoxDropdown
+📝TextFieldUnos teksta
+🔒PasswordFieldUnos lozinke
+📅DatePickerOdabir datuma
+🎨ColorPickerOdabir boje
+📊ProgressBarNapredak
+🎚️SliderKlizač
+📜ScrollPaneScroll container
+
+📜 ScrollPane - Primjer
+
+DatePicker datePicker = new DatePicker(LocalDate.now());
+ColorPicker colorPicker = new ColorPicker(Color.BLUE);
+
+ProgressBar progressBar = new ProgressBar();
+progressBar.progressProperty().bind(
+model.value.divide(model.max)
+);
+
+Slider slider = new Slider(0, 100, 50);
+
+VBox controls = new VBox(20,
+new Button("Click"),
+new CheckBox("Enable"),
+datePicker,
+colorPicker,
+progressBar,
+slider
+);
+
+ScrollPane scrollPane = new ScrollPane(controls);
+scrollPane.setVbarPolicy(AS_NEEDED);
+Uvod u JavaFX
+Moderno grafičko sučelje za Java aplikacije
+
+1
+Grafička sučelja u Javi
+
+2
+Prednosti JavaFX-a
+
+3
+Prva JavaFX aplikacija
+
+4
+FXML
+
+5
+Organizatori rasporeda
+
+6
+MVC arhitektura
+
+7
+JavaFX zbirke
+
+8
+TableView i izbornici
+
+🖥️ Grafička sučelja u Javi
+
+GUI (Graphical User Interface) omogućava korištenje aplikacija kroz grafičke elemente - kontrole ili widgete (Window Gadgets)
+
+AWT (Abstract Window Toolkit) - prvi GUI library u Javi, prisutan od samih početaka
+Swing - primarni GUI toolkit od Jave SE 1.2 do Jave SE 7
+Swing je trenutno samo u fazi održavanja (maintenance mode)
+Ostaje dio Jave radi backward compatibility, ali se više ne razvija aktivno
+
+📜 Povijest JavaFX-a
+
+🚀
+
+2007 - Početak
+JavaFX predstavljen kao konkurent Adobe Flashu i Microsoft Silverlightu
+
+📦
+
+2008 - Verzija 1.0
+Prva službena verzija koristi JavaFX Script (sličan JavaScriptu)
+
+🔄
+
+2011 - Verzija 2.0
+Velika promjena - JavaFX postaje skup Java libraryja
+
+☕
+
+2014 - JavaFX 8
+Integriran s Javom 8, postaje standardni GUI toolkit
+
+✨ Prednosti JavaFX-a
+
+🎨 Scene Builder
+Vizualni alat za dizajniranje GUI-ja. Može se koristiti samostalno ili integriran u IDE.
+
+💅 CSS Styling
+Korištenje CSS-a za oblikovanje komponenti - poznato web developerima!
+
+⚡ Multithreading
+Napredno korištenje niti za optimalne performanse na višejezgrenim procesorima.
+
+🎬 Animacije
+Podrška za transformacije i animacije - dinamični UI efekti.
+
+👨‍💻 Prva JavaFX aplikacija
+
+Main.java
+
+public class Main extends Application {
+@Override
+public void start(Stage primaryStage) {
+try {
+BorderPane root = new BorderPane();
+Scene scene = new Scene(root, 400, 400);
+scene.getStylesheets().add(
+getClass().getResource("application.css")
+.toExternalForm()
+);
+primaryStage.setScene(scene);
+primaryStage.show();
+} catch(Exception e) {
+e.printStackTrace();
+}
+}
+
+public static void main(String[] args) {
+launch(args);
+}
+}
+
+JavaFX Application
+
+📱 Rezultat: prazan prozor 400x400
+
+🔍 Razumijevanje strukture
+
+extends Application - nasljeđivanje klase koja upravlja životnim ciklusom aplikacije
+start(Stage primaryStage) - glavna metoda za pokretanje GUI-ja, prima Stage objekt
+Stage - glavni prozor aplikacije (kao pozornica u kazalištu 🎭)
+Scene - sadržaj prozora, može se mijenjati dinamički
+launch(args) - pokreće JavaFX aplikaciju iz main metode
+
+💡 Scene Graph - JavaFX koncept koji omogućuje korištenje više Scene objekata na jednom Stage objektu
+
+💅 CSS stiliziranje u JavaFX-u
+
+Dodavanje CSS datoteke:
+
+scene.getStylesheets().add(
+getClass().getResource("application.css")
+.toExternalForm()
+);
+
+Inline stil u kodu:
+
+root.setStyle(
+"-fx-background: rgb(225, 228, 203)"
+);
+
+⚠️ Važno: CSS svojstva u JavaFX-u moraju imati -fx- prefiks!
+
+application.css
+
+.root {
+-fx-font-size: 16pt;
+-fx-font-family: "Courier New";
+-fx-background: rgb(225, 228, 203);
+}
+
+📄 FXML - FX Markup Language
+
+Scene Builder generira FXML datoteke - XML format za definiranje GUI-ja
+
+Odvaja prezentacijsku logiku od programske logike
+Lakše održavanje i promjene dizajna bez diranja Java koda
+
+// Učitavanje FXML datoteke
+BorderPane root = (BorderPane) FXMLLoader.load(
+getClass().getResource("Sample.fxml")
+);
+
+FXML Demo
+
+Moj gumb
+
+📱 FXML s jednim gumbom
+
+📝 FXML primjer
+
+Sample.fxml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="287.0" prefWidth="286.0"
+xmlns:fx="http://javafx.com/fxml/1"
+xmlns="http://javafx.com/javafx/8"
+fx:controller="application.SampleController">
+
+<center>
+<Button mnemonicParsing="false"
+text="Moj gumb"
+BorderPane.alignment="CENTER" />
+</center>
+
+</BorderPane>
+
+📐 Organizatori rasporeda (Layouts)
+
+Služe za postavljanje elemenata na GUI u određenom rasporedu:
+
+HBox
+Horizontalni redak
+
+VBox
+Vertikalni stupac
+
+FlowPane
+Tok elemenata
+
+BorderPane
+5 područja
+
+GridPane
+Mreža (tablica)
+
+💡 Svi organizatori automatski prilagođavaju veličinu elemenata pri promjeni veličine prozora!
+
+↔️ HBox - Horizontalni raspored
+
+HBox hbox = new HBox(5); // razmak 5px
+hbox.setPadding(new Insets(1));
+
+Rectangle r1 = new Rectangle(10, 10);
+Rectangle r2 = new Rectangle(20, 20);
+Rectangle r3 = new Rectangle(5, 20);
+Rectangle r4 = new Rectangle(20, 5);
+
+HBox.setMargin(r1, new Insets(2,2,2,2));
+hbox.getChildren().addAll(r1, r2, r3, r4);
+
+💡 Elementi se postavljaju jedan iza drugog horizontalno
+
+HBox Example
+
+📱 Pravokutnici u HBox-u
+
+↕️ VBox - Vertikalni raspored
+
+VBox vbox = new VBox(5); // razmak 5px
+vbox.setPadding(new Insets(1));
+
+Rectangle r1 = new Rectangle(10, 10);
+Rectangle r2 = new Rectangle(20, 20);
+Rectangle r3 = new Rectangle(5, 20);
+Rectangle r4 = new Rectangle(20, 5);
+
+VBox.setMargin(r1, new Insets(2,2,2,2));
+vbox.getChildren().addAll(r1, r2, r3, r4);
+
+💡 Elementi se postavljaju jedan ispod drugog vertikalno
+
+VBox Example
+
+📱 Pravokutnici u VBox-u
+
+🌊 FlowPane
+
+FlowPane flowPane = new FlowPane();
+
+Button b1 = new Button("Prvi");
+Button b2 = new Button("Drugi");
+Button b3 = new Button("Treći");
+// ... više gumbova
+
+flowPane.setAlignment(Pos.TOP_RIGHT);
+flowPane.getChildren().addAll(
+b1, b2, b3, b4, b5, b6, b7, b8, b9, b10
+);
+
+💡 Elementi "teku" dok ne dosegnu kraj, zatim prelaze u novi red
+
+FlowPane Example
+
+Prvi
+Drugi
+Treći
+Četvrti
+Peti
+Šesti
+Sedmi
+Osmi
+
+📱 Gumbi u FlowPane-u
+
+🗺️ BorderPane
+
+Omogućava postavljanje komponenti u 5 područja:
+
+TOP - zaglavlje
+LEFT - lijeva strana
+CENTER - glavni sadržaj
+RIGHT - desna strana
+BOTTOM - podnožje
+
+🌐 Sličan koncept kao kod web dizajna!
+
+BorderPane Example
+
+GORNJI
+LIJEVI
+SREDIŠNJI
+DESNI
+DONJI
+
+📱 BorderPane s 5 područja
+
+🗺️ BorderPane - Primjer koda
+
+BorderPane borderPane = new BorderPane();
+
+Button b1 = new Button("GORNJI");
+Button b2 = new Button("LIJEVI");
+Button b3 = new Button("SREDIŠNJI");
+Button b4 = new Button("DESNI");
+Button b5 = new Button("DONJI");
+
+BorderPane.setAlignment(b1, Pos.TOP_CENTER);
+borderPane.setTop(b1);
+borderPane.setLeft(b2);
+borderPane.setCenter(b3);
+borderPane.setRight(b4);
+BorderPane.setAlignment(b5, Pos.BOTTOM_CENTER);
+borderPane.setBottom(b5);
+
+📊 GridPane
+
+Elementi se postavljaju u tablicu
+Svaki element ima "koordinate" (stupac, redak)
+Idealno za forme za unos
+
+GridPane gridpane = new GridPane();
+
+Label fNameLbl = new Label("First Name");
+TextField fNameFld = new TextField();
+
+gridpane.add(fNameLbl, 0, 0); // col 0, row 0
+gridpane.add(fNameFld, 1, 0); // col 1, row 0
+
+GridPane Form
+
+First Name
+
+Last Name
+
+Save
+
+📱 Forma u GridPane-u
+
+JavaFX MVC
+Model - View - Controller arhitektura
+
+🏗️ Osnove MVC arhitekture
+
+📦 Model
+Klase koje predstavljaju domenske podatke (npr. Knjiga, Korisnik, Proizvod)
+
+👁️ View
+FXML datoteke ili Java klase koje definiraju izgled grafičkog sučelja
+
+🎮 Controller
+Povezuje GUI elemente s poslovnom logikom - reagira na korisničke akcije
+
+💡 Ključno: Elementi GUI-ja trebaju imati jedinstvene identifikatore (fx:id) za povezivanje s Controllerom
+
+🎮 Controller klasa
+
+Povezuje elemente GUI-ja s Java kodom (poslovna logika)
+Varijable moraju odgovarati elementima GUI-ja po tipu i nazivu
+Svaki ekran trebao bi imati svoju FXML datoteku i Controller klasu
+
+Sample.fxml
+
+<BorderPane fx:controller="hr.tvz.controller.KnjigeController">
+...
+</BorderPane>
+
+🏷️ Anotacija @FXML
+
+Označava elemente u Javi koji se koriste u FXML-u:
+
+KnjigeController.java
+
+public class KnjigeController {
+
+@FXML
+private TableView<Knjiga> knjigaTable;
+
+@FXML
+public void initialize() {
+// inicijalizacija ekrana
+}
+
+@FXML
+public void prikaziSveKnjige() {
+// logika za prikaz
+}
+}
+
+⚠️ Važno: Naziv varijable mora odgovarati fx:id u FXML-u!
+
+knjige.fxml
+
+<TableView fx:id="knjigaTable">
+...
+</TableView>
+
+<Button text="Prikaži"
+onAction="#prikaziSveKnjige"/>
+
+📚 JavaFX zbirke (Collections)
+
+Specijalne zbirke koje automatski ažuriraju GUI pri promjenama:
+
+ObservableList
+Lista s automatskim praćenjem promjena preko Listenera
+
+ObservableMap
+Mapa s automatskim praćenjem promjena
+
+FXCollections
+Factory klasa za kreiranje Observable zbirki
+
+ListChangeListener
+Prima notifikacije o promjenama u listi
+
+📋 ObservableList - Primjer
+
+// Kreiranje ObservableList iz obične Java liste
+List<Knjiga> filtriraneKnjige = dohvatiKnjige();
+
+ObservableList<Knjiga> listaKnjiga =
+FXCollections.observableArrayList(filtriraneKnjige);
+
+// Povezivanje s TableView komponentom
+knjigaTable.setItems(listaKnjiga);
+
+// Sada kada se promijeni listaKnjiga,
+// TableView se automatski ažurira! 🎉
+
+💡 Ovo je kao reactive programming - promjena podataka automatski ažurira prikaz, slično kao u React-u ili Vue.js!
+
+🔗 Povezivanje stupaca s podacima
+
+@FXML
+private TableColumn<Knjiga, String> nazivKnjigeColumn;
+
+@FXML
+public void initialize() {
+nazivKnjigeColumn.setCellValueFactory(
+new Callback<CellDataFeatures<Knjiga,String>,
+ObservableValue<String>>() {
+public ObservableValue<String> call(
+CellDataFeatures<Knjiga, String> param) {
+return new ReadOnlyStringWrapper(
+param.getValue().getNaziv()
+);
+}
+}
+);
+}
+
+📑 Povezivanje akcija s izbornikom
+
+Izbornik se sastoji od Menu (glavni element) i MenuItem elemenata:
+
+public void prikaziKnjige() {
+try {
+BorderPane knjigaPane = FXMLLoader.load(
+JavaFXGlavna.class.getResource("../javafx/knjige.fxml")
+);
+JavaFXGlavna.setCenterPane(knjigaPane);
+} catch (IOException e) {
+e.printStackTrace();
+}
+}
+
+💡 Best practice: Svaka opcija izbornika otvara novi ekran definiran u zasebnoj FXML datoteci
+
+🤔
+Pitanja?
+Hvala na pažnji!
+
+←
+1 / 26
+→

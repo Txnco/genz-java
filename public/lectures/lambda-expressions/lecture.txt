@@ -1,0 +1,1688 @@
+Lambda izrazi u Javi
+Što su lambda izrazi?
+Zašto ih koristiti?
+
+2️⃣ Sintaksa
+
+Osnovna sintaksa
+Različiti formati
+
+3️⃣ Funkcionalna sučelja
+
+Predefined sučelja
+Custom sučelja
+
+4️⃣ Method References
+
+Vrste referenci
+Praktična primjena
+
+5️⃣ Stream API
+
+Filter, Map, Reduce
+Collectors
+
+6️⃣ Best Practices
+
+Česte greške
+Savjeti i trikovi
+
+2
+
+🤔 Što su Lambda izrazi?
+
+Definicija
+
+Lambda izraz je anonimna funkcija koja omogućava pisanje kraćeg,
+čitljivijeg koda. Uvedeni su u Java 8 i revolucionirali su način programiranja.
+
+💭 Razmisli ovako:
+
+🎵 Spotify Playlist
+Umjesto da ručno odabireš svaku pjesmu, samo kažeš:
+"Pusti sve rock pjesme iz 2023." - Lambda je ta jednostavna naredba!
+
+📸 Instagram Filter
+Ne trebaš znati kako filter radi iznutra, samo ga primiješ na sliku jednim klikom.
+Lambda je kao taj filter za kod!
+
+3
+
+🎯 Zašto koristiti Lambda izraze?
+
+❌ PRIJE (tradicionalni način)
+
+Sortiranje liste - tradicionalno
+// TikTok korisnici po broju followera
+List<User> users = getTikTokUsers();
+
+Collections.sort(users, new Comparator<User>() {
+@Override
+public int compare(User u1, User u2) {
+return Integer.compare(
+u1.getFollowers(),
+u2.getFollowers()
+);
+}
+});
+
+// 😓 9 linija koda za jednostavnu operaciju!
+
+✅ S LAMBDA IZRAZOM
+
+Sortiranje liste - lambda
+// TikTok korisnici po broju followera
+List<User> users = getTikTokUsers();
+
+users.sort((u1, u2) ->
+Integer.compare(u1.getFollowers(), u2.getFollowers())
+);
+
+// 🎉 3 linije - isti rezultat!
+
+// Ili još kraće s method reference:
+users.sort(Comparator.comparingInt(User::getFollowers));
+
+💡 Pro Tip
+Lambda izrazi čine kod:
+
+📝 Kraćim - manje koda za pisanje i održavanje
+👀 Čitljivijim - fokus na ono što radiš, ne kako
+🚀 Modernijim - funkcionalni stil programiranja
+
+4
+
+📝 Sintaksa Lambda izraza
+
+Opća sintaksa
+
+(parametri) -> { tijelo lambda izraza }
+
+→ Arrow operator povezuje parametre s tijelom funkcije
+
+📖 Različiti formati lambda izraza:
+
+1. Bez parametara
+// Jednostavna lambda bez parametara
+() -> System.out.println("Hello from Lambda! 👋");
+
+// Ili s više linija koda
+() -> {
+System.out.println("Pokretanje Stream aplikacije...");
+streamService.start();
+return "Streaming started!";
+};
+
+2. Jedan parametar
+// Zagrade oko parametra su opcijske
+name -> System.out.println("Hi " + name);
+
+// Ili s eksplicitnim tipom (opcijski)
+(String name) -> System.out.println("Hi " + name);
+
+// YouTube primjer - subscribe notifikacija
+channel -> sendNotification("New video on " + channel);
+
+3. Više parametara
+// Zagrade su obavezne za više parametara
+(x, y) -> x + y;
+
+// Discord primjer - slanje DM poruke
+(user, message) -> user.sendDirectMessage(message);
+
+// S eksplicitnim tipovima
+(Integer followers, Integer likes) -> followers + likes;
+
+5
+
+🔌 Funkcionalna sučelja (Functional Interfaces)
+
+Funkcionalno sučelje je sučelje s točno jednom apstraktnom metodom.
+Lambda izrazi mogu se koristiti samo s funkcionalnim sučeljima!
+
+Vlastito funkcionalno sučelje
+// @FunctionalInterface anotacija osigurava da imamo samo jednu metodu
+@FunctionalInterface
+interface ContentModerator {
+boolean isAppropriate(String content);
+}
+
+// Korištenje s lambdom
+ContentModerator moderator = content ->
+!content.contains("spam") &&
+!content.contains("inappropriate");
+
+// Provjera sadržaja
+boolean canPost = moderator.isAppropriate("Check out my new video!");
+System.out.println("Can post: " + canPost); // true
+
+⚡ Quick Fact
+Java ima više ugrađenih funkcionalnih sučelja u java.util.function paketu.
+Ne moraš uvijek praviti svoje!
+
+6
+
+🎁 Ugrađena funkcionalna sučelja
+
+Predicate<T>
+Prima argument, vraća boolean
+
+// Filter za Instagram story
+Predicate<Story> isActive =
+story -> story.getHoursOld() < 24;
+
+// Provjera
+if (isActive.test(myStory)) {
+showStory(myStory);
+}
+
+Function<T,R>
+Prima argument tipa T, vraća rezultat tipa R
+
+// Username formatter
+Function<String, String> addAtSign =
+name -> "@" + name.toLowerCase();
+
+String handle = addAtSign.apply("JohnDoe");
+// Result: "@johndoe"
+
+Consumer<T>
+Prima argument, ne vraća ništa
+
+// Slanje push notifikacije
+Consumer<User> sendNotif =
+user -> notificationService
+.send(user.getId(), "New message!");
+
+users.forEach(sendNotif);
+
+Supplier<T>
+Ne prima argumente, vraća rezultat
+
+// Random quote generator
+Supplier<String> randomQuote = () -> {
+String[] quotes = {
+"Stay hungry",
+"Think different",
+"Just do it"
+};
+return quotes[new Random()
+.nextInt(quotes.length)];
+};
+
+String quote = randomQuote.get();
+
+7
+
+🔗 Method References
+
+Method reference je još kraći način pisanja lambda izraza
+kada lambda samo poziva postojeću metodu.
+
+Sintaksa: Class::method
+
+Lambda izraz
+
+// Lambda koji poziva metodu
+users.forEach(user ->
+System.out.println(user)
+);
+
+Method Reference
+
+// Ista stvar, kraće
+users.forEach(System.out::println);
+
+🎯 Vrste Method References:
+
+1. Reference na statičku metodu
+// Parsiranje brojeva iz stringa
+List<String> numbers = List.of("1", "2", "3");
+
+// Lambda:
+numbers.stream().map(s -> Integer.parseInt(s));
+
+// Method reference:
+numbers.stream().map(Integer::parseInt);
+
+2. Reference na instance metodu objekta
+// Filtriranje praznih stringova
+List<String> hashtags = List.of("#java", "", "#coding");
+
+// Lambda:
+hashtags.stream().filter(s -> !s.isEmpty());
+
+// Method reference:
+hashtags.stream().filter(String::isEmpty).map(s -> !s);
+
+3. Reference na konstruktor
+// Kreiranje User objekata
+List<String> usernames = List.of("alice", "bob", "charlie");
+
+// Lambda:
+usernames.stream().map(name -> new User(name));
+
+// Method reference:
+usernames.stream().map(User::new);
+
+8
+
+🌊 Stream API + Lambda = 🔥
+
+Stream API omogućava funkcionalno procesiranje kolekcija.
+Lambda izrazi čine Stream API moćnim i lakim za korištenje!
+
+💡 Razmisli o Stream-u kao o "conveyor belt-u"
+
+Podatke stavljaš na "traku" (stream), primjenjuješ operacije (filter, map),
+i na kraju dobiješ rezultat (collect, count, etc.)
+
+Instagram primjer - najpopularniji postovi
+// Lista Instagram postova
+List<Post> posts = getInstagramPosts();
+
+// Zadatak: Nađi top 5 postova s najviše lajkova iz 2024.
+List<Post> topPosts = posts.stream()
+.filter(post -> post.getYear() == 2024)           // 1. Filtriraj po godini
+.filter(post -> post.getLikes() > 10000)           // 2. Samo popularne
+.sorted(Comparator.comparingInt(Post::getLikes)
+.reversed())                                // 3. Sortiraj silazno
+.limit(5)                                          // 4. Uzmi top 5
+.collect(Collectors.toList());                     // 5. Sakupi u listu
+
+// 🎉 Sve u 6 linija čitljivog koda!
+
+🚀 Stream operacije
+
+filter() - filtrira elemente (vraća boolean)
+map() - transformira elemente (vraća novi tip)
+sorted() - sortira elemente
+limit() - ograničava broj elemenata
+collect() - sakuplja rezultate u kolekciju
+
+9
+
+🎮 Stream API - Gaming Primjeri
+
+Primjer 1: Spotify - omiljene pjesme
+// Filtriraj sve rock pjesme duže od 3 minute
+List<Song> playlist = songs.stream()
+.filter(song -> "Rock".equals(song.getGenre()))
+.filter(song -> song.getDuration() > 180)
+.collect(Collectors.toList());
+
+// Prosječna duljina svih rock pjesama
+double avgDuration = songs.stream()
+.filter(song -> "Rock".equals(song.getGenre()))
+.mapToInt(Song::getDuration)
+.average()
+.orElse(0.0);
+
+Primjer 2: Gaming leaderboard
+// Top 10 igrača po score-u
+List<Player> topPlayers = players.stream()
+.sorted(Comparator.comparingInt(Player::getScore).reversed())
+.limit(10)
+.collect(Collectors.toList());
+
+// Ukupni score svih aktivnih igrača
+int totalScore = players.stream()
+.filter(Player::isActive)
+.mapToInt(Player::getScore)
+.sum();
+
+// Pronađi najboljeg igrača
+Optional<Player> bestPlayer = players.stream()
+.max(Comparator.comparingInt(Player::getScore));
+
+Primjer 3: E-commerce - košarica
+// Izračunaj ukupnu cijenu artikala na popustu
+double total = cart.getItems().stream()
+.filter(Item::hasDiscount)
+.mapToDouble(item -> item.getPrice() * (1 - item.getDiscount()))
+.sum();
+
+// Grupiraj artikle po kategoriji
+Map<String, List<Item>> byCategory = cart.getItems().stream()
+.collect(Collectors.groupingBy(Item::getCategory));
+
+10
+
+🔄 map() - Transformacije podataka
+
+map() transformira svaki element u stream-u.
+Prima jedan tip, vraća drugi tip.
+
+TikTok primjer - formatiranje usernames
+// Od liste imena do liste @usernames
+List<String> names = List.of("Ana", "Marko", "Ivana");
+
+List<String> usernames = names.stream()
+.map(name -> "@" + name.toLowerCase())
+.collect(Collectors.toList());
+
+// Rezultat: ["@ana", "@marko", "@ivana"]
+
+YouTube primjer - ekstrakcija podataka
+// Od Video objekata do naslova videa
+List<Video> videos = getVideos();
+
+List<String> titles = videos.stream()
+.map(Video::getTitle)
+.collect(Collectors.toList());
+
+// Ukupno pregleda svih videa
+long totalViews = videos.stream()
+.map(Video::getViews)
+.reduce(0L, Long::sum);
+
+// Ili kraće:
+long totalViews2 = videos.stream()
+.mapToLong(Video::getViews)
+.sum();
+
+Netflix primjer - transformacija Movie -> DTO
+// Pretvori Movie objekte u jednostavne DTO-ove
+List<MovieDTO> movieCards = movies.stream()
+.map(movie -> new MovieDTO(
+movie.getTitle(),
+movie.getThumbnail(),
+movie.getRating()
+))
+.collect(Collectors.toList());
+
+💡 Kada koristiti map()?
+Koristi map() kada trebaš:
+
+Pretvoriti objekte iz jednog tipa u drugi
+Ekstraktirati određeno polje iz objekta
+Primijeniti funkciju na svaki element
+
+11
+
+🗺️ flatMap() - "Ravnanje" struktura
+
+flatMap() se koristi kada imaš "kolekciju kolekcija"
+i želiš je "spljoštiti" u jednu kolekciju.
+
+map() - bez ravnanja
+
+// Svaki korisnik ima listu prijatelja
+List<User> users = getUsers();
+
+// map() vraća Stream<List<User>>
+Stream<List<User>> friendLists =
+users.stream()
+.map(User::getFriends);
+
+// 😕 Lista listi, ne možemo lako raditi
+
+flatMap() - s ravnanjem
+
+// Svaki korisnik ima listu prijatelja
+List<User> users = getUsers();
+
+// flatMap() vraća Stream<User>
+List<User> allFriends =
+users.stream()
+.flatMap(user -> user.getFriends().stream())
+.collect(Collectors.toList());
+
+// 🎉 Jedna ravna lista svih prijatelja!
+
+Snapchat primjer - svi hashtagovi
+// Svaki story ima više hashtagova
+List<Story> stories = getStories();
+
+// Izvuci sve hashtagove iz svih storyja
+List<String> allHashtags = stories.stream()
+.flatMap(story -> story.getHashtags().stream())
+.distinct()  // Ukloni duplikate
+.collect(Collectors.toList());
+
+// Rezultat: [#summer, #fun, #travel, #food, ...]
+
+Discord primjer - svi članovi servera
+// Svaki server (guild) ima više kanala, svaki kanal više članova
+List<Guild> guilds = getGuilds();
+
+Set<User> allMembers = guilds.stream()
+.flatMap(guild -> guild.getChannels().stream())  // Stream kanala
+.flatMap(channel -> channel.getMembers().stream()) // Stream članova
+.collect(Collectors.toSet());  // Set automatski uklanja duplikate
+
+12
+
+🎯 Collectors - Sakupljanje rezultata
+
+Collectors omogućavaju pretvaranje stream-a u različite strukture podataka.
+
+toList() / toSet()
+
+// U listu
+List<String> list = stream
+.collect(Collectors.toList());
+
+// U set (bez duplikata)
+Set<String> set = stream
+.collect(Collectors.toSet());
+
+joining()
+
+// Spoji stringove
+String hashtags = tags.stream()
+.collect(Collectors.joining(", "));
+
+// Result: "java, coding, tech"
+
+groupingBy()
+
+// Grupiraj po žanru
+Map<String, List<Song>> byGenre =
+songs.stream()
+.collect(Collectors
+.groupingBy(Song::getGenre));
+
+partitioningBy()
+
+// Podijeli u dvije grupe (true/false)
+Map<Boolean, List<User>> byStatus =
+users.stream()
+.collect(Collectors
+.partitioningBy(User::isActive));
+
+Instagram Analytics primjer
+// Broj postova po danu u tjednu
+Map<DayOfWeek, Long> postsByDay = posts.stream()
+.collect(Collectors.groupingBy(
+post -> post.getDate().getDayOfWeek(),
+Collectors.counting()
+));
+
+// Prosječan broj lajkova po tipu posta
+Map<PostType, Double> avgLikesByType = posts.stream()
+.collect(Collectors.groupingBy(
+Post::getType,
+Collectors.averagingInt(Post::getLikes)
+));
+
+13
+
+⚠️ Česte greške s Lambda izrazima
+
+❌ GREŠKA #1: Mutiranje vanjskih varijabli
+
+Loše - Side effects
+
+int sum = 0; // Outer variable
+numbers.forEach(n -> {
+sum += n; // ❌ ERROR: Variable used in lambda
+// must be final or effectively final
+});
+
+Dobro - Funkcionalni pristup
+
+// Koristi reduce() za agregaciju
+int sum = numbers.stream()
+.reduce(0, Integer::sum);
+
+// Ili sum() za primitive
+int sum2 = numbers.stream()
+.mapToInt(Integer::intValue)
+.sum();
+
+❌ GREŠKA #2: Presložene lambde
+
+Loše - Nečitljivo
+
+// 😵 Previše logike u lambdi
+users.stream()
+.filter(u -> {
+if (u.getAge() > 18) {
+if (u.isActive()) {
+if (u.getFollowers() > 1000) {
+return true;
+}
+}
+}
+return false;
+});
+
+Dobro - Jasno i čisto
+
+// 😊 Izdvoji u zasebnu metodu
+users.stream()
+.filter(this::isInfluencer);
+
+private boolean isInfluencer(User u) {
+return u.getAge() > 18
+&& u.isActive()
+&& u.getFollowers() > 1000;
+}
+
+❌ GREŠKA #3: Zanemarivanje null vrijednosti
+
+// ❌ Može baciti NullPointerException
+users.stream()
+.map(User::getName)  // getName() može vratiti null!
+.map(String::toUpperCase)  // 💥 NPE!
+.collect(Collectors.toList());
+
+// ✅ Sigurniji pristup
+users.stream()
+.map(User::getName)
+.filter(Objects::nonNull)  // Filtriraj null-ove
+.map(String::toUpperCase)
+.collect(Collectors.toList());
+
+// ✅ Ili koristi Optional
+users.stream()
+.map(User::getNameOptional)
+.flatMap(Optional::stream)  // Java 9+
+.map(String::toUpperCase)
+.collect(Collectors.toList());
+
+14
+
+✨ Best Practices
+
+1️⃣ Koristi method reference kada je moguće
+
+// Dobro ✅
+list.forEach(System.out::println);
+
+// Meh, može bolje
+list.forEach(x -> System.out.println(x));
+
+2️⃣ Izbjegavaj side effects
+Lambda izrazi trebaju biti pure functions - bez mutiranja stanja!
+
+// Dobro ✅
+return users.stream()
+.filter(User::isActive)
+.collect(Collectors.toList());
+
+// Loše ❌
+List<User> result = new ArrayList<>();
+users.forEach(u -> {
+if (u.isActive()) {
+result.add(u); // Side effect!
+}
+});
+
+3️⃣ Lambda ili običan loop?
+Koristi lambdu kada operacija treba biti deklarativna.
+
+// Lambda - za transformacije ✅
+names.stream()
+.map(String::toUpperCase)
+.collect(Collectors.toList());
+
+// Loop - za kompleksnu logiku ✅
+for (User user : users) {
+if (complexCondition(user)) {
+doMultipleThings(user);
+updateDatabase(user);
+}
+}
+
+4️⃣ Ime lambda parametara
+Koristi smislena imena, ne generička x, y.
+
+// Dobro ✅
+users.stream()
+.filter(user -> user.getAge() > 18)
+.map(user -> user.getName())
+
+// Loše ❌
+users.stream()
+.filter(u -> u.getAge() > 18)
+.map(u -> u.getName())
+
+15
+
+⚡ Performance Savjeti
+
+1. Parallel Streams - Pažljivo!
+
+// Parallel stream za velike kolekcije
+List<Integer> numbers = IntStream.range(1, 1_000_000)
+.boxed()
+.collect(Collectors.toList());
+
+// Sequential (obični stream)
+long sum1 = numbers.stream()
+.mapToLong(Integer::longValue)
+.sum();
+
+// Parallel - koristi više CPU cores
+long sum2 = numbers.parallelStream()
+.mapToLong(Integer::longValue)
+.sum();
+
+// ⚠️ PAZI: Parallel je brži samo za:
+// - Velike količine podataka (>10,000 elemenata)
+// - CPU-intensive operacije
+// - Bez side effects i shared state!
+
+2. Lazy Evaluation
+Stream operacije su lazy - izvršavaju se tek kad pozoveš terminal operaciju!
+
+// Ništa se NE izvršava ovdje!
+Stream<User> stream = users.stream()
+.filter(user -> {
+System.out.println("Filtering " + user.getName());
+return user.isActive();
+})
+.map(user -> {
+System.out.println("Mapping " + user.getName());
+return user.getName();
+});
+
+// Izvršava se tek kad pozoveš terminal operaciju:
+List<String> names = stream.collect(Collectors.toList());
+
+// 💡 Ovo je odlično za performanse - ne procesira sve podatke
+// ako koristiš npr. findFirst() ili limit()!
+
+3. Short-circuiting operacije
+
+// anyMatch() - prestaje čim nađe match ✅
+boolean hasActiveUsers = users.stream()
+.anyMatch(User::isActive);  // Zaustavlja se na prvom true
+
+// findFirst() - vraća odmah prvog ✅
+Optional<User> admin = users.stream()
+.filter(User::isAdmin)
+.findFirst();  // Ne procesira ostale elemente
+
+// limit() - ograničava broj elemenata ✅
+List<User> first10 = users.stream()
+.limit(10)
+.collect(Collectors.toList());  // Procesira samo 10
+
+💡 Golden Rule
+Nemoj prerano optimizirati!
+Prvo napiši čitljiv kod, pa optimiziraj ako je potrebno.
+Stream API je uglavnom dovoljno brz za većinu slučajeva.
+
+16
+
+🆕 Što je novo u Java 25?
+
+1. Pattern Matching u lambdama (Preview)
+
+// Tradicionalno
+users.stream()
+.filter(user -> user instanceof PremiumUser)
+.map(user -> (PremiumUser) user)
+.forEach(premium -> System.out.println(premium.getBenefits()));
+
+// Java 25 - Pattern matching u lambdama
+users.stream()
+.filter(PremiumUser premium -> premium.getSubscription().isActive())
+.forEach(premium -> System.out.println(premium.getBenefits()));
+
+2. Enhanced Stream API
+
+// Nove metode za lakšu obradu
+List<Post> posts = getPosts();
+
+// mapMulti() - alternative za flatMap
+posts.stream()
+.mapMulti((post, consumer) -> {
+post.getTags().forEach(consumer);
+})
+.distinct()
+.forEach(System.out::println);
+
+// takeWhile() i dropWhile() za ordered streams
+List<Integer> numbers = List.of(1, 2, 3, 4, 5, 6);
+
+numbers.stream()
+.takeWhile(n -> n < 4)  // [1, 2, 3]
+.forEach(System.out::println);
+
+numbers.stream()
+.dropWhile(n -> n < 4)  // [4, 5, 6]
+.forEach(System.out::println);
+
+3. Record Patterns u lambdama
+
+// Record definicija
+record User(String name, int age, String email) {}
+
+// Dekonstrukcija u lambdi
+List<User> users = getUsers();
+
+users.stream()
+.map(user -> switch (user) {
+case User(var name, var age, var email)
+when age > 18 -> "Adult: " + name;
+case User(var name, var age, var email)
+-> "Minor: " + name;
+})
+.forEach(System.out::println);
+
+🚀 Stay Updated!
+Java se brzo razvija! Prati OpenJDK
+za najnovije značajke i JEP-ove (Java Enhancement Proposals).
+
+17
+
+🎯 Praktični projekt: Social Media Analytics
+
+Zadatak: Analiza Instagram postova
+
+Kreiraj sustav za analizu popularnosti postova koristeći Stream API i lambde.
+
+Model klase
+record Post(
+String id,
+String author,
+String content,
+int likes,
+int comments,
+int shares,
+LocalDateTime postedAt,
+List<String> hashtags
+) {
+// Engagement rate calculation
+public double engagementRate() {
+return (likes + comments * 2 + shares * 3) / 100.0;
+}
+}
+
+Analytics klasa
+public class InstagramAnalytics {
+
+// 1. Top 10 postova po engagement rate-u
+public List<Post> getTopEngagingPosts(List<Post> posts) {
+return posts.stream()
+.sorted(Comparator.comparingDouble(Post::engagementRate).reversed())
+.limit(10)
+.collect(Collectors.toList());
+}
+
+// 2. Najčešći hashtagovi
+public Map<String, Long> getTopHashtags(List<Post> posts, int limit) {
+return posts.stream()
+.flatMap(post -> post.hashtags().stream())
+.collect(Collectors.groupingBy(
+tag -> tag,
+Collectors.counting()
+))
+.entrySet().stream()
+.sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+.limit(limit)
+.collect(Collectors.toMap(
+Map.Entry::getKey,
+Map.Entry::getValue,
+(e1, e2) -> e1,
+LinkedHashMap::new
+));
+}
+
+// 3. Autori s prosječno najviše lajkova
+public Map<String, Double> getTopAuthors(List<Post> posts) {
+return posts.stream()
+.collect(Collectors.groupingBy(
+Post::author,
+Collectors.averagingInt(Post::likes)
+))
+.entrySet().stream()
+.sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+.limit(5)
+.collect(Collectors.toMap(
+Map.Entry::getKey,
+Map.Entry::getValue,
+(e1, e2) -> e1,
+LinkedHashMap::new
+));
+}
+
+// 4. Postovi iz zadnjih 24 sata
+public List<Post> getRecentPosts(List<Post> posts) {
+LocalDateTime yesterday = LocalDateTime.now().minusHours(24);
+return posts.stream()
+.filter(post -> post.postedAt().isAfter(yesterday))
+.sorted(Comparator.comparing(Post::postedAt).reversed())
+.collect(Collectors.toList());
+}
+}
+
+18
+
+🐛 Debugging Lambda izraza
+
+Tipovi grešaka i kako ih riješiti
+
+1. Debug sa peek()
+// peek() omogućava inspekciju elemenata bez mijenjanja stream-a
+List<String> result = users.stream()
+.filter(User::isActive)
+.peek(user -> System.out.println("After filter: " + user))
+.map(User::getName)
+.peek(name -> System.out.println("After map: " + name))
+.collect(Collectors.toList());
+
+// Output:
+// After filter: User[name=Ana, active=true]
+// After map: Ana
+// After filter: User[name=Marko, active=true]
+// After map: Marko
+
+2. Breakpoints u IntelliJ IDEA
+// Postavi breakpoint na liniju s lambdom
+users.stream()
+.filter(user -> user.getAge() > 18)  // ← Breakpoint ovdje
+.collect(Collectors.toList());
+
+// IntelliJ će stati na svakom pozivu lambde!
+// Možeš vidjeti vrijednosti user objekta
+
+3. Izvuci lambdu u zasebnu metodu
+// Loše - teško za debug
+users.stream()
+.filter(u -> u.getAge() > 18 && u.isActive() && u.hasEmail())
+.collect(Collectors.toList());
+
+// Dobro - lako za debug
+users.stream()
+.filter(this::isEligible)
+.collect(Collectors.toList());
+
+private boolean isEligible(User user) {
+// Ovdje možeš staviti breakpoint i vidjeti sve!
+boolean adultAge = user.getAge() > 18;
+boolean active = user.isActive();
+boolean hasEmail = user.hasEmail();
+return adultAge && active && hasEmail;
+}
+
+💡 Pro Debugging Tip
+Koristi Stream.of().toList() za brzo testiranje lambda logike:
+
+// Brzo testiraj svoju lambdu
+List<String> test = Stream.of("Ana", "Marko", "Ivana")
+.map(name -> "@" + name.toLowerCase())
+.toList();
+
+System.out.println(test); // [@ana, @marko, @ivana]
+
+19
+
+🎓 Zaključak
+
+📝 Što smo naučili?
+
+Lambda sintaksu i funkcionalna sučelja
+Method references za kraći kod
+Stream API za elegantnu obradu podataka
+Best practices i česte greške
+Novosti u Java 25
+
+💪 Key Takeaways
+
+Lambda = Kraći, čitljiviji kod
+Stream API = Deklarativno programiranje
+Izbjegavaj side effects
+Koristi method references
+Piši čist, funkcionalan kod
+
+🚀 Sretno s kodiranjem!
+
+Lambda izrazi su moćan alat - koristi ih mudro! 💡
+
+📚 Dodatni resursi
+
+Oracle Java Tutorials: Lambda Expressions
+Baeldung: Odličan izvor za Java tutorijale
+Java Stream API Documentation: Službena dokumentacija
+Modern Java in Action: Preporučena knjiga
+
+Lambda izrazi
+📋 Sadržaj vježbi
+
+Primjeri jednostavnih lambda izraza
+Najčešće operacije s tokovima (Streams)
+Sortiranje elemenata zbirke pomoću tokova
+Primjeri korištenja referenci za metode
+Korištenje paralelizma
+Usporedba performansi sekvencijalnih i paralelnih tokova
+Moderne lambda izraze u Java 17-25 NOVO
+
+🎯 Primjeri jednostavnih lambda izraza
+
+Osnovna sintaksa
+// Lambda bez parametara
+() -> System.out.println("Hello Lambda");
+
+// Lambda s jednim parametrom
+x -> x + 10;
+
+// Lambda s više parametara i eksplicitnim tipovima
+(int x, int y) -> {
+return x + y;
+};
+
+// Lambda koja vraća razliku duljina stringova
+(String x, String y) -> x.length() - y.length();
+
+// Lambda s više naredbi
+(String x) -> {
+listA.add(x);
+listB.remove(x);
+return listB.size();
+};
+
+💡 Ključne karakteristike:
+
+Lambda izrazi su kratki zapisi anonimnih funkcija
+Mogu primiti 0 ili više parametara
+Znak "->" odvaja parametre od tijela lambda izraza
+Kompajler automatski određuje tipove parametara iz konteksta
+
+🔄 Prije i poslije lambda izraza
+
+❌ Stari pristup (anonimna klasa)
+
+button.addActionListener(
+new ActionListener() {
+public void actionPerformed(
+ActionEvent event) {
+System.out.println(
+"button clicked");
+}
+}
+);
+
+✅ Novi pristup (lambda izraz)
+
+button.addActionListener(
+event ->
+System.out.println(
+"button clicked!")
+);
+
+🎉 Prednosti lambda izraza:
+
+Kraći i čitljiviji kod (75% manje koda!)
+Manje ceremonije i boilerplate koda
+Fokus na funkcionalnost umjesto na sintaksu
+
+📝 Važne napomene o lambda izrazima
+
+Prosljeđivanje bloka koda: Umjesto prosljeđivanja objekta, prosljeđuje se funkcija bez imena
+
+Parametri: "event" predstavlja naziv parametra i jednak je nazivu parametra u originalnoj metodi
+
+Operator strelice (->): Odvaja parametre od tijela lambda izraza
+
+Automatsko određivanje tipova: Kompajler određuje tip parametra "event" iz konteksta metode "addActionListener"
+
+Opcionalnost tipova: Tipovi parametara se ne moraju navoditi ako je očito o kojim tipovima se radi
+
+Primjer type inference
+// Kompajler automatski zna da je event tipa ActionEvent
+button.addActionListener(event -> doSomething(event));
+
+// Možemo i eksplicitno navesti tip
+button.addActionListener((ActionEvent event) -> doSomething(event));
+
+🌟 Lambda izrazi u različitim situacijama
+
+Bez argumenata
+Runnable noArguments = () -> System.out.println("Hello World");
+
+// Runnable ima samo jednu metodu: public void run()
+// Lambda izraz ne prima nikakve parametre
+
+Jedan argument
+ActionListener oneArgument =
+event -> System.out.println("button clicked");
+
+Više naredbi u tijelu
+Runnable multiStatement = () -> {
+System.out.print("Hello");
+System.out.println(" World");
+};
+
+Eksplicitno navođenje tipova
+// Implicitno - kompajler sam zaključuje tipove
+BinaryOperator<Long> add = (x, y) -> x + y;
+
+// Eksplicitno - mi navodimo tipove
+BinaryOperator<Long> addExplicit =
+(Long x, Long y) -> x + y;
+
+🚀 Moderne lambda u Java 17-25 NOVO
+
+Pattern Matching u Lambda izrazima (Java 21+)
+
+Pattern matching za instanciranje
+// Kombinacija pattern matching i lambda izraza
+List<Object> objects = List.of("Java", 42, 3.14, "Lambda");
+
+objects.stream()
+.filter(obj -> obj instanceof String s && s.length() > 4)
+.forEach(System.out::println);
+
+// Tradicionalni pristup bi zahtijevao cast:
+objects.stream()
+.filter(obj -> obj instanceof String)
+.map(obj -> (String) obj)  // Ovaj cast više nije potreban!
+.filter(s -> s.length() > 4)
+.forEach(System.out::println);
+
+Records i Lambda izrazi (Java 17+)
+
+Rad sa zapisima
+record Student(String ime, int bodovi) {}
+
+List<Student> studenti = List.of(
+new Student("Ana", 95),
+new Student("Ivan", 87),
+new Student("Marko", 92)
+);
+
+// Sortiranje pomoću lambde
+studenti.stream()
+.sorted((s1, s2) -> s2.bodovi() - s1.bodovi())
+.forEach(s -> System.out.println(
+s.ime() + ": " + s.bodovi()));
+
+📦 Stream operacija: collect
+
+Osnovna collect operacija
+List<String> collected = Stream.of("a", "b", "c")
+.collect(Collectors.toList());
+
+Karakteristike collect() operacije:
+
+Služi za generiranje liste iz vrijednosti unutar Stream-a
+Spada u "eager" operacije (izvršava se odmah)
+Može se koristiti za različite tipove kolekcija (List, Set, Map...)
+
+Moderne collect opcije (Java 16+) NOVO
+
+Nova toList() metoda
+// Java 16+ - jednostavnija sintaksa!
+List<String> collected = Stream.of("a", "b", "c")
+.toList();  // Nema potrebe za Collectors.toList()
+
+// Ova lista je immutable (ne može se mijenjati)
+
+Teeing collector (Java 12+)
+// Kombinira rezultate dva collectora
+record Statistics(double avg, long count) {}
+
+Statistics stats = Stream.of(1, 2, 3, 4, 5)
+.collect(Collectors.teeing(
+Collectors.averagingInt(i -> i),
+Collectors.counting(),
+Statistics::new
+));
+
+🗺️ Stream operacija: map
+
+Osnovna map operacija
+List<String> collected = Stream.of("a", "b", "hello")
+.map(string -> string.toUpperCase())
+.collect(Collectors.toList());
+
+// Rezultat: ["A", "B", "HELLO"]
+
+Što radi map():
+
+"Mapira" jednu skupinu vrijednosti u drugu
+Transformira svaki element Stream-a
+Može se koristiti za 1:1 mapiranje
+
+Napredni primjeri map operacije
+
+Kompleksnije transformacije
+// Mapiranje objekata u njihove duljine
+List<Integer> lengths = Stream.of("Java", "Lambda", "Stream")
+.map(String::length)
+.toList();
+
+// Rezultat: [4, 6, 6]
+
+// Mapiranje s records (Java 17+)
+record Person(String name, int age) {}
+
+List<String> names = Stream.of(
+new Person("Ana", 20),
+new Person("Ivan", 22)
+)
+.map(Person::name)
+.toList();
+
+🔍 Stream operacija: filter
+
+Osnovno filtriranje
+List<String> beginningWithNumbers =
+Stream.of("a", "1abc", "abc1")
+.filter(value -> Character.isDigit(value.charAt(0)))
+.collect(Collectors.toList());
+
+// Rezultat: ["1abc"]
+
+Funkcionalnost filter():
+
+Služi za filtriranje vrijednosti prema zadanim kriterijima
+Vraća novi Stream samo s elementima koji zadovoljavaju uvjet
+Predicat (uvjet) mora vraćati boolean vrijednost
+
+Napredni primjeri filtriranja
+
+Višestruki filtri
+List<String> result = Stream.of("Java", "Python", "C++", "JavaScript")
+.filter(lang -> lang.length() > 4)
+.filter(lang -> lang.contains("a"))
+.toList();
+
+// Rezultat: ["Java", "JavaScript"]
+
+// Filtriranje s pattern matching (Java 21+)
+List<Object> mixed = List.of("tekst", 42, "Java", 3.14);
+List<String> onlyStrings = mixed.stream()
+.filter(obj -> obj instanceof String)
+.map(obj -> (String) obj)
+.toList();
+
+📊 Stream operacije: min i max
+
+Pronalaženje minimalnog elementa
+Track shortestTrack = tracks.stream()
+.min(Comparator.comparing(track -> track.getLength()))
+.get();
+
+// Ili kraće s method reference:
+Track shortestTrack = tracks.stream()
+.min(Comparator.comparing(Track::getLength))
+.get();
+
+⚠️ Važno: Metode min() i max() vraćaju Optional<T> jer Stream može biti prazan!
+
+Siguran pristup s Optional (Java 8+)
+
+Pravilno rukovanje Optional vrijednostima
+// ❌ OPASNO - baca exception ako je stream prazan
+Track shortest = tracks.stream()
+.min(Comparator.comparing(Track::getLength))
+.get();
+
+// ✅ SIGURNO - koristi orElse
+Track shortest = tracks.stream()
+.min(Comparator.comparing(Track::getLength))
+.orElse(null);
+
+// ✅ NAJBOLJE - koristi ifPresent
+tracks.stream()
+.min(Comparator.comparing(Track::getLength))
+.ifPresent(track ->
+System.out.println("Najkraći: " + track));
+
+// ✅ MODERNO - orElseThrow (Java 10+)
+Track shortest = tracks.stream()
+.min(Comparator.comparing(Track::getLength))
+.orElseThrow(() ->
+new NoSuchElementException("Nema pjesama!"));
+
+⚡ Stream operacija: reduce
+
+Osnovna reduce operacija
+int count = Stream.of(1, 2, 3)
+.reduce(0, (acc, element) -> acc + element);
+
+// Rezultat: 6 (0 + 1 + 2 + 3)
+
+Kako radi reduce():
+
+Koristi se kad je iz zbirke vrijednosti potrebno odrediti jednu vrijednost
+Prvi parametar je početna vrijednost (identity)
+Drugi parametar je akumulator funkcija koja kombinira vrijednosti
+
+Napredni primjeri reduce operacije
+
+Različite primjene reduce
+// Računanje sume
+int sum = Stream.of(1, 2, 3, 4, 5)
+.reduce(0, Integer::sum);
+
+// Računanje produkta
+int product = Stream.of(1, 2, 3, 4)
+.reduce(1, (a, b) -> a * b);
+
+// Pronalaženje maksimuma
+Optional<Integer> max = Stream.of(1, 5, 3, 9, 2)
+.reduce(Integer::max);
+
+// Konkatenacija stringova
+String concatenated = Stream.of("Java", "je", "super")
+.reduce("", (a, b) -> a + " " + b)
+.trim();
+
+// Rezultat: "Java je super"
+
+🌊 Stream operacija: flatMap
+
+Osnovna flatMap operacija
+List<Integer> together = Stream.of(
+Arrays.asList(1, 2),
+Arrays.asList(3, 4)
+)
+.flatMap(numbers -> numbers.stream())
+.collect(Collectors.toList());
+
+// Rezultat: [1, 2, 3, 4]
+
+Što radi flatMap():
+
+Koristi se za "spljoštavanje" ugniježđenih kolekcija
+Transformira svaki element u Stream i spaja sve Stream-ove u jedan
+Rješava problem Stream<Stream<T>> → Stream<T>
+
+Praktični primjeri flatMap-a
+
+Rad s ugniježđenim strukturama
+// Dobivanje svih riječi iz liste rečenica
+List<String> sentences = List.of(
+"Java je programski jezik",
+"Lambda izrazi su korisni"
+);
+
+List<String> words = sentences.stream()
+.flatMap(sentence -> Arrays.stream(sentence.split(" ")))
+.toList();
+
+// Rezultat: ["Java", "je", "programski", "jezik",
+//           "Lambda", "izrazi", "su", "korisni"]
+
+// Dobivanje svih kolegija svih studenata
+record Student(String name, List<String> courses) {}
+
+List<Student> students = List.of(
+new Student("Ana", List.of("Java", "Python")),
+new Student("Ivan", List.of("C++", "Java"))
+);
+
+List<String> allCourses = students.stream()
+.flatMap(student -> student.courses().stream())
+.distinct()
+.toList();
+
+// Rezultat: ["Java", "Python", "C++"]
+
+🔗 Ulančavanje operacija kod tokova
+
+Primjer ulančavanja
+Set<String> origins = album.getMusicians()
+.filter(artist -> artist.getName().startsWith("The"))
+.map(artist -> artist.getNationality())
+.collect(Collectors.toSet());
+
+Važno o ulančavanju:
+
+Prvo se izvršavaju "lazy" operacije (filter, map, flatMap...)
+Na kraju se izvršava jedna "eager" operacija (collect, forEach, reduce...)
+Lazy operacije se ne izvršavaju dok ne naiđe eager operacija!
+
+Kompleksan primjer ulančavanja (Java 17+)
+
+Realni scenarij sa zapisima
+record Proizvod(String naziv, double cijena, String kategorija) {}
+
+List<Proizvod> proizvodi = List.of(
+new Proizvod("Laptop", 5000.0, "Elektronika"),
+new Proizvod("Miš", 150.0, "Elektronika"),
+new Proizvod("Stol", 800.0, "Namještaj"),
+new Proizvod("Stolica", 600.0, "Namještaj")
+);
+
+// Pronađi sve proizvode iz kategorije "Elektronika"
+// čija je cijena veća od 1000 kn, sortiraj ih po cijeni
+// i vrati njihove nazive
+List<String> skupiElektronickiProizvodi = proizvodi.stream()
+.filter(p -> p.kategorija().equals("Elektronika"))
+.filter(p -> p.cijena() > 1000)
+.sorted(Comparator.comparing(Proizvod::cijena).reversed())
+.map(Proizvod::naziv)
+.toList();
+
+// Rezultat: ["Laptop"]
+
+🔢 Sortiranje elemenata zbirke pomoću tokova
+
+Osnovno sortiranje
+Set<Integer> numbers = new HashSet<>(Arrays.asList(4, 3, 2, 1));
+
+List<Integer> sameOrder = numbers.stream()
+.sorted()
+.collect(Collectors.toList());
+
+// Rezultat: [1, 2, 3, 4]
+
+Napredne tehnike sortiranja
+
+Sortiranje s Comparator-ima
+record Osoba(String ime, int dob) {}
+
+List<Osoba> osobe = List.of(
+new Osoba("Ana", 25),
+new Osoba("Marko", 30),
+new Osoba("Ivan", 20)
+);
+
+// Sortiranje po dobi (ascending)
+List<Osoba> sortedByAge = osobe.stream()
+.sorted(Comparator.comparing(Osoba::dob))
+.toList();
+
+// Sortiranje po dobi (descending)
+List<Osoba> sortedByAgeDesc = osobe.stream()
+.sorted(Comparator.comparing(Osoba::dob).reversed())
+.toList();
+
+// Višekriterijsko sortiranje (prvo po dobi, pa po imenu)
+List<Osoba> multiSort = osobe.stream()
+.sorted(Comparator
+.comparing(Osoba::dob)
+.thenComparing(Osoba::ime))
+.toList();
+
+// Sortiranje stringova po duljini
+List<String> words = List.of("Java", "Python", "C", "JavaScript");
+List<String> sortedByLength = words.stream()
+.sorted(Comparator.comparing(String::length))
+.toList();
+
+🎯 Primjeri korištenja referenci za metode
+
+Što su reference za metode (Method References)?
+Kratki zapis lambda izraza koji samo poziva postojeću metodu
+
+Tipovi referenci za metode
+
+1. Statička metoda klase
+// Lambda izraz
+list.forEach(x -> System.out.println(x));
+
+// Method reference
+list.forEach(System.out::println);
+
+2. Metoda instance objekta
+// Lambda izraz
+list.stream().map(s -> s.toUpperCase());
+
+// Method reference
+list.stream().map(String::toUpperCase);
+
+3. Metoda konkretne instance
+String prefix = "Hello ";
+
+// Lambda izraz
+list.stream().map(s -> prefix.concat(s));
+
+// Method reference
+list.stream().map(prefix::concat);
+
+4. Konstruktor
+// Lambda izraz
+list.stream().map(s -> new StringBuilder(s));
+
+// Method reference
+list.stream().map(StringBuilder::new);
+
+⚡ Korištenje paralelizma
+
+Zašto paralelizam?
+
+Maksimalno iskorištavanje višejezgrenog procesora
+Značajno ubrzanje kod obrade velikih količina podataka
+Jednostavna upotreba - samo poziv parallelStream()
+
+Serijski tok
+
+public int serialArraySum() {
+return albums.stream()
+.flatMap(Album::getTracks)
+.mapToInt(Track::getLength)
+.sum();
+}
+
+Paralelni tok
+
+public int parallelArraySum() {
+return albums.parallelStream()
+.flatMap(Album::getTracks)
+.mapToInt(Track::getLength)
+.sum();
+}
+
+Kada koristiti paralelne tokove?
+// ✅ DOBRO - velika količina podataka, računski intenzivne operacije
+long sum = IntStream.range(1, 10_000_000)
+.parallel()
+.map(x -> x * x)
+.sum();
+
+// ❌ LOŠE - mala količina podataka, overhead je veći od koristi
+long sum = IntStream.range(1, 100)
+.parallel()
+.sum();
+
+// ❌ LOŠE - operacije koje moraju biti sekvencijalne
+list.parallelStream()
+.forEachOrdered(System.out::println);  // Gubi smisao paralelizma!
+
+📊 Usporedba performansi sekvencijalnih i paralelnih tokova
+
+Testni scenarij:
+
+Polje od 10.000.000 long vrijednosti (od 1 do 1000)
+Računanje: count, sum, min, max, average
+Tri pristupa:
+
+Odvojeno izvođenje operacija
+Sekvencijalni tok
+Paralelni tok
+
+Sljedeći slajdovi pokazuju kompletan kod za usporedbu performansi...
+
+💻 Kod za usporedbu performansi (1/4)
+
+Inicijalizacija i odvojeno računanje
+public class StreamStatisticsComparison {
+public static void main(String[] args) {
+SecureRandom random = new SecureRandom();
+
+// Kreiranje polja random long vrijednosti
+long[] values = random.longs(10_000_000, 1, 1001).toArray();
+
+// Izvođenje računanja odvojeno
+Instant separateStart = Instant.now();
+long count = Arrays.stream(values).count();
+long sum = Arrays.stream(values).sum();
+long min = Arrays.stream(values).min().getAsLong();
+long max = Arrays.stream(values).max().getAsLong();
+double average = Arrays.stream(values).average().getAsDouble();
+Instant separateEnd = Instant.now();
+
+💻 Kod za usporedbu performansi (2/4)
+
+Ispis rezultata odvojenog računanja
+// Prikaz rezultata
+System.out.println("Calculations performed separately");
+System.out.printf("    count: %,d%n", count);
+System.out.printf("      sum: %,d%n", sum);
+System.out.printf("      min: %,d%n", min);
+System.out.printf("      max: %,d%n", max);
+System.out.printf("  average: %f%n", average);
+System.out.printf("Total time in milliseconds: %d%n%n",
+Duration.between(separateStart, separateEnd).toMillis());
+
+// Sekvencijalni tok
+LongStream stream1 = Arrays.stream(values);
+System.out.println("Calculating statistics on sequential stream");
+Instant sequentialStart = Instant.now();
+LongSummaryStatistics results1 = stream1.summaryStatistics();
+Instant sequentialEnd = Instant.now();
+
+💻 Kod za usporedbu performansi (3/4)
+
+Paralelni tok i ispis
+// Prikaz rezultata sekvencijalnog toka
+displayStatistics(results1);
+System.out.printf("Total time in milliseconds: %d%n%n",
+Duration.between(sequentialStart, sequentialEnd).toMillis());
+
+// Paralelni tok
+LongStream stream2 = Arrays.stream(values).parallel();
+System.out.println("Calculating statistics on parallel stream");
+Instant parallelStart = Instant.now();
+LongSummaryStatistics results2 = stream2.summaryStatistics();
+Instant parallelEnd = Instant.now();
+
+// Prikaz rezultata paralelnog toka
+displayStatistics(results2);
+System.out.printf("Total time in milliseconds: %d%n%n",
+Duration.between(parallelStart, parallelEnd).toMillis());
+}
+
+💻 Kod za usporedbu performansi (4/4)
+
+Helper metoda za prikaz statistike
+// Prikazuje LongSummaryStatistics vrijednosti
+private static void displayStatistics(LongSummaryStatistics stats) {
+System.out.println("Statistics");
+System.out.printf("    count: %,d%n", stats.getCount());
+System.out.printf("      sum: %,d%n", stats.getSum());
+System.out.printf("      min: %,d%n", stats.getMin());
+System.out.printf("      max: %,d%n", stats.getMax());
+System.out.printf("  average: %f%n", stats.getAverage());
+}
+} // end class StreamStatisticsComparison
+
+📈 Rezultati usporedbe performansi
+
+Pristup
+Vrijeme (ms)
+Relativno ubrzanje
+
+Odvojeno izvođenje
+188 ms
+-
+
+Sekvencijalni tok
+62 ms
+3x brže ⚡
+
+Paralelni tok
+47 ms
+4x brže ⚡⚡
+
+Potpuni ispis rezultata
+Calculations performed separately
+count: 10,000,000
+sum: 5,006,045,362
+min: 1
+max: 1,000
+average: 500.604536
+Total time in milliseconds: 188
+
+Calculating statistics on sequential stream
+Statistics
+count: 10,000,000
+sum: 5,006,045,362
+min: 1
+max: 1,000
+average: 500.604536
+Total time in milliseconds: 62
+
+Calculating statistics on parallel stream
+Statistics
+count: 10,000,000
+sum: 5,006,045,362
+min: 1
+max: 1,000
+average: 500.604536
+Total time in milliseconds: 47
+
+🚀 Dodatni moderni primjeri (Java 17-25) BONUS
+
+1. Text Blocks s Lambda izrazima (Java 15+)
+
+Formatiranje JSON-a
+List<String> names = List.of("Ana", "Ivan", "Marko");
+
+String json = names.stream()
+.map(name -> """
+{
+"name": "%s",
+"timestamp": "%s"
+}
+""".formatted(name, Instant.now()))
+.collect(Collectors.joining(","));
+
+System.out.println("[" + json + "]");
+
+2. Switch Expressions u Lambda izrazima (Java 14+)
+
+Mapiranje vrijednosti sa switch
+List<String> grades = List.of("A", "B", "C", "D", "F");
+
+List<String> descriptions = grades.stream()
+.map(grade -> switch (grade) {
+case "A" -> "Izvrstan";
+case "B" -> "Vrlo dobar";
+case "C" -> "Dobar";
+case "D" -> "Dovoljan";
+default -> "Nedovoljan";
+})
+.toList();
+
+3. Sequenced Collections (Java 21+)
+
+Pristup prvom i zadnjem elementu
+List<String> languages = List.of("Java", "Python", "C++", "JavaScript");
+
+// Novi načini pristupa prvom i zadnjem elementu
+String first = languages.getFirst();  // "Java"
+String last = languages.getLast();    // "JavaScript"
+
+// Reverzni stream
+List<String> reversed = languages.reversed().stream()
+.toList();
+
+✨ Najbolje prakse i savjeti
+
+✅ Preporučeno
+
+Koristite method references gdje god je to moguće - pregledniji je kod
+Držite lambda izraze kratkim - idealno 1-3 linije
+Koristite toList() umjesto collect(Collectors.toList()) u Java 16+
+Preferirajte var za deklaracije varijabli s lambda izrazima (Java 10+)
+Koristite Optional pravilno - izbjegavajte get() bez provjere
+
+❌ Izbjegavajte
+
+Ne koristite paralelizam bez testiranja - nije uvijek brži!
+Izbjegavajte side effects u lambda izrazima - ne mijenjajte stanje izvan lambda izraza
+Ne pretjerujte s ulančavanjem - pregledniji kod bitniji od "cool" faktora
+Ne koristite peek() za debugging - lazy operacija ne mora se izvršiti!
+
+Primjer dobre prakse
+// ✅ DOBRO
+var activeUsers = users.stream()
+.filter(User::isActive)
+.map(User::getName)
+.toList();
+
+// ❌ LOŠE - side effect
+int count = 0;
+users.stream()
+.filter(u -> u.isActive())
+.forEach(u -> count++);  // NE RADI! Kompajler error

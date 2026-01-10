@@ -1,0 +1,1508 @@
+
+Java 25
+
+📊 UML Class Dijagram
+Vozilo
+- brojPutnika: int
+- potrosnja: float
+↓
+Automobil | Zrakoplov
+- vrstaMotora: String | - rasponKrila: float
+- brojVrata: int | - sirinaTrupa: float
+
+Koncept: Osnovna nadklasa Vozilo sadrži zajedničke atribute, dok podklase dodaju specifične karakteristike
+
+Nadklasa: Vozilo
+public class Vozilo {
+
+private int brojPutnika;
+private float potrosnja;
+
+public Vozilo(int brojPutnika, float potrosnja) {
+this.brojPutnika = brojPutnika;
+this.potrosnja = potrosnja;
+}
+
+// Getteri i setteri
+public int getBrojPutnika() {
+return brojPutnika;
+}
+
+public void setBrojPutnika(int brojPutnika) {
+this.brojPutnika = brojPutnika;
+}
+
+public float getPotrosnja() {
+return potrosnja;
+}
+
+public void setPotrosnja(float potrosnja) {
+this.potrosnja = potrosnja;
+}
+}
+
+Podklasa: Automobil
+public class Automobil extends Vozilo {
+
+// Konstante za vrste motora
+public static final String VRSTA_MOTORA_BENZINSKI =
+"VRSTA_MOTORA_BENZINSKI";
+public static final String VRSTA_MOTORA_DIZEL =
+"VRSTA_MOTORA_DIZEL";
+public static final String VRSTA_MOTORA_HIBRIDNI =
+"VRSTA_MOTORA_HIBRIDNI";
+public static final String VRSTA_MOTORA_ELEKTRICNI =
+"VRSTA_MOTORA_ELEKTRICNI";
+
+private String vrstaMotora;
+private int brojVrata;
+
+public Automobil(String vrstaMotora, int brojVrata,
+int brojPutnika, float potrosnja) {
+// Poziv konstruktora nadklase
+super(brojPutnika, potrosnja);
+this.vrstaMotora = vrstaMotora;
+this.brojVrata = brojVrata;
+}
+
+// Getteri i setteri
+}
+
+Podklasa: Zrakoplov
+public class Zrakoplov extends Vozilo {
+
+private float rasponKrila;
+private float sirinaTrupa;
+
+public Zrakoplov(int brojPutnika, float potrosnja,
+float rasponKrila, float sirinaTrupa) {
+// Poziv konstruktora nadklase
+super(brojPutnika, potrosnja);
+this.rasponKrila = rasponKrila;
+this.sirinaTrupa = sirinaTrupa;
+}
+
+// Getteri i setteri
+public float getRasponKrila() {
+return rasponKrila;
+}
+
+public void setRasponKrila(float rasponKrila) {
+this.rasponKrila = rasponKrila;
+}
+
+public float getSirinaTrupa() {
+return sirinaTrupa;
+}
+
+public void setSirinaTrupa(float sirinaTrupa) {
+this.sirinaTrupa = sirinaTrupa;
+}
+}
+
+Kreiranje i usporedba vozila
+public class Main {
+public static void main(String[] args) {
+
+// Kreiranje automobila
+Automobil mojAuto = new Automobil(
+Automobil.VRSTA_MOTORA_DIZEL,
+5,      // broj vrata
+4,      // broj putnika
+6.7f    // potrošnja
+);
+
+// Kreiranje zrakoplova
+Zrakoplov avion = new Zrakoplov(
+400,        // broj putnika
+234234,     // potrošnja
+102,        // raspon krila
+36          // širina trupa
+);
+
+// Usporedba
+if (mojAuto.getBrojPutnika() > avion.getBrojPutnika()) {
+System.out.println("Ovo je jako veliki auto!!!");
+} else {
+System.out.println("Avion je mnogo veći!!!");
+}
+}
+}
+
+🎸 Primjer polimorfizma - Instrumenti
+
+📊 UML Class Dijagram
+Instrument (abstract)
+- vrstaInstrumenta: int
++ odsvirajNotu(): void (abstract)
+↓
+Gitara | Flauta | Bubanj | Klavir | RitamMasina
+
+Polimorfizam: Ista metoda (odsvirajNotu()), različite implementacije za svaki instrument!
+
+Apstraktna klasa: Instrument
+public abstract class Instrument {
+
+// Konstante za vrste instrumenata
+public static final int VRSTA_INSTRUMENTA_PUHACKI = 1;
+public static final int VRSTA_INSTRUMENTA_UDARALJKE = 2;
+public static final int VRSTA_INSTRUMENTA_ZICANI = 3;
+public static final int VRSTA_INSTRUMENTA_ELEKTRONICKI = 4;
+public static final int VRSTA_INSTRUMENTA_KLAVIJATURE = 5;
+
+private int vrstaInstrumenta;
+
+// Getter i setter
+public int getVrstaInstrumenta() {
+return vrstaInstrumenta;
+}
+
+public void setVrstaInstrumenta(int vrstaInstrumenta) {
+this.vrstaInstrumenta = vrstaInstrumenta;
+}
+
+// Apstraktna metoda - MORA se implementirati u podklasama
+public abstract void odsvirajNotu();
+}
+
+Konkretna klasa: Gitara
+public class Gitara extends Instrument {
+
+public Gitara() {
+setVrstaInstrumenta(VRSTA_INSTRUMENTA_ZICANI);
+}
+
+@Override
+public void odsvirajNotu() {
+System.out.println("🎸 Nota odsvirana gitarom!");
+}
+}
+
+✅ Implementacija: Svaka podklasa implementira odsvirajNotu() na svoj način
+
+Konkretna klasa: Flauta
+public class Flauta extends Instrument {
+
+public Flauta() {
+setVrstaInstrumenta(VRSTA_INSTRUMENTA_PUHACKI);
+}
+
+@Override
+public void odsvirajNotu() {
+System.out.println("🎵 Nota odsvirana flautom!");
+}
+}
+
+Konkretna klasa: Bubanj
+public class Bubanj extends Instrument {
+
+public Bubanj() {
+setVrstaInstrumenta(VRSTA_INSTRUMENTA_UDARALJKE);
+}
+
+@Override
+public void odsvirajNotu() {
+System.out.println("🥁 Ritam odsviran bubnjem!");
+}
+}
+
+Konkretna klasa: Klavir
+public class Klavir extends Instrument {
+
+public Klavir() {
+setVrstaInstrumenta(VRSTA_INSTRUMENTA_KLAVIJATURE);
+}
+
+@Override
+public void odsvirajNotu() {
+System.out.println("🎹 Nota odsvirana klavirom!");
+}
+}
+
+Konkretna klasa: RitamMasina
+public class RitamMasina extends Instrument {
+
+public RitamMasina() {
+setVrstaInstrumenta(VRSTA_INSTRUMENTA_ELEKTRONICKI);
+}
+
+@Override
+public void odsvirajNotu() {
+System.out.println("🎛️ Ritam odsviran ritam-mašinom!");
+}
+}
+
+Popunjavanje polja random instrumentima
+private static Instrument[] popuniPoljeRandomInstrumentima(
+Instrument[] instrumenti) {
+
+Random random = new Random();
+
+for (int i = 0; i < BROJ_INSTRUMENATA; i++) {
+switch (random.nextInt(5)) {
+case 0:
+instrumenti[i] = new Flauta();
+break;
+case 1:
+instrumenti[i] = new Bubanj();
+break;
+case 2:
+instrumenti[i] = new Gitara();
+break;
+case 3:
+instrumenti[i] = new Klavir();
+break;
+case 4:
+instrumenti[i] = new RitamMasina();
+break;
+}
+}
+
+return instrumenti;
+}
+
+Polimorfizam u akciji!
+public class Main {
+
+public static final int BROJ_INSTRUMENATA = 10;
+
+public static void main(String[] args) {
+
+// Kreiranje polja instrumenata
+Instrument[] instrumenti = new Instrument[BROJ_INSTRUMENATA];
+
+// Popunjavanje polja random instrumentima
+instrumenti = popuniPoljeRandomInstrumentima(instrumenti);
+
+// Polimorfizam - pozivamo istu metodu na različitim objektima
+for (int i = 0; i < BROJ_INSTRUMENATA; i++) {
+instrumenti[i].odsvirajNotu();
+System.out.println(instrumenti[i].toString());
+}
+}
+}
+
+🎯 Ključ: Tipovi se određuju tijekom izvođenja - ne moramo znati točan tip prilikom kompajliranja!
+
+Primjer izvršavanja
+
+🎸 Nota odsvirana gitarom!
+🎵 Nota odsvirana flautom!
+🎛️ Ritam odsviran ritam-mašinom!
+🎸 Nota odsvirana gitarom!
+🥁 Ritam odsviran bubnjem!
+🎸 Nota odsvirana gitarom!
+🎸 Nota odsvirana gitarom!
+🎵 Nota odsvirana flautom!
+🥁 Ritam odsviran bubnjem!
+🎵 Nota odsvirana flautom!
+
+💡 Objašnjenje: Svaki put se poziva različita implementacija metode odsvirajNotu() ovisno o stvarnom tipu objekta!
+
+⚡ Primjer sučelja: Elektricno
+
+Sučelja omogućavaju dodavanje dodatnih svojstava klasama
+
+public interface Elektricno {
+
+void ukljuci();
+void iskljuci();
+
+}
+
+Koncept: Električni instrumenti mogu se uključivati i isključivati - dodajemo im to svojstvo putem sučelja
+
+Implementacija sučelja
+public class RitamMasina extends Instrument
+implements Elektricno {
+
+private boolean ukljuceno;
+
+public RitamMasina() {
+setVrstaInstrumenta(VRSTA_INSTRUMENTA_ELEKTRONICKI);
+ukljuceno = false;
+}
+
+@Override
+public void odsvirajNotu() {
+if (ukljuceno) {
+System.out.println("🎛️ Ritam odsviran ritam-mašinom!");
+} else {
+System.out.println("⚠️ Ritam mašina je isključena!!!");
+}
+}
+
+@Override
+public void ukljuci() {
+ukljuceno = true;
+System.out.println("✅ Ritam mašina uključena!");
+}
+
+@Override
+public void iskljuci() {
+ukljuceno = false;
+System.out.println("❌ Ritam mašina isključena!");
+}
+}
+
+🎸 Nadjačavanje u višim razinama
+
+Klase mogu nasljeđivati i druge podklase, ne samo nadklase!
+
+// Gitara već nasljeđuje Instrument
+public class Gitara extends Instrument {
+
+@Override
+public void odsvirajNotu() {
+System.out.println("🎸 Nota odsvirana gitarom!");
+}
+}
+
+// BasGitara nasljeđuje Gitaru i dalje nadjačava metodu
+public class BasGitara extends Gitara {
+
+@Override
+public void odsvirajNotu() {
+System.out.println("🎸🔊 Nota odsvirana bas gitarom!");
+}
+}
+
+🌳 Hijerarhija: Instrument → Gitara → BasGitara
+
+📝 Metoda toString()
+
+Metoda toString() iz klase Object omogućava definiranje kako će se objekt prikazati kao String
+
+Defaultna implementacija
+// Bez nadjačavanja
+Flauta flauta = new Flauta();
+System.out.println(flauta);
+
+// Output:
+// polimorfizam.Flauta@f62373
+❌ Nije informativno!
+
+Nadjačana implementacija
+@Override
+public String toString() {
+return "Flauta je vrsta " +
+"instrumenta pod rednim " +
+"brojem " +
+getVrstaInstrumenta();
+}
+
+// Output:
+// Flauta je vrsta instrumenta
+// pod rednim brojem 1
+✅ Informativno i čitljivo!
+
+🔄 Sortiranje s lambda funkcijama
+
+Sučelje Comparator:
+
+Samo jedna apstraktna metoda: compare(T o1, T o2)
+Vraća rezultat usporedbe:
+
+Negativan broj
+Prvi argument je manji od drugog
+
+0 (nula)
+Argumenti su jednaki
+
+Pozitivan broj
+Prvi argument je veći od drugog
+
+💡 Klasa Arrays: Statičke metode za rad s poljima, uključujući sort()
+
+Lambda izraz za sortiranje
+import java.util.Arrays;
+
+public class Test {
+public static void main(String[] args) {
+
+// Polje stringova
+String[] prezimena = new String[5];
+prezimena[0] = "Ivanić";
+prezimena[1] = "Žarnić";
+prezimena[2] = "Anić";
+prezimena[3] = "Perić";
+prezimena[4] = "Horvat";
+
+// Sortiranje s lambda izrazom
+Arrays.sort(prezimena, (p1, p2) -> p1.compareTo(p2));
+
+// Ispis sortiranog polja
+System.out.println(Arrays.toString(prezimena));
+// Output: [Anić, Horvat, Ivanić, Perić, Žarnić]
+}
+}
+
+✨ Lambda izraz: (p1, p2) -> p1.compareTo(p2) zamjenjuje cijelu anonimnu klasu!
+
+🔍 Operator instanceof
+
+Operator instanceof provjerava je li objekt instanca određene klase
+
+public class Main {
+public static void main(String[] args) {
+
+Osoba[] osobe = new Osoba[5];
+osobe[0] = new Zaposlenik("Horvat", "Ivan");
+osobe[1] = new Klijent("Anić", "Ana");
+osobe[2] = new Zaposlenik("Perić", "Petra");
+// ...
+
+for (Osoba osoba : osobe) {
+System.out.println("Prezime i ime: " +
+osoba.getPrezime() + " " +
+osoba.getIme());
+
+// Provjera tipa objekta
+boolean isZaposlenik = osoba instanceof Zaposlenik;
+
+if (isZaposlenik) {
+System.out.println("✅ Osoba je zaposlenik");
+} else {
+System.out.println("👤 Osoba je klijent");
+}
+}
+}
+}
+
+✨ Java 16+: Pattern Matching
+
+Novost: Pattern matching za instanceof - automatsko castanje!
+
+Stari način (do Java 15)
+if (animal instanceof Cat) {
+// Moramo ručno castati
+Cat cat = (Cat) animal;
+return cat.meow();
+}
+
+Novi način (Java 16+)
+// Automatski cast u varijablu 'cat'
+if (animal instanceof Cat cat) {
+return cat.meow();
+}
+
+🎯 Prednosti: Kraći kod, manje grešaka, bolja čitljivost!
+
+Pattern Matching - Napredni primjer
+public class InstrumentProcessor {
+
+public static void obradiInstrument(Instrument instrument) {
+
+// Pattern matching s automatskim castanjem
+if (instrument instanceof Gitara gitara) {
+System.out.println("🎸 Žičani instrument");
+gitara.odsvirajNotu();
+}
+else if (instrument instanceof RitamMasina masina) {
+System.out.println("🎛️ Elektronički instrument");
+masina.ukljuci();
+masina.odsvirajNotu();
+masina.iskljuci();
+}
+else if (instrument instanceof Bubanj bubanj) {
+System.out.println("🥁 Udaraljka");
+bubanj.odsvirajNotu();
+}
+else {
+System.out.println("🎵 Ostali instrument");
+instrument.odsvirajNotu();
+}
+}
+}
+
+🏗️ Builder Pattern
+
+Problem: Konstruktori s puno parametara, od kojih neki mogu biti null
+
+Loša praksa:
+// Previše parametara, nije jasno što je što
+Student student = new Student(
+"12345678910",  // OIB
+"Horvat",       // prezime
+"Ivan",         // ime
+null,           // email - nije dostupan
+null,           // telefon - nije dostupan
+"Zagreb",       // grad
+4.5             // prosjek
+);
+
+💡 Rješenje: Builder Pattern - postavljamo samo dostupne parametre!
+
+Builder Pattern - Implementacija (1/3)
+public class Student {
+
+private final String oib;
+private final String prezime;
+private final String ime;
+private final String email;
+private final String telefon;
+private final String grad;
+private final double prosjek;
+
+// Privatni konstruktor - poziva ga samo Builder
+private Student(StudentBuilder builder) {
+this.oib = builder.oib;
+this.prezime = builder.prezime;
+this.ime = builder.ime;
+this.email = builder.email;
+this.telefon = builder.telefon;
+this.grad = builder.grad;
+this.prosjek = builder.prosjek;
+}
+
+// Getteri...
+public String getOib() { return oib; }
+public String getPrezime() { return prezime; }
+// ...
+}
+
+Builder Pattern - Implementacija (2/3)
+// Statička ugniježđena klasa Builder
+public static class StudentBuilder {
+
+// Obavezni parametri
+private final String oib;
+private final String prezime;
+private final String ime;
+
+// Opcionalni parametri - defaultne vrijednosti
+private String email = "";
+private String telefon = "";
+private String grad = "";
+private double prosjek = 0.0;
+
+// Konstruktor sa obaveznim parametrima
+public StudentBuilder(String oib, String prezime, String ime) {
+this.oib = oib;
+this.prezime = prezime;
+this.ime = ime;
+}
+
+// Metode za postavljanje opcionalnih parametara
+public StudentBuilder email(String email) {
+this.email = email;
+return this;
+}
+// ...nastavlja se na sljedećem slajdu
+}
+
+Builder Pattern - Implementacija (3/3)
+// Nastavak Builder klase...
+
+public StudentBuilder telefon(String telefon) {
+this.telefon = telefon;
+return this;
+}
+
+public StudentBuilder grad(String grad) {
+this.grad = grad;
+return this;
+}
+
+public StudentBuilder prosjek(double prosjek) {
+this.prosjek = prosjek;
+return this;
+}
+
+// Build metoda - kreira finalni objekt
+public Student build() {
+return new Student(this);
+}
+}
+
+Builder Pattern - Korištenje
+public class Main {
+public static void main(String[] args) {
+
+// Kreiranje studenta s SVIM podacima
+Student student1 = new Student.StudentBuilder(
+"12345678910", "Horvat", "Ivan"
+)
+.email("ivan.horvat@foi.hr")
+.telefon("098-123-4567")
+.grad("Zagreb")
+.prosjek(4.5)
+.build();
+
+// Kreiranje studenta sa SAMO OBAVEZNIM podacima
+Student student2 = new Student.StudentBuilder(
+"10987654321", "Anić", "Ana"
+)
+.prosjek(4.8)
+.build();
+
+System.out.println("Student 1: " + student1.getIme());
+System.out.println("Student 2: " + student2.getIme());
+}
+}
+
+Builder Pattern - Prednosti
+
+✅ Prednosti
+
+Čitljiviji kod
+Nema null parametara
+Immutable objekti
+Fleksibilnost pri kreiranju
+Lakša validacija
+
+💡 Kada koristiti
+
+Klase s >4 parametra
+Mnogo opcionalnih parametara
+Kompleksno kreiranje objekta
+Potreba za immutability
+
+🎯 Moderne alternative: Java Records (Java 14+) mogu zamijeniti Builder Pattern u jednostavnijim slučajevima
+
+📊 Usporedba: Tradicionalno vs. Builder
+
+❌ Tradicionalni konstruktor
+// Teško čitljivo
+Student s = new Student(
+"123",
+"Horvat",
+"Ivan",
+null,  // email?
+null,  // telefon?
+"Zagreb",
+4.5
+);
+
+// Što je što?!
+
+✅ Builder Pattern
+// Jasno i čitljivo
+Student s = new Student
+.StudentBuilder(
+"123",
+"Horvat",
+"Ivan"
+)
+.grad("Zagreb")
+.prosjek(4.5)
+.build();
+
+📚 Rekapitulacija
+
+Što smo naučili danas:
+
+✅ Praktične primjere nasljeđivanja (Vozilo, Instrumenti)
+✅ Polimorfizam u akciji
+✅ Implementaciju i korištenje sučelja
+✅ Nadjačavanje metoda u hijerarhiji
+✅ toString() metodu
+✅ Sortiranje s lambda izrazima
+✅ Pattern matching za instanceof (Java 16+)
+✅ Builder Pattern za elegantno kreiranje objekata
+
+✅ OOP Best Practices
+
+Uvijek koristite:
+
+@Override anotaciju
+toString() za debugging
+Pattern matching umjesto castanja
+Lambda izraze za jednostavniji kod
+Builder za kompleksne objekte
+
+Izbjegavajte:
+
+Duboke hijerarhije (>3 razine)
+Castanje bez instanceof
+Previše parametara u konstruktoru
+Null parametri
+
+Java 25
+OOP
+Design Patterns
+
+📋 Sadržaj prezentacije
+
+Osnovni koncepti
+
+Nasljeđivanje među klasama
+Nadklase i podklase
+Modifikator protected
+Ključna riječ super
+Konstruktori u podklasama
+
+Napredne značajke
+
+Polimorfizam
+Apstraktne klase
+Sučelja (Interfaces)
+Lambda izrazi (Java 8+)
+Records i Sealed klase
+
+🧬 Nasljeđivanje među klasama
+
+Nasljeđivanje omogućava kreiranje novih klasa koje koriste članove već postojećih klasa
+
+Ključni pojmovi:
+
+Nadklasa (superclass) - postojeća klasa
+Podklasa (subclass) - nova klasa koja nasljeđuje
+Podklasa dodaje nove značajke i modificira ponašanje nadklase
+Sve klase u Javi nasljeđuju java.lang.Object
+
+⚠️ Važno: Java podržava samo jednostruko nasljeđivanje - svaka klasa može nasljeđivati samo jednu nadklasu!
+
+Primjer nasljeđivanja
+// Nadklasa - općenita klasa
+public class BankovniKredit {
+protected double iznos;
+protected double kamatnaStopa;
+protected int rokOtplate;
+
+public double izracunajMjesecnuRatu() {
+// Osnovna formula za izračun rate
+return iznos * (1 + kamatnaStopa) / rokOtplate;
+}
+}
+
+// Podklasa - specifičnija implementacija
+public class KreditZaAuto extends BankovniKredit {
+private String markaAutomobila;
+private int godinaProizvodnje;
+
+@Override
+public double izracunajMjesecnuRatu() {
+// Poseban izračun za auto kredite
+double osnovnaRata = super.izracunajMjesecnuRatu();
+return osnovnaRata * 0.95; // 5% popusta
+}
+}
+
+👥 Nadklase i podklase - Primjeri
+
+Nadklasa
+Podklase
+
+Student
+Apsolvent, DodiplomskiStudent, PostdiplomskiStudent
+
+Oblik
+Krug, Trokut, Pravokutnik, Kugla, Kocka
+
+BankovniKredit
+KreditZaAuto, HipotekarniKredit, GotovinsKredit
+
+Zaposlenik
+NastavnickoOsoblje, PomocnoOsoblje, Administrator
+
+BankovniRacun
+TekuciRacun, Ziroracun, StedniRacun
+
+💡 Pravilo: Podklasa "JE" vrsta nadklase (npr. Student JE ClanZajednice)
+
+🌳 Hijerarhija nasljeđivanja
+
+Odnosi između klasa prikazuju se UML Class dijagramima
+
+📊 UML Dijagram: ClanZajednice → Student → Apsolvent
+📊 ClanZajednice → Zaposlenik → NastavnickoOsoblje → Profesor
+
+"JE" veza (is-a)
+Student JE ClanZajednice
+Profesor JE Zaposlenik
+
+"IMA" veza (has-a)
+Knjiga IMA Autora
+Zaposlenik IMA DatumRodjenja
+
+🔐 Modifikatori pristupa
+
+Modifikator
+Pristup
+
+public
+Dostupno svugdje
+
+protected
+Dostupno u podklasama i istom paketu
+
+private
+Dostupno samo unutar klase
+
+(bez modifikatora)
+Package-private - samo isti paket
+
+💡 Best practice: Koristite protected za članove koje podklase trebaju moći mijenjati!
+
+⬆️ Ključna riječ super
+
+Korištenje:
+
+super - referenca na nadklasu
+this - referenca na trenutnu klasu
+
+public class DvodimenzionalniOblik {
+protected double visina;
+protected double sirina;
+
+public DvodimenzionalniOblik(double v, double s) {
+this.visina = v;
+this.sirina = s;
+}
+}
+
+public class Pravokutnik extends DvodimenzionalniOblik {
+
+public Pravokutnik(double v, double s) {
+// Poziv konstruktora nadklase
+super(v, s);
+}
+
+public double getVisina() {
+// Pristup varijabli nadklase
+return super.visina;
+}
+}
+
+🏗️ Konstruktori u podklasamas
+
+⚠️ Važno pravilo: Prva naredba svakog konstruktora podklase je super()
+
+public class Zaposlenik {
+private String ime;
+
+public Zaposlenik(String ime) {
+this.ime = ime;
+}
+}
+
+public class Profesor extends Zaposlenik {
+private String katedra;
+
+public Profesor(String ime, String katedra) {
+// MORA biti prva naredba!
+super(ime);
+this.katedra = katedra;
+}
+}
+
+Konstruktori se pozivaju ulančano - od nadklase prema podklasi
+
+🔄 Nadjačavanje metoda (@Override)
+public class DvodimenzionalniOblik {
+private double visina;
+private double sirina;
+
+public double izracunajPovrsinu() {
+return visina * sirina;
+}
+}
+
+public class Krug extends DvodimenzionalniOblik {
+private double polumjer;
+
+// Anotacija označava nadjačavanje
+@Override
+public double izracunajPovrsinu() {
+return Math.PI * Math.pow(polumjer, 2);
+}
+}
+
+✅ Prednosti @Override: Kompajler provjerava da li pravilno nadjačavate metodu i javlja grešku ako nije!
+
+🔷 Klasa java.lang.Object
+
+Sve klase u Javi nasljeđuju Object - "majka svih klasa"
+
+Metoda
+Opis
+
+equals()
+Usporedba objekata (preporučeno nadjačati!)
+
+hashCode()
+Hash vrijednost objekta (za kolekcije)
+
+toString()
+String reprezentacija objekta
+
+clone()
+Kopiranje objekta
+
+wait(), notify()
+Rad s nitima i sinkronizacija
+
+Nadjačavanje equals() i hashCode()
+public class Student {
+private String oib;
+private String ime;
+
+@Override
+public boolean equals(Object obj) {
+if (this == obj) return true;
+if (obj == null || getClass() != obj.getClass())
+return false;
+Student student = (Student) obj;
+return Objects.equals(oib, student.oib);
+}
+
+@Override
+public int hashCode() {
+return Objects.hash(oib);
+}
+
+@Override
+public String toString() {
+return "Student{oib='" + oib + "', ime='" + ime + "'}";
+}
+}
+
+💡 Pravilo: Ako nadjačate equals(), morate nadjačati i hashCode()!
+
+🎭 Polimorfizam
+
+Polimorfizam = "Mnogo oblika" - ista metoda, različito ponašanje
+
+Prednosti polimorfizma:
+
+✅ Općenito programiranje umjesto specifičnog
+✅ Lakše proširivanje sustava
+✅ Tipovi se određuju tijekom izvođenja
+✅ Fleksibilniji kod
+
+// Polje različitih oblika
+Oblik[] oblici = new Oblik[3];
+oblici[0] = new Krug(5.0);
+oblici[1] = new Pravokutnik(4.0, 6.0);
+oblici[2] = new Trokut(3.0, 4.0, 5.0);
+
+// Polimorfizam - različite implementacije
+for (Oblik oblik : oblici) {
+System.out.println("Površina: " + oblik.izracunajPovrsinu());
+}
+
+🔄 Casting objekata
+// Upcasting (implicitno)
+Oblik oblik = new Krug(5.0);  // Automatski
+
+// Downcasting (eksplicitno - opasno!)
+Krug krug = (Krug) oblik;
+krug.setPolumjer(10.0);
+
+// Sigurna provjera prije castinga
+if (oblik instanceof Krug) {
+Krug k = (Krug) oblik;
+System.out.println("Polumjer: " + k.getPolumjer());
+}
+
+// Java 16+ - Pattern matching
+if (oblik instanceof Krug k) {
+// Varijabla 'k' je automatski dostupna!
+System.out.println("Polumjer: " + k.getPolumjer());
+}
+
+✨ Java 16+: Pattern matching za instanceof - kraći i čitljiviji kod!
+
+🎨 Apstraktne klase
+
+⚠️ Važno: Iz apstraktnih klasa nije moguće kreirati objekte!
+
+public abstract class Oblik {
+protected String naziv;
+
+// Obična metoda s implementacijom
+public String getNaziv() {
+return naziv;
+}
+
+// Apstraktna metoda - BEZ implementacije
+public abstract double izracunajPovrsinu();
+public abstract double izracunajOpseg();
+}
+
+public class Krug extends Oblik {
+private double polumjer;
+
+// MORA implementirati sve apstraktne metode
+@Override
+public double izracunajPovrsinu() {
+return Math.PI * polumjer * polumjer;
+}
+
+@Override
+public double izracunajOpseg() {
+return 2 * Math.PI * polumjer;
+}
+}
+
+Apstraktne klase - Pravila
+
+✅ Ključna pravila:
+
+Označava se ključnom riječju abstract
+Može sadržavati i obične i apstraktne metode
+Ako ima barem jednu apstraktnu metodu → klasa MORA biti apstraktna
+Podklase MORAJU implementirati sve apstraktne metode
+Ako podklasa ne implementira sve → i ona mora biti apstraktna
+Mogu imati vlastiti konstruktor
+
+💡 Kada koristiti: Kada želite definirati zajedničko ponašanje, ali implementacija ovisi o konkretnom tipu objekta
+
+🔒 Ključna riječ final
+
+Final klase
+// Sprječava nasljeđivanje
+public final class String {
+// ...
+}
+
+// GREŠKA - ne može se naslijediti!
+public class MyString
+extends String {
+}
+
+Final metode
+public class Osoba {
+// Sprječava nadjačavanje
+public final String getOIB() {
+return oib;
+}
+}
+
+// GREŠKA!
+@Override
+public String getOIB() {
+// ...
+}
+
+Final varijable (konstante)
+public static final double PI = 3.14159265359;
+public static final String NAZIV_DRZAVE = "Hrvatska";
+private final int MAX_STUDENTS = 100;  // Ne može se mijenjati
+
+📋 Definiranje sučelja (Interfaces)
+
+Sučelja definiraju "ugovor" - koje metode klasa mora implementirati
+
+// Definiranje sučelja
+public interface Elektricno {
+// Konstantne vrijednosti (public static final)
+int MAX_NAPON = 230;
+
+// Apstraktne metode (public abstract)
+void ukljuci();
+void iskljuci();
+boolean jeUkljuceno();
+}
+
+// Implementiranje sučelja
+public class ElektricnaGitara extends Gitara
+implements Elektricno {
+
+private boolean ukljucena;
+
+@Override
+public void ukljuci() {
+ukljucena = true;
+System.out.println("Gitara uključena!");
+}
+
+@Override
+public void iskljuci() {
+ukljucena = false;
+}
+
+@Override
+public boolean jeUkljuceno() {
+return ukljucena;
+}
+}
+
+🔗 Višestruka implementacija sučelja
+
+✨ Ključna razlika: Klasa može implementirati više sučelja, ali naslijediti samo jednu klasu!
+
+public interface Plivajuce {
+void pliva();
+}
+
+public interface Letece {
+void leti();
+}
+
+public interface Trkace {
+void trci();
+}
+
+// Implementira VIŠE sučelja!
+public class Patka extends Zivotinja
+implements Plivajuce, Letece, Trkace {
+
+@Override
+public void pliva() {
+System.out.println("Patka pliva!");
+}
+
+@Override
+public void leti() {
+System.out.println("Patka leti!");
+}
+
+@Override
+public void trci() {
+System.out.println("Patka trči!");
+}
+}
+
+✨ Java 8: Default metode u sučeljima
+
+Novost u Java 8: Sučelja mogu imati metode s implementacijom!
+
+public interface PracenjeVremena {
+
+// Default metoda - ima implementaciju
+default String dohvatiDatumVrijeme() {
+LocalDateTime now = LocalDateTime.now();
+return now.format(
+DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm:ss")
+);
+}
+
+// Apstraktna metoda
+void zabiljeziAktivnost(String opis);
+}
+
+public class Zadatak implements PracenjeVremena {
+
+// Može koristiti default implementaciju
+public void ispisi() {
+System.out.println("Vrijeme: " + dohvatiDatumVrijeme());
+}
+
+// ILI nadjačati default metodu
+@Override
+public String dohvatiDatumVrijeme() {
+return "Custom format...";
+}
+
+@Override
+public void zabiljeziAktivnost(String opis) {
+// Implementacija...
+}
+}
+
+Java 8: Statičke metode u sučeljima
+public interface Provjera {
+
+// Statička metoda u sučelju
+static boolean provjeriPrazanString(String tekst) {
+return tekst == null || tekst.isEmpty();
+}
+
+static boolean provjeriEmail(String email) {
+return email != null && email.contains("@");
+}
+}
+
+// Korištenje - direktno iz sučelja!
+public class Main {
+public static void main(String[] args) {
+String ime = "";
+
+// Poziv statičke metode iz sučelja
+if (Provjera.provjeriPrazanString(ime)) {
+System.out.println("Ime je prazno!");
+}
+
+String email = "student@foi.hr";
+if (Provjera.provjeriEmail(email)) {
+System.out.println("Email je valjan!");
+}
+}
+}
+
+🚀 Java 8: Lambda izrazi
+
+Lambda izrazi = skraćena sintaksa za anonimne metode
+
+Stari način
+// Anonimna klasa
+Comparator comp =
+new Comparator() {
+@Override
+public int compare(String s1,
+String s2) {
+return s1.length() -
+s2.length();
+}
+};
+
+Lambda način
+// Lambda izraz
+Comparator comp =
+(s1, s2) ->
+s1.length() - s2.length();
+
+// Još kraće!
+Comparator comp2 =
+Comparator.comparingInt(
+String::length
+);
+
+Sintaksa: (parametri) -> { tijelo }
+
+Funkcionalna sučelja i Lambda
+// Funkcionalno sučelje - samo JEDNA apstraktna metoda
+@FunctionalInterface
+public interface Kalkulator {
+int izracunaj(int a, int b);
+}
+
+public class Main {
+public static void main(String[] args) {
+// Lambda izrazi za različite operacije
+Kalkulator zbroj = (a, b) -> a + b;
+Kalkulator razlika = (a, b) -> a - b;
+Kalkulator umnozak = (a, b) -> a * b;
+Kalkulator dijeljenje = (a, b) -> a / b;
+
+System.out.println("Zbroj: " + zbroj.izracunaj(10, 5));
+System.out.println("Razlika: " + razlika.izracunaj(10, 5));
+System.out.println("Umnožak: " + umnozak.izracunaj(10, 5));
+
+// Primjena na liste
+List brojevi = Arrays.asList(1, 2, 3, 4, 5);
+brojevi.forEach(broj -> System.out.println(broj * 2));
+}
+}
+
+✨ Java 9: Privatne metode u sučeljima
+public interface Sucelje {
+
+// Privatna metoda - može koristiti samo interno
+private void test() {
+System.out.println("Privatna metoda");
+}
+
+// Statička metoda
+public static void test2() {
+System.out.println("Javna statička metoda");
+}
+
+// Default metoda koja poziva privatnu
+public default void test3() {
+test();  // Poziv privatne metode
+System.out.println("Default metoda");
+}
+}
+
+💡 Svrha: Privatne metode omogućavaju dijeljenje koda među default metodama bez da ih izlažu van sučelja
+
+🎯 Java 14: Records
+
+Records = kompaktni, nepromjenjivi (immutable) nositelji podataka
+
+Stari način
+public class Person {
+private final String name;
+private final String address;
+
+public Person(String name,
+String address) {
+this.name = name;
+this.address = address;
+}
+
+public String getName() {
+return name;
+}
+
+public String getAddress() {
+return address;
+}
+
+// + equals, hashCode,
+// toString...
+}
+
+Records način
+// Automatski generira:
+// - konstruktor
+// - getters
+// - equals()
+// - hashCode()
+// - toString()
+public record Person(
+String name,
+String address
+) {}
+
+// Korištenje
+Person p = new Person(
+"Ana",
+"Zagreb"
+);
+System.out.println(
+p.name()
+);
+
+✨ Prednosti: Manje koda, thread-safe, savršeno za DTO objekte!
+
+Records - Dodatne mogućnosti
+public record Student(
+String oib,
+String ime,
+String prezime,
+double prosjek
+) {
+// Kompaktni konstruktor - validacija
+public Student {
+if (oib == null || oib.length() != 11) {
+throw new IllegalArgumentException("Neispravan OIB!");
+}
+if (prosjek < 1.0 || prosjek > 5.0) {
+throw new IllegalArgumentException("Prosjek mora biti 1-5!");
+}
+}
+
+// Dodatne metode
+public String punoIme() {
+return ime + " " + prezime;
+}
+
+public boolean jeDobitan() {
+return prosjek >= 4.0;
+}
+
+// Statičke metode
+public static Student kreirajDefault() {
+return new Student("00000000000", "N/A", "N/A", 2.0);
+}
+}
+
+🔐 Java 17: Sealed klase i sučelja
+
+Sealed klase omogućavaju kontrolu koje klase mogu nasljeđivati/implementirati
+
+// Sealed sučelje - SAMO Car i Truck mogu implementirati!
+public sealed interface Service
+permits Car, Truck {
+
+int getMaxServiceIntervalInMonths();
+
+default int getMaxDistanceBetweenServicesInKilometers() {
+return 100000;
+}
+}
+
+// Sealed apstraktna klasa
+public abstract sealed class Vehicle
+permits Car, Truck {
+
+protected final String registrationNumber;
+
+public Vehicle(String registrationNumber) {
+this.registrationNumber = registrationNumber;
+}
+
+public String getRegistrationNumber() {
+return registrationNumber;
+}
+}
+
+Sealed klase - Implementacija
+
+Final implementacija
+// FINAL - ne može se dalje
+// nasljeđivati
+public final class Truck
+extends Vehicle
+implements Service {
+
+private final int loadCapacity;
+
+public Truck(int load,
+String regNum) {
+super(regNum);
+this.loadCapacity = load;
+}
+
+@Override
+public int
+getMaxServiceIntervalInMonths() {
+return 18;
+}
+}
+
+Non-sealed implementacija
+// NON-SEALED - može se dalje
+// nasljeđivati
+public non-sealed class Car
+extends Vehicle
+implements Service {
+
+private final int numberOfSeats;
+
+public Car(int seats,
+String regNum) {
+super(regNum);
+this.numberOfSeats = seats;
+}
+
+@Override
+public int
+getMaxServiceIntervalInMonths() {
+return 12;
+}
+}
+
+💡 Koristi: Bolja kontrola nad hijerarhijom, sigurnija API dizajna, pattern matching
+
+📊 Usporedba OOP koncepata
+
+Koncept
+Kada koristiti
+Primjer
+
+Apstraktna klasa
+Zajednička implementacija + apstraktne metode
+Oblik, Zivotinja
+
+Interface
+Ugovor bez implementacije, višestruka impl.
+Comparable, Serializable
+
+Record
+Nepromjenjivi nositelji podataka (DTO)
+Person, Student
+
+Sealed class
+Kontrolirana hijerarhija
+Vehicle, Shape
+
+Final class
+Sprječavanje nasljeđivanja
+String, Math
+
+✅ OOP Best Practices
+
+DO ✅
+
+Koristiti @Override anotaciju
+Nadjačati equals() i hashCode() zajedno
+Favorizirati kompoziciju nad nasljeđivanjem
+Koristiti sučelja za fleksibilnost
+Records za DTO objekte
+Sealed klase za kontroliranu hijerarhiju
+
+DON'T ❌
+
+Duboke hijerarhije nasljeđivanja
+Pretjerano korištenje nasljeđivanja
+Zaboraviti super() u konstruktoru
+Casting bez instanceof provjere
+Javne promjenjive varijable u klasama
+Zanemariti princip SRP
+
+

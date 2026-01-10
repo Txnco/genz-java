@@ -1,0 +1,726 @@
+JDBC
+Java Database Connectivity
+☕ Java 25 Edition
+
+Što su relacijske baze podataka
+JDBC arhitektura i kako radi
+H2 baza podataka
+
+💻 Praktični dio
+
+Spajanje na bazu podataka
+Pripremanje i izvršavanje upita
+Kreiranje i dohvaćanje podataka
+
+⚡ Napredne teme
+
+PreparedStatement vs Statement
+Try-with-resources pattern
+Rad s transakcijama
+
+🛡️ Best Practices
+
+Sigurno zatvaranje resursa
+Sprječavanje SQL injection napada
+Optimizacija performansi
+
+🗄️ Osnove baza podataka
+
+Relacijske baze podataka (engl. relational databases) predstavljaju organizirane zbirke podataka koje koriste tablice s redcima i stupcima za pohranu informacija.
+
+💡
+
+RDBMS sustav omogućava:
+Pouzdano upravljanje operacijama poput kreiranja tablica, spremanja, dohvaćanja, ažuriranja i brisanja podataka — sve uz održavanje konzistentnosti!
+
+Najpopularnije baze podataka
+
+🐘
+PostgreSQL
+Open source, moćna
+
+🐬
+MySQL
+Najpopularnija
+
+🔷
+MS SQL Server
+Enterprise rješenje
+
+🔶
+Oracle
+Industrijski standard
+
+🧪
+H2
+Idealna za razvoj
+
+🐦
+Apache Derby
+Embedded baza
+
+🔌 Što je JDBC?
+
+JDBC (Java Database Connectivity) je Java API koji omogućava spajanje Java aplikacija na bilo koju relacijsku bazu podataka korištenjem odgovarajućeg JDBC drivera.
+
+Tri glavne aktivnosti
+
+🔗
+1. Povezivanje
+Ostvarivanje veze s bazom podataka
+
+📝
+2. Izvršavanje
+SQL upiti za CRUD operacije
+
+🚪
+3. Zatvaranje
+Oslobađanje resursa
+
+🎯
+
+CRUD operacije
+Create (INSERT) • Read (SELECT) • Update (UPDATE) • Delete (DELETE)
+
+🏗️ JDBC arhitektura
+
+☕ Java Aplikacija
+
+📚 JDBC API
+
+🔧 JDBC Driver Manager
+
+🗄️ Oracle
+🗄️ MySQL
+🗄️ H2
+
+Kako to funkcionira?
+
+Iz Java aplikacije poziva se kod iz JDBC biblioteke
+JDBC pomoću drivera komunicira s bazom korištenjem SQL upita
+Driveri SQL pozive pretvaraju u komunikacijski protokol specifične baze
+
+📦
+
+Driver = JAR datoteka
+Svaka baza ima svoj driver koji se dodaje kao dependency u projektu.
+
+🧪 H2 baza podataka
+
+H2 je open-source relacijska baza podataka u cijelosti implementirana u Javi. Savršena je za razvoj i testiranje!
+
+✨ Prednosti
+
+🚀 Super brza — idealna za razvoj
+📦 Embedded mod — ne treba instalacija
+🌐 Server mod — za višekorisničke scenarije
+🎨 Web konzola — vizualni pregled podataka
+💾 In-memory — podaci u RAM-u
+
+📥 Instalacija
+Preuzmi s: h2database.com
+Verzija: 2.4.240 (2025)
+
+pom.xml
+
+<!-- Maven dependency -->
+<dependency>
+<groupId>com.h2database</groupId>
+<artifactId>h2</artifactId>
+<version>2.4.240</version>
+</dependency>
+
+🔗 Spajanje na bazu podataka
+
+Prvi korak je kreiranje Connection objekta koji predstavlja vezu s bazom:
+
+DatabaseConnection.java
+
+try {
+// Kreiranje veze s bazom podataka
+Connection veza = DriverManager.getConnection(
+"jdbc:h2:tcp://localhost/~/Java-2025",  // URL baze
+"student",                                // korisničko ime
+"student"                                 // lozinka
+);
+
+System.out.println("✅ Uspješno spojen na bazu!");
+
+} catch (SQLException e) {
+System.err.println("❌ Greška: " + e.getMessage());
+}
+
+🔍 Struktura URL-a
+
+jdbc:h2
+Tip baze podataka
+
+tcp://localhost/~/
+Lokacija servera
+
+Java-2025
+Naziv baze
+
+⚠️
+
+SQLException
+Ova checked iznimka obuhvaća sve potencijalne probleme u radu s bazom — obavezno ju hvataj!
+
+📝 Pripremanje i izvršavanje upita
+
+Za izvršavanje SQL upita koristimo Statement objekt:
+
+QueryExample.java
+
+// Kreiranje Statement objekta iz Connection objekta
+Statement stmt = veza.createStatement();
+
+// Izvršavanje SELECT upita — vraća ResultSet
+ResultSet rs = stmt.executeQuery(
+"SELECT id, ime, prezime FROM STUDENTI"
+);
+
+// Iteriranje kroz rezultate
+while (rs.next()) {
+int id       = rs.getInt("id");
+String ime   = rs.getString("ime");
+String prezime = rs.getString("prezime");
+
+System.out.println(id + ": " + ime + " " + prezime);
+}
+
+📦 ResultSet metode
+
+getInt() — za INTEGER
+getString() — za VARCHAR
+getDouble() — za DECIMAL
+getDate() — za DATE
+getBoolean() — za BOOLEAN
+
+🔄 Tip metode ovisi o operaciji
+
+executeQuery() — SELECT
+executeUpdate() — INSERT, UPDATE, DELETE
+execute() — bilo koji SQL
+
+🏗️ Kreiranje tablice STUDENTI
+
+create_table.sql
+
+CREATE TABLE STUDENTI (
+id             INT          NOT NULL GENERATED ALWAYS AS IDENTITY,
+jmbag          VARCHAR(20)  NOT NULL,
+ime            VARCHAR(50)  NOT NULL,
+prezime        VARCHAR(50)  NOT NULL,
+datum_rodjenja DATE         NOT NULL,
+
+PRIMARY KEY (id)
+);
+
+📊 Struktura tablice
+
+StupacTipOpis
+idINTAuto-increment PK
+jmbagVARCHAR(20)JMBAG studenta
+imeVARCHAR(50)Ime studenta
+prezimeVARCHAR(50)Prezime
+datum_rodjenjaDATEDatum rođenja
+
+🔑
+
+GENERATED ALWAYS AS IDENTITY
+Automatski generira jedinstveni ID za svaki novi redak — zamjena za AUTO_INCREMENT u MySQL-u.
+
+📖 Dohvaćanje podataka — Java 25 stil
+
+FetchStudents.java
+
+final String URL = "jdbc:h2:tcp://localhost/~/Java-2025";
+final String USER = "student";
+final String PASS = "student";
+
+// ✨ Try-with-resources — automatski zatvara sve resurse!
+try (
+Connection veza = DriverManager.getConnection(URL, USER, PASS);
+Statement stmt = veza.createStatement();
+ResultSet rs = stmt.executeQuery("SELECT * FROM STUDENTI")
+) {
+while (rs.next()) {
+var id      = rs.getInt("id");
+var jmbag   = rs.getString("jmbag");
+var ime     = rs.getString("ime");
+var prezime = rs.getString("prezime");
+var datum   = rs.getObject("datum_rodjenja", LocalDate.class);
+
+System.out.println(STR."Student: \{id} \{jmbag} \{ime} \{prezime} \{datum}");
+}
+} catch (SQLException e) {
+e.printStackTrace();
+}
+
+📤 Output
+Student: 1 0036374849 Pero Perić 1994-01-01
+Student: 2 0024568238 Ivo Ivić 1993-01-01
+
+🆕
+
+Java 25 novosti u ovom primjeru
+var za type inference • STR template za string interpolaciju • LocalDate direktno iz ResultSet-a
+
+⚡ PreparedStatement — sigurnije i brže!
+
+❌ Statement — NE RADI OVO!
+
+// Ranjivo na SQL injection! 💀
+String sql = "SELECT * FROM STUDENTI " +
+"WHERE jmbag = '" + userInput + "'";
+stmt.executeQuery(sql);
+
+✅ PreparedStatement — KORISTI OVO!
+
+// Sigurno — parametri su escapirani! 🛡️
+String sql = "SELECT * FROM STUDENTI " +
+"WHERE jmbag = ?";
+pstmt.setString(1, userInput);
+
+PreparedStatementExample.java
+
+// UPDATE s parametrima
+String updateSql = "UPDATE STUDENTI SET ime = ? WHERE jmbag = ?";
+
+try (PreparedStatement pstmt = veza.prepareStatement(updateSql)) {
+pstmt.setString(1, "Željko");    // 1. parametar (ime)
+pstmt.setString(2, "0024568238"); // 2. parametar (jmbag)
+
+int affectedRows = pstmt.executeUpdate();
+System.out.println("Ažurirano redaka: " + affectedRows);
+}
+
+🛡️ Prednosti
+
+Zaštita od SQL injection napada
+Brže — upit se kompajlira samo jednom
+Čitljiviji kod s parametrima
+
+🔢
+
+Parametri počinju od 1!
+Za razliku od nizova, JDBC parametri su 1-indexed: prvi je ? ima indeks 1, ne 0.
+
+➕ Spremanje novih podataka
+
+InsertStudent.java
+
+String insertSql = """
+INSERT INTO STUDENTI (jmbag, ime, prezime, datum_rodjenja)
+VALUES (?, ?, ?, ?)
+""";
+
+try (PreparedStatement pstmt = veza.prepareStatement(insertSql)) {
+
+// Postavljanje vrijednosti parametara
+pstmt.setString(1, "0012345678");
+pstmt.setString(2, "Ana");
+pstmt.setString(3, "Anić");
+pstmt.setObject(4, LocalDate.of(2000, 5, 15));
+
+// Izvršavanje INSERT naredbe
+int result = pstmt.executeUpdate();
+
+if (result > 0) {
+System.out.println("✅ Student uspješno dodan!");
+}
+
+} catch (SQLException e) {
+System.err.println("❌ Greška: " + e.getMessage());
+}
+
+📝
+
+Text Blocks (Java 15+)
+Koristi """ za višelinijske stringove — SQL upiti su puno čitljiviji!
+
+📊 Metode za različite tipove
+
+setString() → VARCHAR, CHAR
+setInt() → INTEGER
+setLong() → BIGINT
+
+setDouble() → DOUBLE, FLOAT
+setObject() → LocalDate, LocalDateTime
+setBoolean() → BOOLEAN
+
+🚪 Zatvaranje veze s bazom
+
+Uvijek moramo zatvoriti resurse! Pogledaj razliku između starog i novog načina:
+
+❌ Stari način — verbose i error-prone
+
+Connection veza = null;
+Statement stmt = null;
+ResultSet rs = null;
+
+try {
+veza = DriverManager.getConnection(...);
+stmt = veza.createStatement();
+rs = stmt.executeQuery("SELECT...");
+// obrada rezultata...
+} catch (SQLException e) {
+e.printStackTrace();
+} finally {
+try {
+if (rs != null) rs.close();
+if (stmt != null) stmt.close();
+if (veza != null) veza.close();
+} catch (SQLException ex) {
+ex.printStackTrace();
+}
+}
+
+✅ Try-with-resources — čisto i sigurno
+
+try (
+Connection veza = DriverManager.getConnection(...);
+Statement stmt = veza.createStatement();
+ResultSet rs = stmt.executeQuery("SELECT...")
+) {
+// obrada rezultata...
+while (rs.next()) {
+// ...
+}
+
+} catch (SQLException e) {
+e.printStackTrace();
+}
+
+// Resursi se automatski zatvaraju! 🎉
+
+💡
+
+Zašto try-with-resources?
+Sve klase koje implementiraju AutoCloseable (Connection, Statement, ResultSet) automatski se zatvaraju na kraju bloka — čak i ako dođe do iznimke!
+
+🔄 Transakcije — sve ili ništa!
+
+Transakcija = skup operacija koje se moraju izvršiti zajedno kao jedna atomarna cjelina. Ili sve uspije, ili se sve vraća na staro stanje.
+
+TransactionExample.java
+
+try (Connection veza = DriverManager.getConnection(URL, USER, PASS)) {
+
+// 🔒 Isključi auto-commit — sada MI kontroliramo kada se sprema!
+veza.setAutoCommit(false);
+
+try {
+// Prva operacija
+try (var ps1 = veza.prepareStatement(
+"UPDATE STUDENTI SET ime = ? WHERE jmbag = ?")) {
+ps1.setString(1, "Petar");
+ps1.setString(2, "0024568238");
+ps1.executeUpdate();
+}
+
+// Druga operacija
+try (var ps2 = veza.prepareStatement(
+"UPDATE STUDENTI SET prezime = ? WHERE jmbag = ?")) {
+ps2.setString(1, "Ivičić");
+ps2.setString(2, "0024568238");
+ps2.executeUpdate();
+}
+
+// ✅ Sve OK — spremi promjene!
+veza.commit();
+
+} catch (SQLException e) {
+// ❌ Nešto je pošlo po zlu — vrati sve nazad!
+veza.rollback();
+throw e;
+}
+}
+
+🔒
+setAutoCommit(false)
+Isključuje automatsko spremanje
+
+✅
+commit()
+Trajno sprema sve promjene
+
+↩️
+rollback()
+Poništava sve promjene
+
+
+JDBC
+Auditorne vježbe
+
+Preuzimanje H2 baze podataka
+Instalacija i pokretanje
+Maven konfiguracija
+
+🖥️ H2 konzola
+
+Pokretanje admin konzole
+Spajanje na bazu
+Izvršavanje SQL upita
+
+⚙️ Konfiguracija
+
+Properties datoteke
+Čitanje konfiguracijskih podataka
+Best practices
+
+💻 Praktični rad
+
+Kreiranje tablice STUDENTI
+INSERT, SELECT operacije
+Testiranje kroz konzolu
+
+📥 Preuzimanje H2 baze podataka
+
+Da bi se iz IntelliJ-a mogla ostvariti veza s H2 bazom podataka, prvo je potrebno preuzeti i pokrenuti instancu H2 baze.
+
+1
+
+Otvori službenu stranicu
+Idi na h2database.com/html/main.html
+
+2
+
+Preuzmi Platform-Independent verziju
+Odaberi "All Platforms (zip)" — radi na Windows, Mac i Linux!
+
+3
+
+Raspakiraj arhivu
+Ekstrahiraj ZIP datoteku (~9.5 MB) na željenu lokaciju — to je to! 🎉
+
+💡
+
+Aktualna verzija: 2.4.240
+H2 je potpuno napisan u Javi — ne treba ti nikakva dodatna instalacija!
+
+📁 Struktura H2 instalacije
+
+📁 h2/
+├── 📁 bin/
+│   ├── 🔹 h2.bat      ← Windows
+│   ├── 🔹 h2.sh       ← Linux/Mac
+│   ├── 🔹 h2w.bat
+│   └── 📦 h2-2.3.232.jar
+├── 📁 docs/
+├── 📁 service/
+├── 📁 src/
+├── 📄 build.bat
+└── 📄 build.sh
+
+🔑 Ključne datoteke
+
+h2.bat
+Pokreće H2 (Windows)
+
+h2.sh
+Pokreće H2 (Linux/Mac)
+
+h2-*.jar
+JDBC driver
+
+🎯
+
+Pro tip
+Spremi H2 folder na lokaciju bez razmaka u putanji, npr. C:\tools\h2
+
+🚀 Pokretanje H2 administracijske konzole
+
+1
+
+Pokreni H2 server
+
+Terminal / CMD
+
+# Windows
+cd C:\tools\h2\bin
+h2.bat
+
+# Linux / Mac
+cd /opt/h2/bin
+./h2.sh
+
+2
+
+Automatski se otvara browser
+H2 konzola se otvara na http://localhost:8082
+
+⚠️ Važno!
+Terminal/CMD prozor mora ostati otvoren dok koristiš H2 bazu. Ako ga zatvoriš, server se gasi!
+
+🔗 Spajanje na bazu kroz konzolu
+
+📝 Podaci za prijavu
+
+Polje
+Vrijednost
+
+Saved Settings
+Generic H2 (Server)
+
+Driver Class
+org.h2.Driver
+
+JDBC URL
+jdbc:h2:tcp://localhost/~/Java-2025
+
+User Name
+student
+
+Password
+student
+
+🧪
+
+Test Connection
+Uvijek prvo klikni "Test Connection" da provjeriš je li sve OK prije spajanja!
+
+🔍 Dekodiranje URL-a
+
+jdbc:h2 → H2 baza
+tcp://localhost → server mod
+~/ → home direktorij
+Java-2025 → naziv baze
+
+⚡ Izvršavanje SQL upita
+
+Nakon uspješne prijave možeš izvršavati SQL naredbe direktno u konzoli:
+
+H2 Console - SQL Statement
+
+-- Kreiranje tablice STUDENTI
+CREATE TABLE STUDENTI (
+id             INT NOT NULL GENERATED ALWAYS AS IDENTITY,
+jmbag          VARCHAR(20) NOT NULL,
+ime            VARCHAR(50) NOT NULL,
+prezime        VARCHAR(50) NOT NULL,
+datum_rodjenja DATE NOT NULL,
+PRIMARY KEY (id)
+);
+
+-- Unos test podataka
+INSERT INTO STUDENTI (jmbag, ime, prezime, datum_rodjenja)
+VALUES ('0036374849', 'Pero', 'Perić', '1994-01-01');
+
+INSERT INTO STUDENTI (jmbag, ime, prezime, datum_rodjenja)
+VALUES ('0024568238', 'Ivo', 'Ivić', '1993-01-01');
+
+-- Provjera podataka
+SELECT * FROM STUDENTI;
+
+▶️
+Run
+Izvršava sve naredbe
+
+✂️
+Run Selected
+Samo označeni dio
+
+⌨️
+Ctrl + Enter
+Brzo izvršavanje
+
+⚙️ Properties datoteke
+
+Properties datoteke služe za pohranu konfiguracijskih podataka izvan programskog koda. Na taj način izbjegavamo "hardkodiranje" i omogućavamo promjenu postavki bez ponovnog kompajliranja!
+
+❌ Hardkodirano — NE RADI OVO!
+
+// Lozinka u kodu = sigurnosni rizik! 💀
+String url = "jdbc:h2:tcp://localhost/~/Java-2025";
+String user = "student";
+String pass = "student";
+
+✅ Properties datoteka — KORISTI OVO!
+
+# database.properties
+bazaPodatakaUrl = jdbc:h2:tcp://localhost/~/Java-2025
+korisnickoIme = student
+lozinka = student
+
+🔑
+
+Key-Value princip
+Svaki ključ ima svoju vrijednost. Ključevi ostaju isti u kodu, a vrijednosti se mogu mijenjati bez recompilea!
+
+📖 Čitanje Properties datoteke — Java 25
+
+database.properties
+
+# Podaci za spajanje na bazu podataka
+bazaPodatakaUrl = jdbc:h2:tcp://localhost/~/Java-2025
+korisnickoIme = student
+lozinka = student
+
+DatabaseUtil.java
+
+private static final String DATABASE_FILE = "database.properties";
+
+public static Connection connectToDatabase() throws SQLException, IOException {
+
+// ✨ Try-with-resources za automatsko zatvaranje FileReader-a
+try (var reader = new FileReader(DATABASE_FILE)) {
+
+var properties = new Properties();
+properties.load(reader);
+
+// Dohvaćanje vrijednosti prema ključu
+var url  = properties.getProperty("bazaPodatakaUrl");
+var user = properties.getProperty("korisnickoIme");
+var pass = properties.getProperty("lozinka");
+
+return DriverManager.getConnection(url, user, pass);
+}
+}
+
+⚠️ Nikad ne uključuj .properties u Git!
+Dodaj database.properties u .gitignore — lozinke ne smiju završiti u repozitoriju!
+
+📦 Maven konfiguracija
+
+Za korištenje H2 drivera u Maven projektu, dodaj ovu ovisnost:
+
+pom.xml
+
+<dependencies>
+
+<!-- H2 Database Driver -->
+<dependency>
+<groupId>com.h2database</groupId>
+<artifactId>h2</artifactId>
+<version>2.3.232</version>
+</dependency>
+
+</dependencies>
+
+🔄 Koraci u IntelliJ-u
+
+Otvori pom.xml
+Dodaj dependency unutar <dependencies>
+Klikni na "Load Maven Changes" ikonu 🔄
+Pričekaj da se preuzme JAR
+
+🌐
+
+Maven Central
+Najnoviju verziju uvijek možeš pronaći na mvnrepository.com — traži "h2 database"!
+
+✅ Checklist prije početka rada
+
+📥
+H2 preuzet
+ZIP raspakiran
+
+🚀
+Server pokrenut
+h2.bat/h2.sh radi
+
+📦
+Maven dependency
+pom.xml ažuriran

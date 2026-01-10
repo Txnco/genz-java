@@ -1,0 +1,1984 @@
+Datoteke u Javi - Tehničko veleučilište u Zagrebu
+Sadržaj
+
+📚 Uvod u rad s datotekama
+🌊 Vrste tokova podataka u Javi
+📁 Klasa java.io.File
+🗂️ Sučelja i klase iz paketa java.nio.file
+✏️ Klasa Formatter
+🔄 Tokovi za čitanje i zapisivanje podataka
+📊 Klase koje predstavljaju tokove podataka
+💾 Čitanje i zapisivanje u binarne datoteke
+🛡️ Blok "try-with-resources"
+⚡ Unapređenja u Javi 9
+🌊 Korištenje streamova s datotekama
+🔐 Serijalizacija i deserijalizacija
+📄 XML format (JAXB)
+🔗 JSON format (JSON-B)
+
+Uvod u rad s datotekama
+
+Datoteke se koriste za trajnije pohranjivanje podataka ili dohvat informacija iz njih koje su postojale i prije pokretanja programa
+Postoje dvije vrste datoteka: tekstualne i binarne
+Iz perspektive Java programa svaka datoteka može se razmatrati kao niz bajtova (engl. stream of bytes)
+Svaka datoteka na kraju ima "end-of-file" oznaku kojom se detektira kraj datoteke nakon čega je potrebno zaustaviti proces čitanja njenog sadržaja
+U datoteke je moguće spremati i cijele objekte postupkom koji se naziva serijalizacija, a čitanje podataka o objektima se naziva deserijalizacija
+
+💡 Zanimljivost za Z generaciju
+Slično kao što Instagram sprema vaše storije ili TikTok čuva vaše draftove - datoteke omogućuju programima da "zapamte" stvari i nakon što ih ugasite!
+
+Vrste tokova podataka u Javi
+
+Tokovi podataka pomoću kojih se dohvaćaju i zapisuju podaci u datoteke mogu biti temeljeni na:
+
+Binarni format
+
+Ulazni i izlazni tok predstavljeni bajtovima
+char ima 2 bajta, int 4 bajta, double 8 bajtova itd.
+Koristi se kod binarnih datoteka
+
+Znakovni format
+
+Ulazni i izlazni tok predstavljen nizom znakova
+Svaki znak ima 2 bajta
+Koristi se kod tekstualnih datoteka
+
+Prilikom otvaranja datoteka potrebno je kreirati pripadajući objekt čiji konstruktor komunicira s operacijskim sustavom
+U Javi postoje tri standardna toka podataka:
+
+System.in - za učitavanje podataka s tipkovnice
+System.out - za ispis podataka na zaslon
+System.err - za ispis podataka o pogreškama na zaslon
+
+Klasa java.io.File
+
+Predstavlja element datotečnog sustava (može biti datoteka ili mapa)
+Sadrži putanju, ime i veličinu datoteke, ali ne i sam sadržaj
+Može kreirati datoteku na sljedeće načine:
+
+// Kreiranje File objekata
+File wf1 = new File("moj.htm");
+File wf2 = new File("java\\html\\IO.html");
+File wf3 = new File("D:\\java\\25.txt");
+
+// Provjera postojanja i tipa
+if (wf1.exists()) {
+System.out.println("Datoteka postoji!");
+}
+
+if (wf1.isFile()) {
+System.out.println("To je datoteka");
+} else if (wf1.isDirectory()) {
+System.out.println("To je mapa");
+}
+
+// Dohvat informacija
+System.out.println("Naziv: " + wf1.getName());
+System.out.println("Putanja: " + wf1.getPath());
+System.out.println("Veličina: " + wf1.length() + " bajtova");
+
+Sadrži niz korisnih metoda: exists(), isFile(), isDirectory(), getName(), getPath() itd.
+
+Sučelja i klase iz paketa java.nio.file
+
+Omogućavaju dohvat podataka iz datoteka pomoću sljedećih sučelja i klasa (uvedeni od Jave SE 6):
+
+Sučelje/Klasa
+Opis
+
+Path (sučelje)
+Objekti predstavljaju lokaciju datoteka ili mape, ali ne omogućavaju čitanje sadržaja
+
+Paths (klasa)
+Sadrži statičke metode za dohvat Path objekata koji predstavljaju datoteku ili mapu
+
+Files (klasa)
+Sadrži statičke metode za rad s datotekama: kopiranje, kreiranje, brisanje, čitanje sadržaja itd.
+
+DirectoryStream (sučelje)
+Omogućava iteraciju kroz sadržaj mape
+
+🎯 Moderna praksa
+NIO.2 API (java.nio.file) je moderniji i preporučeniji način rada s datotekama u odnosu na stari java.io.File!
+
+Klasa Formatter
+
+Služi za oblikovanje teksta koji se može zapisivati u datoteku
+Radi po principu korištenja metode printf
+
+import java.util.Formatter;
+import java.io.IOException;
+
+public class FormatterPrimjer {
+public static void main(String[] args) {
+try (Formatter output = new Formatter("clients.txt")) {
+// Zapisivanje formatiranih podataka
+output.format("%d %s %s %.2f%n",
+1, "Ivan", "Horvat", 1500.50);
+output.format("%d %s %s %.2f%n",
+2, "Ana", "Kovač", 2300.75);
+output.format("%d %s %s %.2f%n",
+3, "Marko", "Babić", 1850.00);
+
+System.out.println("Podaci uspješno zapisani!");
+
+} catch (IOException | SecurityException e) {
+System.err.println("Pogreška: " + e.getMessage());
+}
+}
+}
+
+U slučaju nedostatka prava za korištenje datoteke baca se iznimka SecurityException
+
+Tokovi za čitanje i zapisivanje podataka
+
+U Javi postoji nekoliko klasa koje predstavljaju tokove za razmjenu podataka s datotekama:
+
+📥 Ulazni tokovi podataka
+Za čitanje podataka iz datoteka
+
+📤 Izlazni tokovi podataka
+Za zapisivanje podataka u datoteke
+
+Osnovne apstraktne klase za binarne datoteke:
+
+java.io.InputStream - šalje bajtove iz vanjskog izvora u Java program
+java.io.OutputStream - šalje bajtove iz Java programa u neko vanjsko odredište
+
+Osnovne apstraktne klase za tekstualne datoteke:
+
+java.io.Reader - prima znakove iz vanjskog izvora i šalje ih u Java program
+java.io.Writer - šalje znakove iz Java programa u vanjski izvor
+
+Klase koje predstavljaju tokove podataka
+
+Postoji niz klasa koje predstavljaju implementaciju apstraktnih klasa za čitanje i zapisivanje tokova podataka u Javi:
+
+Tip
+Klase
+Namjena
+
+InputStream
+FileInputStream, BufferedInputStream, DataInputStream
+Čitanje binarnih podataka
+
+OutputStream
+FileOutputStream, BufferedOutputStream, DataOutputStream
+Zapisivanje binarnih podataka
+
+Reader
+FileReader, BufferedReader, InputStreamReader
+Čitanje tekstualnih podataka
+
+Writer
+FileWriter, BufferedWriter, PrintWriter
+Zapisivanje tekstualnih podataka
+
+⚡ Performance tip
+Uvijek koristite Buffered verzije klasa (BufferedReader, BufferedWriter) za bolje performanse pri radu s većim datotekama!
+
+Čitanje i zapisivanje u binarne datoteke
+
+Osnovna metoda klase InputStream
+
+public abstract int read() throws IOException
+
+Čita 1 bajt iz ulaznog toka
+Vraća cjelobrojnu vrijednost tog bajta
+Metoda read() blokira izvođenje ostatka programa dok se bajt ne pročita
+
+Osnovna metoda klase OutputStream
+
+public abstract void write(int b) throws IOException
+
+Šalje 1 bajt podataka preko izlaznog toka
+Odredište taj znak interpretira na određeni način
+
+// Primjer kopiranja datoteke bajt po bajt
+try (FileInputStream fis = new FileInputStream("ulaz.bin");
+FileOutputStream fos = new FileOutputStream("izlaz.bin")) {
+
+int bajt;
+while ((bajt = fis.read()) != -1) {
+fos.write(bajt);
+}
+} catch (IOException e) {
+e.printStackTrace();
+}
+
+Blok "try-with-resources"
+
+Svaku datoteku je nakon korištenja potrebno zatvoriti pozivom metode close()
+Od Jave 7 uveden je poseban "try" blok koji automatski poziva metodu close()
+Naziva se "try-with-resources"
+
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class TryWithResourcesPrimjer {
+private static final String FILENAME = "test.txt";
+
+public static void main(String[] args) {
+// Objekt se automatski zatvara na kraju try bloka
+try (FileInputStream fis = new FileInputStream(FILENAME)) {
+
+for (int n = fis.read(); n != -1; n = fis.read()) {
+System.out.write(n);
+}
+System.out.flush();
+
+} catch (IOException ex) {
+System.err.println("Pogreška kod čitanja datoteke " + FILENAME);
+ex.printStackTrace();
+}
+// Nije potrebno ručno zvati fis.close()!
+}
+}
+
+✨ Prednosti try-with-resources
+Automatsko zatvaranje resursa, čišći kod, manje šanse za memory leakove!
+
+Unapređenja bloka "try-with-resources" u Javi 9
+
+U Javi 9 je moguće koristiti blok "try-with-resources" na način da se objekti mogu definirati prije bloka i samo se koristiti u njemu:
+
+Uvjet: objekti moraju biti "final" ili "effectively final"
+
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class Java9TryWithResources {
+private static final String FILENAME = "test.txt";
+
+public static void main(String[] args) {
+// Objekt se kreira PRIJE try bloka
+FileInputStream fis = new FileInputStream(FILENAME);
+
+// Objekt se samo koristi u try bloku (mora biti effectively final)
+try (fis) {
+
+for (int n = fis.read(); n != -1; n = fis.read()) {
+System.out.write(n);
+}
+System.out.flush();
+
+} catch (IOException ex) {
+System.err.println("Pogreška kod čitanja datoteke " + FILENAME);
+ex.printStackTrace();
+}
+// fis se automatski zatvara!
+}
+}
+
+🎯 Effectively final
+Varijabla je "effectively final" ako joj se vrijednost ne mijenja nakon inicijalizacije, čak i ako nije eksplicitno označena kao final.
+
+Korištenje streamova u radu s datotekama
+
+Klasa Files sadrži nekoliko metoda koje su vezane uz streamove i drastično olakšavaju rad s datotekama:
+
+Metoda
+Opis
+
+lines(Path putanja)
+Dohvaća sve linije unutar datoteke
+
+list(Path putanja)
+Dohvaća sve datoteke na zadanoj putanji
+
+newDirectoryStream(Path)
+Otvara mapu i omogućava dohvaćanje sadržaja
+
+walk(Path putanja)
+Otvara mape i sve podmape u hijerarhiji
+
+readString(Path)
+Čita cijeli sadržaj datoteke u jedan String
+
+writeString(Path, String)
+Zapisuje cijeli String u datoteku
+
+import java.nio.file.*;
+import java.io.IOException;
+
+// Čitanje svih linija i filtriranje
+Files.lines(Paths.get("podaci.txt"))
+.filter(line -> line.contains("Java"))
+.forEach(System.out::println);
+
+// Ispis svih .java datoteka u mapi
+Files.list(Paths.get("./src"))
+.filter(path -> path.toString().endsWith(".java"))
+.forEach(System.out::println);
+
+Nakon dohvaćanja podataka, moguće je koristiti metode temeljene na lambda izrazima kao što su filter, forEach, limit, map itd.
+
+Serijalizacija i deserijalizacija u Javi
+
+Tijekom izvođenja Java programa objekti koji se koriste su u memoriji
+Nakon završetka programa se oslobađa memorija koju su objekti koristili
+Ako je potrebno "sačuvati" objekte kako bi se mogli koristiti i nakon završetka programa ili ih je potrebno pretvoriti u "fizički" oblik koji se može koristiti za slanje na druge lokacije, potrebno ih je serijalizirati
+
+📦 Serijalizacija
+Zapisivanje stanja objekta (vrijednosti varijabli) u binarnom obliku u datoteku
+
+📂 Deserijalizacija
+Obrnuti proces čitanja objekata u binarnom obliku i njihovo "aktiviranje" u trenutno aktivnom programu
+
+⚠️ Važno
+Klase čiji objekti se žele serijalizirati moraju implementirati sučelje Serializable
+
+import java.io.Serializable;
+
+public class Osoba implements Serializable {
+private static final long serialVersionUID = 1L;
+
+private String ime;
+private String prezime;
+private int godina;
+
+// Konstruktori, getteri, setteri...
+}
+
+Serijalizacija objekata u Javi
+
+Za serijaliziranje objekata u binarnom obliku koristi se klasa ObjectOutputStream i metoda writeObject():
+
+import java.io.*;
+import java.util.Date;
+
+public class SerijalizacijaPrimjer {
+public static void main(String[] args) {
+try (ObjectOutputStream out = new ObjectOutputStream(
+new FileOutputStream("osobe.dat"))) {
+
+// Kreiranje objekata
+Zupanija zagrebacka = new Zupanija(
+"Zagrebačka",
+309696,
+3078.0,
+Zupanija.POZIVNI_BROJ_ZUPANIJA_ZAGREBACKA_GRAD_ZAGREB
+);
+
+Osoba osoba = new Osoba(
+"Pero",
+"Perić",
+zagrebacka,
+new Date()
+);
+
+// Serijalizacija objekta
+out.writeObject(osoba);
+
+System.out.println("Objekt uspješno serijaliziran!");
+
+} catch (IOException e) {
+System.err.println("Pogreška prilikom serijalizacije: " + e.getMessage());
+e.printStackTrace();
+}
+}
+}
+
+💡 Savjet
+Možete serijalizirati više objekata u istu datoteku pozivajući writeObject() više puta.
+
+Deserijalizacija objekata u Javi
+
+Proces deserijalizacije obavlja se istim redoslijedom kojim su objekti i serijalizirani:
+
+import java.io.*;
+
+public class DeserijalizacijaPrimjer {
+private static final String SERIALIZATION_FILE_NAME = "osobe.dat";
+
+public static void main(String[] args) {
+try (ObjectInputStream in = new ObjectInputStream(
+new FileInputStream(SERIALIZATION_FILE_NAME))) {
+
+// Deserijalizacija objekta
+Osoba procitanaOsoba = (Osoba) in.readObject();
+
+// Ispis podataka o pročitanom objektu
+System.out.println("Podaci o pročitanom objektu:");
+System.out.println("Ime osobe: " + procitanaOsoba.getIme());
+System.out.println("Prezime osobe: " + procitanaOsoba.getPrezime());
+System.out.println("Županija: " +
+procitanaOsoba.getZupanija().getNaziv());
+System.out.println("Datum rođenja: " +
+procitanaOsoba.getDatumRodenja());
+
+} catch (IOException ex) {
+System.err.println("Pogreška kod čitanja datoteke: " + ex);
+} catch (ClassNotFoundException ex) {
+System.err.println("Klasa nije pronađena: " + ex);
+}
+}
+}
+
+⚠️ Važno
+Potrebno je hvatati dvije iznimke: IOException i ClassNotFoundException
+
+Zapisivanje i čitanje objekata u XML formatu
+
+XML (eXtensible Markup Language) je fleksibilan način strukturiranja podataka u čitljivom formatu.
+
+📋 Prednosti XML-a:
+
+Čitljiv i razumljiv format za ljude
+Platform-independent (ne ovisi o platformi)
+Široko podržan u različitim programskim jezicima
+Pogodan za konfiguracije i razmjenu podataka između sistema
+
+🔧 Java XML API-ji:
+
+JAXB (do Java 10)
+
+Java Architecture for XML Binding
+Automatsko mapiranje između Java objekata i XML-a
+Od Java 11 je eksterena biblioteka
+
+Jakarta XML Binding (Java 11+)
+
+Nasljednik JAXB-a
+Dio Jakarta EE
+Preporučen za moderne aplikacije
+
+💡 Zanimljivost
+XML se koristi u mnogim poznatim tehnologijama: Android manifesti, Maven pom.xml, Spring konfiguracije, RSS feedovi itd.
+
+XML Serijalizacija s Jakarta XML Binding
+
+1️⃣ Dodavanje dependency-ja (Maven):
+
+<dependency>
+<groupId>jakarta.xml.bind</groupId>
+<artifactId>jakarta.xml.bind-api</artifactId>
+<version>4.0.0</version>
+</dependency>
+<dependency>
+<groupId>org.glassfish.jaxb</groupId>
+<artifactId>jaxb-runtime</artifactId>
+<version>4.0.2</version>
+</dependency>
+
+2️⃣ Označavanje klase s anotacijama:
+
+import jakarta.xml.bind.annotation.*;
+
+@XmlRootElement(name = "student")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Student {
+
+@XmlElement(name = "id")
+private int id;
+
+@XmlElement(name = "ime")
+private String ime;
+
+@XmlElement(name = "prezime")
+private String prezime;
+
+@XmlElement(name = "prosjek")
+private double prosjek;
+
+// Prazan konstruktor je obavezan za JAXB
+public Student() {}
+
+public Student(int id, String ime, String prezime, double prosjek) {
+this.id = id;
+this.ime = ime;
+this.prezime = prezime;
+this.prosjek = prosjek;
+}
+
+// Getteri i setteri...
+}
+
+Zapisivanje objekata u XML datoteku
+
+import jakarta.xml.bind.*;
+import java.io.File;
+
+public class XMLSerijalizacija {
+public static void main(String[] args) {
+try {
+// Kreiranje objekta studenta
+Student student = new Student(
+1,
+"Ana",
+"Horvat",
+4.8
+);
+
+// Kreiranje JAXB konteksta
+JAXBContext context = JAXBContext.newInstance(Student.class);
+
+// Kreiranje marshallera (za zapisivanje u XML)
+Marshaller marshaller = context.createMarshaller();
+
+// Postavljanje formatiranja (za ljepši ispis)
+marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+
+// Zapisivanje u datoteku
+File xmlFile = new File("student.xml");
+marshaller.marshal(student, xmlFile);
+
+// Ispis na ekran za provjeru
+marshaller.marshal(student, System.out);
+
+System.out.println("\nStudent uspješno zapisan u XML!");
+
+} catch (JAXBException e) {
+System.err.println("Pogreška kod XML serijalizacije: "
++ e.getMessage());
+e.printStackTrace();
+}
+}
+}
+
+📄 Rezultat - student.xml:
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<student>
+<id>1</id>
+<ime>Ana</ime>
+<prezime>Horvat</prezime>
+<prosjek>4.8</prosjek>
+</student>
+
+Čitanje objekata iz XML datoteke
+
+import jakarta.xml.bind.*;
+import java.io.File;
+
+public class XMLDeserijalizacija {
+public static void main(String[] args) {
+try {
+// Kreiranje JAXB konteksta
+JAXBContext context = JAXBContext.newInstance(Student.class);
+
+// Kreiranje unmarshallera (za čitanje iz XML-a)
+Unmarshaller unmarshaller = context.createUnmarshaller();
+
+// Čitanje objekta iz datoteke
+File xmlFile = new File("student.xml");
+Student student = (Student) unmarshaller.unmarshal(xmlFile);
+
+// Ispis učitanih podataka
+System.out.println("Podaci o pročitanom studentu:");
+System.out.println("ID: " + student.getId());
+System.out.println("Ime: " + student.getIme());
+System.out.println("Prezime: " + student.getPrezime());
+System.out.println("Prosjek: " + student.getProsjek());
+
+} catch (JAXBException e) {
+System.err.println("Pogreška kod XML deserijalizacije: "
++ e.getMessage());
+e.printStackTrace();
+}
+}
+}
+
+🎯 Praktična primjena
+XML se često koristi za:
+
+Konfiguracijske datoteke aplikacija
+Razmjenu podataka između različitih sistema
+Web servise (SOAP)
+Export/import podataka
+
+Zapisivanje i čitanje objekata u JSON formatu
+
+JSON (JavaScript Object Notation) je lagan, čitljiv format za razmjenu podataka koji je postao standard u modernom razvoju softvera.
+
+🚀 Prednosti JSON-a:
+
+Jednostavniji i komaktniji od XML-a
+Native format za JavaScript i web aplikacije
+Brža obrada i manja veličina datoteka
+Dominantan format u REST API-jima
+Odličan za moderne microservice arhitekture
+
+🔧 Java JSON biblioteke:
+
+Jakarta JSON Binding (JSON-B)
+
+Službeni Java EE/Jakarta EE standard
+Sličan JAXB-u, ali za JSON
+Jednostavan za korištenje
+
+Jackson
+
+Najpopularnija JSON biblioteka
+Visoke performanse
+Bogat feature set
+
+💡 Zanimljivost za Z generaciju
+Svaki put kad koristite Instagram, TikTok, Spotify ili bilo koju drugu mobilnu app - šaljete i primate podatke u JSON formatu! 📱
+
+JSON-B Serijalizacija - Setup
+
+1️⃣ Dodavanje dependency-ja (Maven):
+
+<dependency>
+<groupId>jakarta.json.bind</groupId>
+<artifactId>jakarta.json.bind-api</artifactId>
+<version>3.0.0</version>
+</dependency>
+<dependency>
+<groupId>org.eclipse</groupId>
+<artifactId>yasson</artifactId>
+<version>3.0.3</version>
+<scope>runtime</scope>
+</dependency>
+
+2️⃣ Kreiranje klase (nije potrebno označavanje anotacijama!):
+
+public class Korisnik {
+private int id;
+private String korisnickoIme;
+private String email;
+private boolean aktivan;
+
+// Prazan konstruktor
+public Korisnik() {}
+
+public Korisnik(int id, String korisnickoIme,
+String email, boolean aktivan) {
+this.id = id;
+this.korisnickoIme = korisnickoIme;
+this.email = email;
+this.aktivan = aktivan;
+}
+
+// Getteri i setteri za sve varijable
+public int getId() { return id; }
+public void setId(int id) { this.id = id; }
+
+public String getKorisnickoIme() { return korisnickoIme; }
+public void setKorisnickoIme(String korisnickoIme) {
+this.korisnickoIme = korisnickoIme;
+}
+
+// ... ostali getteri i setteri
+}
+
+Zapisivanje objekata u JSON datoteku
+
+import jakarta.json.bind.*;
+import java.io.*;
+import java.util.*;
+
+public class JSONSerijalizacija {
+public static void main(String[] args) {
+try {
+// Kreiranje Jsonb instance
+Jsonb jsonb = JsonbBuilder.create();
+
+// Kreiranje jednog korisnika
+Korisnik korisnik = new Korisnik(
+1,
+"ana.horvat",
+"[email protected]",
+true
+);
+
+// Zapisivanje objekta u JSON string
+String json = jsonb.toJson(korisnik);
+System.out.println("JSON reprezentacija:\n" + json);
+
+// Zapisivanje u datoteku
+try (FileWriter writer = new FileWriter("korisnik.json")) {
+writer.write(json);
+}
+
+// Možemo raditi i s listama objekata!
+List<Korisnik> korisnici = Arrays.asList(
+new Korisnik(1, "ana.horvat", "[email protected]", true),
+new Korisnik(2, "marko.markic", "[email protected]", true),
+new Korisnik(3, "ivana.ivic", "[email protected]", false)
+);
+
+String jsonLista = jsonb.toJson(korisnici);
+try (FileWriter writer = new FileWriter("korisnici.json")) {
+writer.write(jsonLista);
+}
+
+System.out.println("\n✅ Podaci uspješno zapisani u JSON!");
+
+} catch (Exception e) {
+System.err.println("Pogreška: " + e.getMessage());
+e.printStackTrace();
+}
+}
+}
+
+📄 Rezultat - korisnik.json:
+
+{
+"id": 1,
+"korisnickoIme": "ana.horvat",
+"email": "[email protected]",
+"aktivan": true
+}
+
+Čitanje objekata iz JSON datoteke
+
+import jakarta.json.bind.*;
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+
+public class JSONDeserijalizacija {
+public static void main(String[] args) {
+try {
+// Kreiranje Jsonb instance
+Jsonb jsonb = JsonbBuilder.create();
+
+// Čitanje JSON-a iz datoteke
+String json = Files.readString(Paths.get("korisnik.json"));
+
+// Deserijalizacija u objekt
+Korisnik korisnik = jsonb.fromJson(json, Korisnik.class);
+
+// Ispis podataka
+System.out.println("Pročitani podaci o korisniku:");
+System.out.println("ID: " + korisnik.getId());
+System.out.println("Korisničko ime: " + korisnik.getKorisnickoIme());
+System.out.println("Email: " + korisnik.getEmail());
+System.out.println("Aktivan: " + korisnik.isAktivan());
+
+// Čitanje liste objekata
+String jsonLista = Files.readString(Paths.get("korisnici.json"));
+
+// Deserijalizacija liste - koristimo Type reference
+List<Korisnik> korisnici = jsonb.fromJson(
+jsonLista,
+new ArrayList<Korisnik>(){}.getClass().getGenericSuperclass()
+);
+
+System.out.println("\nLista korisnika:");
+for (Korisnik k : korisnici) {
+System.out.printf("- %s (%s) - %s%n",
+k.getKorisnickoIme(),
+k.getEmail(),
+k.isAktivan() ? "Aktivan" : "Neaktivan"
+);
+}
+
+} catch (Exception e) {
+System.err.println("Pogreška: " + e.getMessage());
+e.printStackTrace();
+}
+}
+}
+
+JSON-B - Napredne mogućnosti
+
+🎨 Prilagodba formatiranja:
+
+import jakarta.json.bind.*;
+
+// Konfiguracija za lijep ispis
+JsonbConfig config = new JsonbConfig()
+.withFormatting(true)  // Formatiran ispis s novim redovima
+.withNullValues(true)  // Uključi null vrijednosti
+.withEncoding("UTF-8"); // Postavi encoding
+
+Jsonb jsonb = JsonbBuilder.create(config);
+
+🏷️ Prilagodba imena polja s anotacijama:
+
+import jakarta.json.bind.annotation.*;
+import java.time.LocalDate;
+
+public class Proizvod {
+@JsonbProperty("product_id")
+private int id;
+
+@JsonbProperty("product_name")
+private String naziv;
+
+@JsonbDateFormat("dd.MM.yyyy")
+private LocalDate datumKreiranja;
+
+@JsonbTransient  // Ovo polje se neće serijalizirati
+private String interniKod;
+
+// Konstruktori, getteri, setteri...
+}
+
+🔥 Real-world primjer
+Kad razvijate REST API ili radite s bazom podataka preko JPA, JSON-B automatski radi serijalizaciju/deserijalizaciju između HTTP zahtjeva i Java objekata!
+
+Usporedba: Binary vs XML vs JSON
+
+Karakteristika
+Binary (Serializable)
+XML
+JSON
+
+Čitljivost
+❌ Nije čitljiv ljudima
+✅ Čitljiv
+✅ Vrlo čitljiv
+
+Veličina datoteke
+✅ Najmanja
+❌ Najveća
+✅ Mala do srednja
+
+Brzina
+✅ Najbrža
+❌ Sporija
+✅ Brza
+
+Interoperabilnost
+❌ Samo Java
+✅ Svi jezici
+✅ Svi jezici
+
+Validacija schema
+❌ Nema
+✅ XSD
+✅ JSON Schema
+
+Web API
+❌ Ne koristi se
+⚠️ SOAP (legacy)
+✅ REST (standard)
+
+📊 Kada koristiti koji format?
+
+✅ Koristi Binary serijalizaciju
+
+Interni Java sustavi
+Cache mehanizmi
+Performanse su kritične
+
+✅ Koristi XML
+
+Konfiguracijske datoteke
+Legacy sistemi
+Potrebna je validacija schema
+
+✅ Koristi JSON (najpopularniji izbor!)
+
+REST API-ji
+Web aplikacije
+Mobile aplikacije
+Microservices
+NoSQL baze (MongoDB)
+Config datoteke (moderne)
+
+Praktični primjer: REST API s JSON-om
+
+Primjer kako se JSON koristi u stvarnoj web aplikaciji s Spring Boot-om:
+
+import org.springframework.web.bind.annotation.*;
+import java.util.*;
+
+@RestController
+@RequestMapping("/api/korisnici")
+public class KorisnikController {
+
+private List<Korisnik> korisnici = new ArrayList<>();
+
+// GET zahtjev - vraća JSON
+@GetMapping
+public List<Korisnik> dohvatiSveKorisnike() {
+return korisnici;  // Automatski se pretvara u JSON!
+}
+
+// GET zahtjev s parametrom - vraća jedan objekt kao JSON
+@GetMapping("/{id}")
+public Korisnik dohvatiKorisnika(@PathVariable int id) {
+return korisnici.stream()
+.filter(k -> k.getId() == id)
+.findFirst()
+.orElse(null);
+}
+
+// POST zahtjev - prima JSON i kreira objekt
+@PostMapping
+public Korisnik kreirajKorisnika(@RequestBody Korisnik korisnik) {
+korisnici.add(korisnik);
+return korisnik;  // Vraća JSON natrag klijentu
+}
+
+// PUT zahtjev - ažurira postojeći objekt
+@PutMapping("/{id}")
+public Korisnik azurirajKorisnika(@PathVariable int id,
+@RequestBody Korisnik noviPodaci) {
+Korisnik postojeci = korisnici.stream()
+.filter(k -> k.getId() == id)
+.findFirst()
+.orElse(null);
+
+if (postojeci != null) {
+postojeci.setKorisnickoIme(noviPodaci.getKorisnickoIme());
+postojeci.setEmail(noviPodaci.getEmail());
+postojeci.setAktivan(noviPodaci.isAktivan());
+}
+return postojeci;
+}
+}
+
+💡 Što se događa u pozadini?
+Spring Boot automatski koristi Jackson biblioteku za konverziju između JSON-a i Java objekata. Programer ne mora ručno pozivati JsonbBuilder!
+
+Best Practices za rad s datotekama
+
+1️⃣ Uvijek koristi try-with-resources
+Automatski zatvara resurse i sprječava memory leakove
+
+2️⃣ Koristi NIO.2 API (java.nio.file)
+Moderniji, brži i fleksibilniji od starog java.io
+
+3️⃣ Koristi buffering za velike datoteke
+BufferedReader/Writer drastično poboljšavaju performanse
+
+4️⃣ Hvtaj specifične iznimke
+IOException, FileNotFoundException, itd.
+
+5️⃣ JSON > XML za nove projekte
+Jednostavniji, brži, bolji za web i mobile
+
+6️⃣ Postavi encoding eksplicitno
+Koristi UTF-8 za compatibility
+
+7️⃣ Validiraj putanje datoteka
+Provjeri da datoteka postoji prije čitanja
+
+8️⃣ Ne čitaj cijelu veliku datoteku u memoriju
+Koristi streamove za procesiranje liniju po liniju
+
+9️⃣ Koristi Files utility metode
+Files.lines(), Files.readString(), Files.writeString()
+
+🔟 Dokumentiraj format datoteka
+Jasno napiši što tvoj program očekuje
+
+💪 Praktična vježba
+
+Zadatak: Sustav za upravljanje studentima
+
+Kreirajte Java aplikaciju koja:
+
+Definira klasu Student s poljima: id, ime, prezime, JMBAG, prosjek, godina studija
+Omogućava kreiranje liste studenata
+Sprema listu studenata u JSON datoteku
+Čita studente iz JSON datoteke
+Filtrira studente s prosjekom iznad 4.0
+Sortira studente po prezimenu
+Ispisuje rezultate na ekran
+
+
+Datoteke u Javi - Auditorne vježbe - TVZ
+Sadržaj
+
+📁 Primjer rada s datotekama i mapama
+✏️ Zapisivanje s Formatter klasom
+📖 Čitanje binarne datoteke
+📋 Kopiranje binarne datoteke
+📄 Čitanje tekstualne datoteke
+🌊 Korištenje streamova s datotekama
+🔐 Serijalizacija i deserijalizacija
+📄 XML serijalizacija (JAXB)
+🔗 JSON serijalizacija (JSON-B)
+🎓 Pitanja s certifikata
+
+Primjer rada s datotekama i mapama
+
+Vježba 1
+Provjera postojanja datoteke ili mape koristeći Path i Files klase:
+
+import java.nio.file.*;
+import java.util.Scanner;
+
+Scanner input = new Scanner(System.in);
+
+System.out.println("Unesite naziv datoteke ili mape:");
+
+Path path = Paths.get(input.nextLine());
+
+if (Files.exists(path)) {
+// navedena datoteka ili mapa postoji
+System.out.println("Datoteka ili mapa postoji!");
+} else {
+System.out.printf("%s ne postoji!%n", path);
+}
+
+💡 Objašnjenje
+
+Paths.get() - pretvara string u Path objekt
+Files.exists() - provjerava postoji li datoteka ili mapa
+Path - predstavlja lokaciju u datotečnom sustavu
+
+Primjer rada s datotekama i mapama
+
+Vježba 1 - nastavak
+Dohvaćanje informacija o datoteci ili mapi:
+
+System.out.printf("%n%s postoji%n", path.getFileName());
+System.out.printf("%s mapa %n",
+Files.isDirectory(path) ? "je" : "nije");
+System.out.printf("%s apsolutna putanja %n",
+path.isAbsolute() ? "je" : "nije");
+System.out.printf("Posljednja promjena: %s%n",
+Files.getLastModifiedTime(path));
+System.out.printf("Veličina: %s%n", Files.size(path));
+System.out.printf("Putanja: %s%n", path);
+System.out.printf("Apsolutna putanja: %s%n", path.toAbsolutePath());
+
+if (Files.isDirectory(path)) {
+System.out.printf("%nSadržaj mape:%n");
+
+DirectoryStream directoryStream =
+Files.newDirectoryStream(path);
+
+for (Path p : directoryStream) {
+System.out.println(p);
+}
+}
+
+Objašnjenje korištenih metoda
+
+Paths.get() - pomoću statičke metode pretvara se putanja datoteke ili mape u objekt Path
+Files.exists() - provjerava postoji li datoteka na određenoj putanji
+getFileName() - služi za dohvaćanje naziva datoteke ili mape
+isDirectory() - određuje je li riječ o mapi ili datoteci
+isAbsolute() - provjerava radi li se o apsolutnoj ili relativnoj putanji
+toAbsolutePath() - pretvara putanju u apsolutnu putanju
+getLastModifiedTime() - dohvaća vrijeme posljednje promjene u datoteci
+size() - dohvaća veličinu datoteke
+DirectoryStream - omogućava dohvaćanje sadržaja mape
+
+Zapisivanje u datoteku - Formatter klasa
+
+Vježba 2
+Osnovna struktura programa za zapisivanje u datoteku:
+
+import java.util.Formatter;
+import java.util.Scanner;
+
+public class FormatterExample {
+private static Formatter output;
+
+public static void main(String[] args) {
+openFile();
+addRecords();
+closeFile();
+}
+
+public static void closeFile() {
+if (output != null) {
+output.close();
+}
+}
+
+// openFile() i addRecords() na sljedećem slajdu...
+}
+
+🔑 Važno
+Uvijek zatvorite Formatter nakon korištenja kako biste osigurali da su svi podaci zapisani u datoteku!
+
+Otvaranje datoteke - openFile()
+
+Vježba 2 - nastavak
+
+public static void openFile() {
+try {
+output = new Formatter("clients.txt");
+}
+catch (SecurityException securityException) {
+System.err.println("Write permission denied. Terminating.");
+System.exit(1);
+}
+catch (FileNotFoundException fileNotFoundException) {
+System.err.println("Error opening file. Terminating.");
+System.exit(1);
+}
+}
+
+⚠️ Iznimke
+
+SecurityException - nema prava za pisanje
+FileNotFoundException - problem s otvaranjem datoteke
+
+Dodavanje zapisa - addRecords()
+
+Vježba 2 - nastavak
+
+public static void addRecords() {
+Scanner input = new Scanner(System.in);
+System.out.printf("%s%n%s%n? ",
+"Enter account number, first name, last name and balance.",
+"Enter end-of-file indicator to end input.");
+
+while (input.hasNext()) {
+try {
+output.format("%d %s %s %.2f%n",
+input.nextInt(),
+input.next(),
+input.next(),
+input.nextDouble());
+}
+catch (FormatterClosedException formatterClosedException) {
+System.err.println("Error writing to file. Terminating.");
+break;
+}
+catch (NoSuchElementException elementException) {
+System.err.println("Invalid input. Please try again.");
+input.nextLine();
+}
+
+System.out.print("? ");
+}
+}
+
+Čitanje binarne datoteke
+
+Vježba 3
+Čitanje datoteke bajt po bajt koristeći FileInputStream:
+
+import java.io.*;
+
+public static final String FILENAME = "datumi.dat";
+public static final int DATE_FORMAT_LENGTH = "dd.MM.yyyy.".length();
+
+public static void main(String[] args) {
+try {
+InputStream in = new FileInputStream(FILENAME);
+char[] data = new char[DATE_FORMAT_LENGTH];
+
+for (int i = 0; i < data.length; i++) {
+int datum = in.read();
+if (datum == -1) {
+break;
+}
+data[i] = (char) datum;
+}
+
+System.out.println("Pročitani datum : " + String.valueOf(data));
+in.close();
+} catch (IOException ex) {
+System.err.println(ex.getMessage());
+}
+}
+
+💡 Napomena
+Metoda read() vraća -1 kada dođe do kraja datoteke (EOF).
+
+Kopiranje binarne datoteke
+
+Vježba 4
+Učinkovito kopiranje binarne datoteke koristeći buffer:
+
+import java.io.*;
+
+public static final String IN_BIN_FILE_NAME = "binary_digits.dat";
+public static final String OUT_BIN_FILE_NAME = "binary_digits_copy.dat";
+
+File inFile = new File(IN_BIN_FILE_NAME);
+File outFile = new File(OUT_BIN_FILE_NAME);
+
+try (FileInputStream fin = new FileInputStream(inFile);
+FileOutputStream fout = new FileOutputStream(outFile)) {
+
+byte[] buffer = new byte[1024];
+
+while (true) {
+int bytesRead = fin.read(buffer);
+if (bytesRead == -1) {
+break;
+}
+fout.write(buffer, 0, bytesRead);
+}
+} catch(IOException ex) {
+System.err.println(ex.getMessage());
+}
+
+⚡ Performance tip
+Korištenje buffera od 1024 bajta značajno ubrzava kopiranje velikih datoteka!
+
+Kopiranje datoteke s Files klasom
+
+Vježba 4 - alternativa
+Moderni način kopiranja datoteka koristeći NIO.2 API:
+
+import java.io.*;
+import java.nio.file.Files;
+
+public static void copyFile(File from, File to) throws IOException {
+Files.copy(from.toPath(), to.toPath());
+}
+
+🎯 Preporuka
+Ovo je preporučeni način za kopiranje datoteka u modernom Javi - jednostavniji i sigurniji!
+
+// Primjer korištenja
+File izvor = new File("original.txt");
+File destinacija = new File("kopija.txt");
+
+try {
+copyFile(izvor, destinacija);
+System.out.println("Datoteka uspješno kopirana!");
+} catch (IOException e) {
+System.err.println("Greška pri kopiranju: " + e.getMessage());
+}
+
+Čitanje tekstualne datoteke
+
+Vježba 5
+Čitanje tekstualne datoteke liniju po liniju:
+
+import java.io.*;
+
+public static final String FILE_NAME = "input.txt";
+
+try (BufferedReader in = new BufferedReader(
+new FileReader(FILE_NAME))) {
+
+String line;
+while ((line = in.readLine()) != null) {
+System.out.println(line);
+}
+
+} catch (IOException e) {
+System.err.println(e);
+}
+
+✨ Prednosti BufferedReader
+
+Učinkovito čitanje velikih datoteka
+Metoda readLine() čita cijelu liniju
+Automatsko buffering povećava performanse
+
+Čitanje tekstualne datoteke u Javi 11+
+
+Vježba 5 - moderniji način
+Najjednostavniji način čitanja cijele datoteke u String:
+
+import java.nio.file.*;
+import java.io.IOException;
+
+Path datoteka = Path.of("datoteka.txt");
+
+try {
+String tekst = Files.readString(datoteka);
+System.out.println("Pročitana datoteka:");
+System.out.println(tekst);
+} catch (IOException e) {
+e.printStackTrace();
+}
+
+🚀 Java 11+ novost
+Metoda Files.readString() uvedena je u Javi 11 i omogućava čitanje cijele datoteke u jedan String poziv!
+
+⚠️ Upozorenje
+Koristi se samo za manje datoteke jer učitava cijelu datoteku u memoriju odjednom!
+
+Zapisivanje u tekstualne datoteke
+
+Vježba 6
+Zapisivanje teksta u datoteku koristeći PrintWriter:
+
+import java.io.*;
+
+public static final String FILE_NAME = "output.txt";
+
+public static void main(String[] args) {
+try (PrintWriter out = new PrintWriter(
+new FileWriter(new File(FILE_NAME)))) {
+
+int i = 0;
+do {
+out.println((i + 1) + ". redak");
+i++;
+} while (i < 10);
+
+} catch (IOException e) {
+System.err.println(e);
+}
+}
+
+💡 PrintWriter prednosti
+
+Jednostavne metode za ispis: print(), println(), printf()
+Automatsko formatiranje podataka
+Ne baca checked iznimke pri pisanju
+
+Zapisivanje u tekstualne datoteke u Javi 11+
+
+Vježba 6 - moderniji način
+Najjednostavniji način zapisivanja String-a u datoteku:
+
+import java.nio.file.*;
+import java.io.IOException;
+
+String tekst = "Ovo je tekst koji se zapisuje u datoteku!\nDrugi redak teksta";
+
+Path datoteka = Path.of("datoteka.txt");
+
+try {
+Files.writeString(datoteka, tekst);
+System.out.println("Tekst uspješno zapisan!");
+} catch (IOException e) {
+e.printStackTrace();
+}
+
+🚀 Java 11+ novost
+Metoda Files.writeString() omogućava zapisivanje String-a u datoteku jednim pozivom!
+
+// Dodavanje teksta na kraj postojeće datoteke
+Files.writeString(datoteka, "\nNovi tekst",
+StandardOpenOption.APPEND);
+
+Korištenje streamova s datotekama
+
+Vježba 7
+Čitanje datoteke koristeći Stream API:
+
+import java.nio.file.*;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.*;
+
+List listaStringova;
+
+try (Stream stream =
+Files.lines(new File("dat/radneMemorije.txt").toPath())) {
+
+listaStringova = stream.collect(Collectors.toList());
+
+} catch (IOException e) {
+e.printStackTrace();
+logger.error("Došlo je do pogreške u čitanju datoteke!", e);
+}
+
+⚠️ Važno
+Obvezno koristiti "try-with-resources" kako bi se datoteka automatski zatvorila nakon završetka operacije čitanja!
+
+Streamovi - list() i walk()
+
+Vježba 7 - nastavak
+
+Files.list() - samo trenutna mapa
+
+Files.list(new File(".").toPath())
+.filter(p -> !p.getFileName()
+.toString().startsWith("."))
+.limit(3)
+.forEach(System.out::println);
+
+Files.walk() - rekurzivno kroz sve podmape
+
+Files.walk(new File(".").toPath())
+.filter(p -> !p.getFileName()
+.toString().startsWith("."))
+.forEach(System.out::println);
+
+🔍 Razlika
+
+list() - prikazuje samo sadržaj trenutne mape
+walk() - prolazi rekurzivno kroz sve podmape
+
+Serijalizacija objekata
+
+Vježba 8
+Zapisivanje objekta u binarnu datoteku:
+
+import java.io.*;
+import java.util.Date;
+
+public static final String SERIALIZATION_FILE_NAME = "osobe.dat";
+
+try (ObjectOutputStream out = new ObjectOutputStream(
+new FileOutputStream(SERIALIZATION_FILE_NAME))) {
+
+Osoba osoba = new Osoba(
+"Pero",
+"Perić",
+Zupanija.ZUPANIJA_ZAGREBACKA,
+new Date()
+);
+
+out.writeObject(osoba);
+System.out.println("Objekt uspješno serijaliziran!");
+
+} catch (IOException ex) {
+System.err.println(ex);
+}
+
+⚠️ Preduvjet
+Klasa Osoba mora implementirati sučelje Serializable!
+
+Deserijalizacija objekata
+
+Vježba 8 - nastavak
+Čitanje objekta iz binarne datoteke:
+
+try (ObjectInputStream in = new ObjectInputStream(
+new FileInputStream(SerijalizacijaTest.SERIALIZATION_FILE_NAME))) {
+
+Osoba procitanaOsoba = (Osoba) in.readObject();
+
+System.out.println("Podaci o pročitanom objektu:");
+System.out.println("Ime osobe: " + procitanaOsoba.getIme());
+System.out.println("Prezime osobe: " + procitanaOsoba.getPrezime());
+System.out.println("Datum rođenja osobe: " +
+procitanaOsoba.getDatumRodjenja());
+System.out.println("Županija: " +
+procitanaOsoba.getZupanija().getNaziv());
+
+} catch (IOException ex) {
+System.err.println(ex);
+} catch (ClassNotFoundException ex) {
+System.err.println(ex);
+}
+
+⚠️ Iznimke
+Potrebno je hvatati dvije iznimke: IOException i ClassNotFoundException
+
+XML serijalizacija - Setup
+
+Vježba 9 - XML
+
+1. Dodavanje dependency-ja (Maven)
+
+<dependency>
+<groupId>jakarta.xml.bind</groupId>
+<artifactId>jakarta.xml.bind-api</artifactId>
+<version>4.0.0</version>
+</dependency>
+<dependency>
+<groupId>org.glassfish.jaxb</groupId>
+<artifactId>jaxb-runtime</artifactId>
+<version>4.0.2</version>
+</dependency>
+
+2. Kreiranje klase Student
+
+import jakarta.xml.bind.annotation.*;
+
+@XmlRootElement(name = "student")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Student {
+
+@XmlElement private int id;
+@XmlElement private String ime;
+@XmlElement private String prezime;
+@XmlElement private double prosjek;
+
+public Student() {} // Obavezan prazan konstruktor!
+
+public Student(int id, String ime, String prezime, double prosjek) {
+this.id = id;
+this.ime = ime;
+this.prezime = prezime;
+this.prosjek = prosjek;
+}
+
+// Getteri i setteri...
+}
+
+Zapisivanje objekta u XML datoteku
+
+Vježba 9 - nastavak
+
+import jakarta.xml.bind.*;
+import java.io.File;
+
+public class XMLSerijalizacijaVjezba {
+
+public static void main(String[] args) {
+try {
+// Kreiranje studenta
+Student student = new Student(1, "Ana", "Horvat", 4.8);
+
+// Kreiranje JAXB konteksta
+JAXBContext context = JAXBContext.newInstance(Student.class);
+
+// Kreiranje marshallera (za zapisivanje)
+Marshaller marshaller = context.createMarshaller();
+
+// Postavljanje formatiranja
+marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+
+// Zapisivanje u datoteku
+File xmlFile = new File("student.xml");
+marshaller.marshal(student, xmlFile);
+
+System.out.println("✅ Student uspješno zapisan u XML!");
+
+// Ispis na ekran
+marshaller.marshal(student, System.out);
+
+} catch (JAXBException e) {
+System.err.println("Greška: " + e.getMessage());
+}
+}
+}
+
+Čitanje objekta iz XML datoteke
+
+Vježba 9 - nastavak
+
+import jakarta.xml.bind.*;
+import java.io.File;
+
+public class XMLDeserijalizacijaVjezba {
+
+public static void main(String[] args) {
+try {
+// Kreiranje JAXB konteksta
+JAXBContext context = JAXBContext.newInstance(Student.class);
+
+// Kreiranje unmarshallera (za čitanje)
+Unmarshaller unmarshaller = context.createUnmarshaller();
+
+// Čitanje objekta iz datoteke
+File xmlFile = new File("student.xml");
+Student student = (Student) unmarshaller.unmarshal(xmlFile);
+
+// Ispis učitanih podataka
+System.out.println("Podaci pročitanog studenta:");
+System.out.println("ID: " + student.getId());
+System.out.println("Ime: " + student.getIme());
+System.out.println("Prezime: " + student.getPrezime());
+System.out.println("Prosjek: " + student.getProsjek());
+
+} catch (JAXBException e) {
+System.err.println("Greška: " + e.getMessage());
+}
+}
+}
+
+📄 Rezultat - student.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<student>
+<id>1</id>
+<ime>Ana</ime>
+<prezime>Horvat</prezime>
+<prosjek>4.8</prosjek>
+</student>
+
+XML - Lista objekata
+
+Vježba 9 - dodatak
+
+Wrapper klasa za listu
+
+import jakarta.xml.bind.annotation.*;
+import java.util.List;
+
+@XmlRootElement(name = "studenti")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class StudentiLista {
+
+@XmlElement(name = "student")
+private List<Student> studenti;
+
+public StudentiLista() {}
+
+public StudentiLista(List<Student> studenti) {
+this.studenti = studenti;
+}
+
+public List<Student> getStudenti() {
+return studenti;
+}
+
+public void setStudenti(List<Student> studenti) {
+this.studenti = studenti;
+}
+}
+
+Zapisivanje liste u XML
+
+Vježba 9 - dodatak
+
+import java.util.*;
+
+List<Student> lista = Arrays.asList(
+new Student(1, "Ana", "Horvat", 4.8),
+new Student(2, "Marko", "Marković", 4.5),
+new Student(3, "Ivana", "Ivić", 4.9)
+);
+
+StudentiLista studentiLista = new StudentiLista(lista);
+
+JAXBContext context = JAXBContext.newInstance(StudentiLista.class);
+Marshaller marshaller = context.createMarshaller();
+marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+marshaller.marshal(studentiLista, new File("studenti.xml"));
+
+📄 Rezultat - studenti.xml
+
+<studenti>
+<student>
+<id>1</id>
+<ime>Ana</ime>
+<prezime>Horvat</prezime>
+<prosjek>4.8</prosjek>
+</student>
+<student>
+<id>2</id>
+<ime>Marko</ime>
+<prezime>Marković</prezime>
+<prosjek>4.5</prosjek>
+</student>
+</studenti>
+
+JSON serijalizacija - Setup
+
+Vježba 10 - JSON
+
+1. Dodavanje dependency-ja (Maven)
+
+<dependency>
+<groupId>jakarta.json.bind</groupId>
+<artifactId>jakarta.json.bind-api</artifactId>
+<version>3.0.0</version>
+</dependency>
+<dependency>
+<groupId>org.eclipse</groupId>
+<artifactId>yasson</artifactId>
+<version>3.0.3</version>
+<scope>runtime</scope>
+</dependency>
+
+2. Kreiranje klase Proizvod
+
+public class Proizvod {
+private int id;
+private String naziv;
+private double cijena;
+private boolean naSkladistu;
+
+public Proizvod() {} // Prazan konstruktor
+
+public Proizvod(int id, String naziv, double cijena,
+boolean naSkladistu) {
+this.id = id;
+this.naziv = naziv;
+this.cijena = cijena;
+this.naSkladistu = naSkladistu;
+}
+
+// Getteri i setteri za sva polja...
+}
+
+💡 Napomena
+Za JSON-B nisu potrebne anotacije kao kod XML-a!
+
+Zapisivanje objekta u JSON datoteku
+
+Vježba 10 - nastavak
+
+import jakarta.json.bind.*;
+import java.io.*;
+
+public class JSONSerijalizacijaVjezba {
+
+public static void main(String[] args) {
+try {
+// Kreiranje Jsonb instance
+Jsonb jsonb = JsonbBuilder.create();
+
+// Kreiranje proizvoda
+Proizvod proizvod = new Proizvod(
+1,
+"Laptop Dell XPS 15",
+8999.99,
+true
+);
+
+// Pretvaranje objekta u JSON string
+String json = jsonb.toJson(proizvod);
+
+// Ispis na ekran
+System.out.println("JSON reprezentacija:");
+System.out.println(json);
+
+// Zapisivanje u datoteku
+try (FileWriter writer = new FileWriter("proizvod.json")) {
+writer.write(json);
+}
+
+System.out.println("\n✅ Proizvod uspješno zapisan u JSON!");
+
+} catch (Exception e) {
+System.err.println("Greška: " + e.getMessage());
+}
+}
+}
+
+Čitanje objekta iz JSON datoteke
+
+Vježba 10 - nastavak
+
+import jakarta.json.bind.*;
+import java.nio.file.*;
+import java.io.IOException;
+
+public class JSONDeserijalizacijaVjezba {
+
+public static void main(String[] args) {
+try {
+// Kreiranje Jsonb instance
+Jsonb jsonb = JsonbBuilder.create();
+
+// Čitanje JSON-a iz datoteke
+String json = Files.readString(Paths.get("proizvod.json"));
+
+// Deserijalizacija u objekt
+Proizvod proizvod = jsonb.fromJson(json, Proizvod.class);
+
+// Ispis učitanih podataka
+System.out.println("Pročitani podaci o proizvodu:");
+System.out.println("ID: " + proizvod.getId());
+System.out.println("Naziv: " + proizvod.getNaziv());
+System.out.println("Cijena: " + proizvod.getCijena() + " EUR");
+System.out.println("Na skladištu: " +
+(proizvod.isNaSkladistu() ? "DA" : "NE"));
+
+} catch (Exception e) {
+System.err.println("Greška: " + e.getMessage());
+}
+}
+}
+
+📄 Rezultat - proizvod.json
+
+{
+"id": 1,
+"naziv": "Laptop Dell XPS 15",
+"cijena": 8999.99,
+"naSkladistu": true
+}
+
+JSON - Lista objekata
+
+Vježba 10 - dodatak
+
+Zapisivanje liste
+
+import java.util.*;
+
+Jsonb jsonb = JsonbBuilder.create();
+
+List<Proizvod> proizvodi = Arrays.asList(
+new Proizvod(1, "Laptop Dell XPS 15", 8999.99, true),
+new Proizvod(2, "iPhone 15 Pro", 7499.00, true),
+new Proizvod(3, "Samsung Galaxy S24", 5999.00, false)
+);
+
+// Serijalizacija liste
+String jsonLista = jsonb.toJson(proizvodi);
+
+// Zapisivanje u datoteku
+Files.writeString(Paths.get("proizvodi.json"), jsonLista);
+
+Čitanje liste
+
+// Čitanje JSON-a
+String jsonLista = Files.readString(Paths.get("proizvodi.json"));
+
+// Deserijalizacija liste
+List<Proizvod> proizvodi = jsonb.fromJson(
+jsonLista,
+new ArrayList<Proizvod>(){}.getClass().getGenericSuperclass()
+);
+
+// Iteracija kroz listu
+System.out.println("Lista proizvoda:");
+for (Proizvod p : proizvodi) {
+System.out.printf("%d. %s - %.2f EUR%n",
+p.getId(), p.getNaziv(), p.getCijena());
+}
+
+JSON-B - Napredne mogućnosti
+
+Vježba 10 - dodatak
+
+Prilagodba formatiranja
+
+import jakarta.json.bind.*;
+
+// Konfiguracija za lijep ispis
+JsonbConfig config = new JsonbConfig()
+.withFormatting(true)        // Formatirani ispis
+.withNullValues(true)        // Uključi null vrijednosti
+.withEncoding("UTF-8");      // UTF-8 encoding
+
+Jsonb jsonb = JsonbBuilder.create(config);
+
+Prilagodba imena polja
+
+import jakarta.json.bind.annotation.*;
+
+public class Proizvod {
+@JsonbProperty("product_id")
+private int id;
+
+@JsonbProperty("product_name")
+private String naziv;
+
+@JsonbTransient  // Ovo polje se neće serijalizirati
+private String interniKod;
+
+@JsonbDateFormat("dd.MM.yyyy")
+private LocalDate datumKreiranja;
+
+// Konstruktori, getteri, setteri...
+}
+
+Usporedba: Binary vs XML vs JSON
+
+📊 Praktična usporedba
+
+Isti objekt Student(1, "Ana", "Horvat", 4.8):
+
+Binary (Serializable):  ~120 bajtova
+XML (JAXB):            ~180 bajtova
+JSON (JSON-B):         ~80 bajtova
+
+Brzina deserijalizacije (relativno):
+Binary: 1.0x (najbrže)
+JSON:   1.5x
+XML:    2.5x (najsporije)
+
+🎯 Kada koristiti koji format?
+
+Binary - interni Java sistemi, cache, performanse kritične
+XML - legacy sustavi, konfiguracijske datoteke, potrebna validacija
+JSON - REST API-ji, web/mobile aplikacije, moderna praksa ⭐
+
+💪 Praktični zadatak
+
+Kreirajte sustav za upravljanje knjižnicom
+
+📚 Zahtjevi
+
+Kreirajte klasu Knjiga s poljima: id, naslov, autor, isbn, cijena, godinaIzdanja
+Implementirajte spremanje liste knjiga u JSON datoteku
+Implementirajte čitanje knjiga iz JSON datoteke
+Dodajte metode za:
+
+Pretragu knjiga po autoru
+Filtriranje knjiga po godini izdanja
+Sortiranje po cijeni
+
+Dodajte export/import u XML format
+
+🎯 Bonus
+
+Dodajte izračun prosječne cijene svih knjiga
+Implementirajte pretragu s više kriterija odjednom
+Kreirajte jednostavni konzolni meni za upravljanje
+
+Pitanja s certifikata (1)
+
+📝 Pitanja s certifikata
+Na ovom slajdu u originalnoj prezentaciji nalaze se pitanja s Oracle Java certifikata.
+Preporučam da ih proučite iz službenih izvora!
+
+💡 Preporuka za učenje
+
+Oracle Certified Professional: Java SE 11 Developer
+Oracle Certified Professional: Java SE 17 Developer
+Vježbajte sa stvarnim primjerima koda
+Analizirajte izlaz programa prije pokretanja
+
+Pitanja s certifikata (2)
+
+🎯 Teme za pripremu
+
+Razlika između FileInputStream i FileReader
+Try-with-resources i AutoCloseable sučelje
+Path i Files API (NIO.2)
+Serijalizacija i transient keyword
+BufferedReader vs Scanner za čitanje datoteka
+Encoding (UTF-8, ISO-8859-1)
+
+Pitanja s certifikata (3)
+
+Tipična pitanja na certifikatima:
+
+1. Što će ispisati ovaj kod?
+
+try (FileReader fr = new FileReader("test.txt")) {
+System.out.println(fr.read());
+}
+
+Odgovor: Ispisuje ASCII vrijednost prvog znaka u datoteci
+
+2. Je li kod ispravan?
+
+Path p = Paths.get("test.txt");
+if (Files.exists(p)) {
+Files.delete(p);
+}
+
+Odgovor: Da, ali može baciti IOException!
+
+Pitanja s certifikata (4)
+
+Česte zamke:
+
+❌ Greška 1: Zaboravljeno zatvaranje
+
+FileWriter fw = new FileWriter("test.txt");
+fw.write("Hello");
+// GREŠKA: Nije zatvoreno - podaci možda neće biti zapisani!
+
+✅ Ispravno: Try-with-resources
+
+try (FileWriter fw = new FileWriter("test.txt")) {
+fw.write("Hello");
+} // Automatski se zatvara
+
+Pitanja s certifikata (5)
+
+🔍 Analiziraj kod
+
+class Data implements Serializable {
+private static final long serialVersionUID = 1L;
+transient String password = "secret";
+String username = "user";
+}
+
+// Nakon serijalizacije i deserijalizacije:
+Data data = // ... učitano iz datoteke
+System.out.println(data.password);    // ?
+System.out.println(data.username);    // ?
+
+Odgovor:
+
+password će biti null (transient se ne serijalizira)
+username će biti "user"
+
+Pitanja s certifikata (6)
+
+Performance pitanja:
+
+Koji je brži za čitanje velikih datoteka?
+
+// Opcija A
+FileReader fr = new FileReader("big.txt");
+int c;
+while ((c = fr.read()) != -1) { ... }
+
+// Opcija B
+BufferedReader br = new BufferedReader(
+new FileReader("big.txt"));
+String line;
+while ((line = br.readLine()) != null) { ... }
+
+Odgovor: B - BufferedReader koristi buffering i čita blokove podataka, što je puno brže!

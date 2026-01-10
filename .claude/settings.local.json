@@ -7,7 +7,10 @@
       "Bash(node:*)",
       "Bash(python fix-seed-files.py:*)",
       "Bash(python fix-code-compile.py:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "ask": []
